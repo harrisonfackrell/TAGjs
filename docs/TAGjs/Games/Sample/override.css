@@ -1,0 +1,58 @@
+body {
+  background-color: tan;
+}
+@font-face {
+  font-family: custom;
+  src: url("../../Fonts/Reformed Ellar.ttf");
+}
+#roomDisplay {
+  background-color: lightgreen;
+  border: 3px solid grey;
+  margin: auto;
+  max-width: 50%;
+  font-size: 200%;
+}
+#roomNameDisplay {
+  margin: auto;
+  text-align: center;
+  width: 50%;
+  font-size: 200%;
+  font-family: custom;
+}
+#imageDisplay {
+  display: block;
+  margin: auto;
+  width: 50%;
+  height: 40%;
+  min-width: 95%;
+  min-height: 40%;
+}
+#audio p {
+  font: 3em custom;
+  color: black;
+}
+#outputBox {
+  background-color: lightgrey;
+  border: 3px solid grey;
+  height: 35%;
+  font-family: custom;
+  font-size: 250%;
+  overflow-y: scroll;
+  padding: 5px;
+}
+#inputBackground {
+  position: relative;
+  height: 4em;
+  background-color: lightblue;
+  border: 3px solid grey;
+}
+#inputBox {
+  position: absolute;
+  margin-left: 3%;
+  width: 94%;
+  top: 20%;
+  border: 3px solid grey;
+  box-sizing: border-box;
+  font-family: custom;
+  font-size: 250%;
+}

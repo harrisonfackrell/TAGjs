@@ -1,0 +1,75 @@
+@font-face {
+  font-family: reformedEllar;
+  src: url("Fonts/Reformed Ellar.ttf");
+}
+body {
+  background-color: grey;
+  margin: 0;
+}
+header {
+  margin: 0;
+  padding: 0;
+  background-color: darkgrey;
+  height: 250px;
+  position: relative;
+  width: 100%;
+}
+#TAGHeading {
+  font-family: reformedEllar;
+  font-size: 1000%;
+  margin: 0;
+  margin-left: 5%;
+  padding: 0;
+}
+#TAGSubtext {
+  margin: 0;
+  padding: 0;
+  margin-top: 0.75em;
+  margin-left: 5%;
+  position: relative;
+  bottom: 0.75em;
+  font-family: reformedEllar;
+  font-size: 500%;
+}
+.navbar {
+  position: absolute;
+  bottom: 0;
+  padding: 0;
+  background-color: gainsboro;
+  font-family: reformedEllar;
+  font-size: 250%;
+  text-align: center;
+  width: 100%;
+  overflow: hidden;
+  border-top: 5px solid grey;
+  border-bottom: 3px solid darkgrey;
+}
+#navlist {
+  list-style: none;
+  margin: auto;
+}
+#navlist .element {
+  float: left;
+  padding: 2px 16px;
+  display: block;
+  margin: 0;
+
+}
+#navlist .navlink {
+  margin: 0;
+  text-decoration: none;
+  color: black;
+
+}
+#navlist .selected {
+  background-color: grey;
+}
+#outputBox {
+  margin: 1em;
+  border: 3px solid darkgrey;
+  height: 35%;
+  font-family: reformedEllar;
+  font-size: 250%;
+  padding: 5px;
+  background-color: lightgrey;
+}
