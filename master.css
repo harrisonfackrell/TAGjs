@@ -41,7 +41,7 @@ header {
   text-align: center;
   width: 100%;
   overflow: hidden;
-  border-top: 5px solid grey;
+  border-top: 3px solid grey;
   border-bottom: 3px solid darkgrey;
 }
 #navlist {
@@ -53,13 +53,14 @@ header {
   padding: 2px 16px;
   display: block;
   margin: 0;
-
+}
+#navlist li:hover {
+  background-color: darkgrey;
 }
 #navlist .navlink {
   margin: 0;
   text-decoration: none;
   color: black;
-
 }
 #navlist .selected {
   background-color: grey;
