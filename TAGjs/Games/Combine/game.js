@@ -249,7 +249,9 @@ var combinationArray = [
   ["Literature","Electronics","Ebook"],
   ["Clay","Wheel","Pottery"],
   ["Artistry","Wood","Carpentry"],
-  ["Paper","Pencil","Writing"]
+  ["Paper","Pencil","Writing"],
+  ["Wires","Wires","Electronics"],
+  ["Wires","Genius","Electronics"]
 ];
 //Functions---------------------------------------------------------------------
 function init() {
