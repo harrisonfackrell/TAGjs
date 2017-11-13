@@ -45,7 +45,9 @@ var Player = new Entity("player",
       var exits = Object.keys(getCurrentExits());
       exits = exits.concat(Object.keys(getInterceptorExits(room)));
       for (var i = 0; i < exits.length; i++) {
-        if(getInput() == exits[i]) {
+        var input = getInput().toLowerCase();
+        var exit = exits[i].toLowerCase();
+        if(input == exit) {
           var player = getPlayer();
           player.methods.move();
           return;
@@ -308,7 +310,7 @@ var interceptorArray = [
 ];
 //Functions---------------------------------------------------------------------
 function init() {
-  
+
 }
 //Execution---------------------------------------------------------------------
 setup();

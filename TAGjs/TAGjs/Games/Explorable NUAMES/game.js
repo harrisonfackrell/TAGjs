@@ -44,7 +44,9 @@ var Player = new Entity("player",
       var exits = Object.keys(getCurrentExits());
       exits = exits.concat(Object.keys(getInterceptorExits(room)));
       for (var i = 0; i < exits.length; i++) {
-        if(getInput() == exits[i]) {
+        var input = toLowerCase(getInput());
+        var exit = toLowerCase(exits[i]);
+        if(input == exit) {
           var player = getPlayer();
           player.methods.move();
           return;
