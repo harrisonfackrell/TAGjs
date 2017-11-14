@@ -263,7 +263,9 @@ function describeObstructions(room) {
   for (var i = 0; i < narrowedEntities.length; i++) {
     var entity = narrowedEntities[i];
     var entityDescription = embolden(entity.exit[1], entity.givenName);
-    entityDescription = embolden(entityDescription, entity.exit[0]);
+    if (testForWord(entityDescription, entity.exit[0])) {
+      var entityDescription = embolden(entity.exit[1], entity.exit[0]);
+    }
     description += manageEntityGrammar(entityDescription, length, i);
   }
   return description;
