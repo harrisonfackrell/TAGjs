@@ -1,143 +1,213 @@
 //Player------------------------------------------------------------------------
 function getPlayer() {
+  //Returns the global Player object.
+
   return Player;
 }
 function getPlayerLocation() {
+  //Returns the player's location. This is mostly for convenience.
+
   var player = getPlayer();
   return player.location;
 }
 function inventoryContains(name) {
-  var inventory = narrowEntitiesByLocation(getEntities(), "Inventory");
-  var item = findByName(name, inventory);
-  if (typeof item == "object") {
-    return true;
-  }
-  return false;
+  //Tests for an entity with a given name in the "Inventory" location. This is
+  //Really just a specialized shorthand for roomContains.
+
+  var contains = roomContains("Inventory", name);
+  return contains;
 }
 //I/O Processing----------------------------------------------------------------
 function enterHandler() {
+  //Enter handler for the input box that sets instruction execution into motion.
+
+  //Get the output box
   var outputBox = document.getElementById("outputBox");
-  var inputBox = document.getElementById("inputBox");
-  var input = inputBox.value;
+  //Get and display input.
+  var input = getInput();
   output(input);
-  var player = getPlayer();
-  var playerLocation = player.location;
+  //Get the player's location.
+  var playerLocation = getPlayerLocation();
+  //Parse and execute input.
   var parsedInput = parseInput(input, playerLocation);
   executeParsedInput(parsedInput);
+  //Blank the input box.
   inputBox.value = "";
 }
 function output(str) {
+  //Outputs a string to the output box.
+
+  //Get the output box
   var outputBox = document.getElementById("outputBox");
+  //Append the string onto the output box's content and scroll to the bottom.
   outputBox.innerHTML += "<br>>" + str;
   outputBox.scrollTop = outputBox.scrollHeight;
 }
 function listenForKey(e, key, callback) {
+  //Listens for a key. "e" is an event. This function is intended to be used as
+  //a keydown handler for an element.
+
   if (e.key == key) {
     callback();
   }
 }
 //Input Processing--------------------------------------------------------------
 function testForWord(input, word) {
+  //Returns true if the given input contains the given word or one of its
+  //synonyms, defined in game.js. Case insensitive.
+
+  //Convert both the input and the word to lowercase
   input = input.toLowerCase();
   word = word.toLowerCase();
+  //Get synonyms
   var synonyms = getSynonyms(word);
+  //If the input includes the word
+  if (input.includes(word)) {
+    return true;
+  }
+  //If there are synonyms
   if (synonyms) {
-    for (var j = 0; j < synonyms.length; j++) {
-      if (input.includes(synonyms[j])) {
+    //Iterate through them.
+    for (var i = 0; i < synonyms.length; i++) {
+      if (input.includes(synonyms[i])) {
         return true;
       }
     }
-  } else if (input.includes(word)) {
-    return true;
-  } else {
-    return false;
   }
+  //If we've made it to here, the input does not contain the word.
+  return false;
 }
-function getSynonyms(word) {;
+function getSynonyms(word) {
+  //Returns the synonyms of a word, as defined in game.js.
   return SYNONYMS[word];
 }
 function getInput() {
+  //Returns the current input. Useful in entity methods.
   var inputBox = document.getElementById("inputBox");
   return inputBox.value;
 }
 function detectEntity(input, entities) {
+  //Returns the first entity referenced by the input that is contained in
+  //"entities". This is according to the order of the entities array, not the
+  //input itself. If no entity is found, it returns the player.
+
+  //Iterate through the entites
   for (var i = 0; i < entities.length; i++) {
     var entity = entities[i];
     var entityName = entity.givenName;
+    //If the input contains the entity's name (or a synonym)
     if (testForWord(input, entityName)) {
+      //Return it.
       return entity;
     }
   }
+  //If nothing is referenced, return the player.
   return getPlayer();
 }
 function detectAction(input, subject) {
+  //Tests the input for an action attached to the given "subject" entity.
+
+  //Get the keys for the subject's methods
   var methodKeys = Object.keys(subject.methods);
+  //Iterate through these keys
   for (var i = 0; i < methodKeys.length; i++) {
     var key = methodKeys[i];
+    //If the input contains the key (or a synonym)
     if(testForWord(input, key)) {
+      //Make sure the key is not "parent" - the parent property of the
+      //subject.methods object is not a function.
       if (testForWord("parent", key)) {
         return "nothing";
       } else {
+        //As long as it's not "parent", return the key.
         return key;
       }
     }
   }
+  //If nothing matches, return "nothing".
   return "nothing";
 }
 function parseInput(input) {
+  //Parses input, returning a subject entity and an action attached to that
+  //entity.
+
+  //Get the interactable entities here.
   var location = getPlayerLocation();
   var entities = getEntities().concat(getObstructions());
   entities = narrowEntitiesByLocation(entities, location);
+  //Find the subject.
   var subject = detectEntity(input, entities);
+  //If it's the player (default for finding none)
   if (subject == getPlayer()) {
+    //Try again with inventory items.
     entities = narrowEntitiesByLocation(getEntities(), "Inventory");
     subject = detectEntity(input, entities);
   }
+  //Find an action
   var action = detectAction(input, subject);
+  //Return parsed input.
   return [subject, action];
 }
 function executeParsedInput(parsedInput) {
+  //Executes parsed input.
+
+  //Extract the subject and the action
   var subject = parsedInput[0];
   var action = parsedInput[1];
+  //Run subject.methods.action
   subject.methods[action]();
 }
 //Setup-------------------------------------------------------------------------
 function inputSetup() {
+  //Finds the inputBox and assigns the necessary handler to it.
   var inputBox = document.getElementById("inputBox");
   inputBox.onkeydown = function() {listenForKey(event, "Enter", enterHandler);};
   inputBox.focus();
 }
 function imageSetup(room) {
+  //Finds the imageDisplay and configures it according to USE_IMAGES
   var image = document.getElementById("imageDisplay");
-  if (USE_IMAGES == true) {
+  //If USE_IMAGES is true
+  if (USE_IMAGES) {
+    //Update it.
     updateImageDisplay(room.image);
   } else {
+    //If not make the outputBox bigger and make the imageDisplay disappear.
     var outputBox = document.getElementById("outputBox");
     outputBox.style.height = "75%";
-    image.style.width = 0;
-    image.style.height = 0;
+    image.style.display = "none";
   }
 }
 function audioSetup() {
+  //Sets up the audio buttons.
+
+  //If USE_SOUND is true
   if (USE_SOUND) {
+    //Find the controls
     var musicControls = document.getElementById("musicControls");
     var soundControls = document.getElementById("soundControls");
+    //Apply handlers to them.
     musicControls.onclick = function() {musicControlsClick();};
     soundControls.onclick = function() {soundControlsClick();};
   } else {
+    //Otherwise
+    //Find the actual audio fields and their containing div
     var audio = document.getElementById("audio");
     var music = document.getElementById("music");
     var sound = document.getElementById("sound");
+    //Set their volume to 0 and set the div's display to none.
     music.volume = 0;
     sound.volume = 0;
     audio.style.display = "none";
   }
 }
 function setup() {
+  //Runs necessary setup functions.
   var startingRoom = findByName(STARTING_ROOM, getRooms());
   inputSetup();
   imageSetup(startingRoom);
   audioSetup();
+  //init() is defined in game.js
   init();
   updateRoomDisplay(startingRoom);
   changeMusic(startingRoom.music);
@@ -280,13 +350,24 @@ function manageEntityGrammar(entityDescription, length, i) {
   }
 }
 function embolden(string, substr) {
-  var re = new RegExp(substr, "i");
-  var index = string.search(re);
-  var strA = string.slice(0, index);
-  var strB = string.slice(index + substr.length);
-  var substrings = string.split(re);
-  var description = strA + "<strong>" + substr + "</strong>" + strB;
-  return description;
+  //Bolds a substring within a string. If the string does not contain the
+  //substring, it returns the original string.
+
+  //Test for substring within string.
+  if (string.includes(substr)) {
+    //Convert string into a RegExp
+    var re = new RegExp(substr, "i");
+    //Find the position of the substring
+    var index = string.search(re);
+    //Split the string into two strings around the substring.
+    var strA = string.slice(0, index);
+    var strB = string.slice(index + substr.length);
+    //Reconstruct the string, but with strong tags around the substring.
+    var description = strA + "<strong>" + substr + "</strong>" + strB;
+    //Return the reconstructed string.
+    return description;
+  }
+  return string;
 }
 //Rooms-------------------------------------------------------------------------
 function Room(name, image, music, description, exits, givenName) {
@@ -296,6 +377,19 @@ function Room(name, image, music, description, exits, givenName) {
   this.description = description;
   this.exits = exits;
   this.givenName = givenName;
+}
+function roomContains(roomName, name) {
+  //Checks the room with the given roomName for the entity with the given name.
+
+  //Get all the entities in the room
+  var entities = narrowEntitiesByLocation(getEntities(), roomName);
+  //Find the entity you're looking for
+  var item = findByName(name, entities);
+  //If it exists
+  if (typeof item == "object") {
+    return true;
+  }
+  return false;
 }
 function findByName(name, arr) {
   for (var i = 0; i < arr.length; i++) {
