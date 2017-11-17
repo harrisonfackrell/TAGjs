@@ -32,8 +32,8 @@ header {
   font-size: 500%;
 }
 .navbar {
-  position: absolute;
   bottom: 0;
+  position: absolute;
   padding: 0;
   background-color: gainsboro;
   font-family: reformedEllar;
@@ -43,27 +43,43 @@ header {
   overflow: hidden;
   border-top: 3px solid grey;
   border-bottom: 3px solid darkgrey;
+  height: 32px;
 }
-#navlist {
+.navlist {
   list-style: none;
   margin: auto;
+  overflow: hidden;
 }
-#navlist .element {
+.navlist li {
   float: left;
-  padding: 2px 16px;
+  padding-left: 16px;
+  padding-right: 16px;
   display: block;
   margin: 0;
+  position: relative;
+  height: 100%
 }
-#navlist li:hover {
+.navlist li:hover {
   background-color: darkgrey;
 }
-#navlist .navlink {
+.navlist a {
   margin: 0;
   text-decoration: none;
   color: black;
+  cursor: pointer;
 }
-#navlist .selected {
+.navlist .selected {
   background-color: grey;
+}
+.navlist li ul {
+  float: right;
+  padding: 0;
+  margin: 0;
+  display: none;
+}
+.navlist li:hover ul, .navlist li:active ul {
+  display: block;
+  padding-left: 16px;
 }
 #outputBox {
   margin: 1em;
