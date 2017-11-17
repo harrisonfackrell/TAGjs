@@ -50,6 +50,9 @@ header {
   margin: auto;
   overflow: hidden;
 }
+.navlist .selected {
+  background-color: grey;
+}
 .navlist li {
   float: left;
   padding-left: 16px;
@@ -67,9 +70,6 @@ header {
   text-decoration: none;
   color: black;
   cursor: pointer;
-}
-.navlist .selected {
-  background-color: grey;
 }
 .navlist li ul {
   float: right;

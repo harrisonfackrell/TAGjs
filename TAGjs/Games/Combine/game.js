@@ -258,7 +258,7 @@ function init() {
   updateNameDisplay("Combine");
   output("Welcome to Combine! You can combine two elements by typing their \
   names, try again by typing <strong>restart</strong>, or see which elements \
-  you have by typing <strong>list</strong>. There are 98 elements to create - \
+  you have by typing <strong>list</strong>. There are 97 elements to create - \
   good luck!")
   var elements = ["Ocean","Stone","Explosion","Wind","Genius","Clay","Steam",
                   "Mist","Lava","Sky","Volcano","Wave","Brick","Pottery",
