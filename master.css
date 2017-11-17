@@ -14,22 +14,11 @@ header {
   position: relative;
   width: 100%;
 }
-#TAGHeading {
-  font-family: reformedEllar;
-  font-size: 1000%;
-  margin: 0;
-  margin-left: 5%;
-  padding: 0;
+a {
+  text-decoration: none;
 }
-#TAGSubtext {
-  margin: 0;
-  padding: 0;
-  margin-top: 0.75em;
-  margin-left: 5%;
-  position: relative;
-  bottom: 0.75em;
-  font-family: reformedEllar;
-  font-size: 500%;
+#logo {
+  margin: 50px;
 }
 .navbar {
   bottom: 0;
@@ -84,9 +73,29 @@ header {
 #outputBox {
   margin: 1em;
   border: 3px solid darkgrey;
-  height: 35%;
+  min-height: 35%;
   font-family: reformedEllar;
   font-size: 250%;
   padding: 5px;
   background-color: lightgrey;
+}
+#outputBox p {
+  margin: 0;
+  padding: 0;
+}
+#outputBox ul {
+  list-style: none;
+  font-family: reformedEllar;
+}
+footer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  font-family: reformedEllar;
+  text-align: center;
+  font-size: 150%;
+  padding: 0;
+  width: 75%;
+  margin: auto;
 }
