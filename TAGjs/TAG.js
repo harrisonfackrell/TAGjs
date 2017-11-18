@@ -172,9 +172,8 @@ function imageSetup(room) {
     //Update it.
     updateImageDisplay(room.image);
   } else {
-    //If not make the outputBox bigger and make the imageDisplay disappear.
+    //If not make the imageDisplay disappear.
     var outputBox = document.getElementById("outputBox");
-    outputBox.style.height = "75%";
     image.style.display = "none";
   }
 }
