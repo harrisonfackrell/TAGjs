@@ -1,5 +1,5 @@
 body {
-  background-color: grey;
+  background-color: goldenRod;
 }
 @font-face {
   font-family: custom;
@@ -7,7 +7,7 @@ body {
 }
 #roomDisplay {
   background-color: Gainsboro;
-  border-color: dimgrey;
+  border-color: DarkGoldenRod;
 }
 #roomNameDisplay {
   font-family: custom;
@@ -22,7 +22,7 @@ body {
 }
 #outputBox {
   background-color: lightgrey;
-  border-color: dimgrey;
+  border-color: DarkGoldenRod;
   color: black;
   font-family: custom;
 }

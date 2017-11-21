@@ -100,12 +100,12 @@ var ROOM_ARRAY = [
   new Room("Crossroads",
     "",
     "",
-    "Two roads diverge in a yellow wood",
+    "Two roads diverge in a yellow wood.",
     {
       "first": ["One Path", "take the first path"],
-      "other": ["One Path", "you can take the other, just as fair"]
+      "other": ["One Path", "you can take the other, just as fair."]
     },
-    "Two Roads Diverge in a Yellow Wood."
+    "Two Roads Diverge in a Yellow Wood"
   ),
   new Room("One Path",
     "",
@@ -123,22 +123,24 @@ var obstructionArray = [
   new Obstruction("Indecision","Crossroads",
     {
       nothing: function() {
-        output("You look down one path as far as you can, to where it bends in the \
-          undergrowth.");
-        output("You feel more ready to make a decision.");
+        output("You can't do that.");
       }
     },
-    ["first","being one traveler, long you stand, trying to make a decision -"],
-    "decision"
+    ["first","you are sorry you cannot travel both;"],
+    "stand"
   ),
   new Obstruction("OtherIndecision","Crossroads",
     {
       nothing: function() {
-        output("You can't do that.")
+        output("You look down one path as far as you can, to where it bends in the \
+          undergrowth.");
+        output("You feel more ready to make a decision.");
+        this.parent.location = "Nowhere";
+        var other = findByName("OtherIndecision", getEntities());
       }
     },
-    ["other","you are sorry you can't travel both"],
-    "abracadoobie"
+    ["other","being one traveler, long you stand."],
+    "stand"
     )
 ];
 var interceptorArray = [];

@@ -281,16 +281,16 @@ function updateRoomDisplay(room) {
   var description = "";
   description += describe(room);
   if (entities.length > 0) {
-    description += " There's " + describeEntities(room) + ".";
+    description += " There's " + describeEntities(room);
   }
   if (exitKeys.length > 0) {
-    description += " You can " + describeExits(exitKeys, exits) + ".";
+    description += " You can " + describeExits(exitKeys, exits);
   }
   if (obstructions.length > 0) {
-    description += " However, " + describeObstructions(room) + ".";
+    description += " However, " + describeObstructions(room);
   }
   if (interceptorKeys.length > 0) {
-    description += " You can also " + describeExits(interceptorKeys, interceptorExits) + ".";
+    description += " You can also " + describeExits(interceptorKeys, interceptorExits);
   }
   output(description);
 }
@@ -432,7 +432,7 @@ function movePlayerByInput(input) {
   if (obstruction) {
     var description = embolden(obstruction.exit[1], obstruction.exit[0]);
     description = embolden(description, obstruction.givenName);
-    output(description + ".");
+    output(description);
     return;
   }
   if (direction) {
