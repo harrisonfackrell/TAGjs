@@ -281,7 +281,7 @@ function updateRoomDisplay(room) {
   var description = "";
   description += describe(room);
   if (entities.length > 0) {
-    description += " There's " + describeEntities(room);
+    description += " There's " + describeEntities(room) + ".";
   }
   if (exitKeys.length > 0) {
     description += " You can " + describeExits(exitKeys, exits);
