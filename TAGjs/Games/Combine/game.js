@@ -162,8 +162,8 @@ var combinationArray = [
   ["Oil","Civilization","Gasoline"],
   ["Gasoline","Fire","Lantern"],
   ["Cloud","Cloud","Lightning"],
-  ["Lightning","Metal","Wires"],
-  ["Metal","Wires","Electronics"],
+  ["Lightning","Metal","Wire"],
+  ["Metal","Wire","Electronics"],
   ["Metal","Gasoline","Motor"],
   ["Motor","Metal","Vehicle"],
   ["Vehicle","Astronomy","Rocket"],
@@ -192,7 +192,7 @@ var combinationArray = [
   ["Diplomacy","Plane","Trade"],
   ["Wave","Stone","Sand"],
   ["Sand","Fire","Glass"],
-  ["Glass","Wires","Lightbulb"],
+  ["Glass","Wire","Lightbulb"],
   ["Fire","Plant","Smoke"],
   ["Fire","Tree","Charcoal"],
   ["Lightning","Tree","Charcoal"],
@@ -204,7 +204,7 @@ var combinationArray = [
   ["Papyrus","Pencil","Writing"],
   ["Writing","Genius","Literature"],
   ["Computer","Writing","Email"],
-  ["Wires","Diplomacy","Telegraph"],
+  ["Wire","Diplomacy","Telegraph"],
   ["Artistry","Writing","Literature"],
   ["Writing","Diplomacy","Postal Service"],
   ["Writing","Metal","Engraving"],
@@ -250,8 +250,12 @@ var combinationArray = [
   ["Clay","Wheel","Pottery"],
   ["Artistry","Wood","Carpentry"],
   ["Paper","Pencil","Writing"],
-  ["Wires","Wires","Electronics"],
-  ["Wires","Genius","Electronics"]
+  ["Wire","Wire","Electronics"],
+  ["Wire","Genius","Electronics"],
+  ["Tool","Charcoal","Pencil"],
+  ["Cavern","Writing","Cave Painting"],
+  ["Diplomacy","Sound","Telephone"],
+  ["Postal Service","Internet","Email"]
 ];
 //Functions---------------------------------------------------------------------
 function init() {
@@ -267,7 +271,7 @@ function init() {
                   "Physics","Quantum Theory","Tree","Tectonics","Mountain",
                   "Tool","Wood","Mining","Metal","Smithing","Plank",
                   "Raft","Boat","Cooking","Artistry",
-                  "Astronomy","Oil","Gasoline","Lantern","Wires","Lightning",
+                  "Astronomy","Oil","Gasoline","Lantern","Wire","Lightning",
                   "Electronics","Motor","Rocket","Plane","Computer",
                   "Programmer","Text Adventure Game","Eruption","Engraving",
                   "Vehicle","Diplomacy","Hypercomputing","Autopilot",
