@@ -126,8 +126,9 @@ var obstructionArray = [
         output("You look down one path as far as you can, to where it bends in the \
           undergrowth.");
         output("You feel more ready to make a decision.");
-        var indecision = findByName("Indecision", getEntities());
-        var other = findByName("OtherIndecision", getEntities());
+        var obstructions = getObstructions();
+        var indecision = findByName("Indecision", obstructions);
+        var other = findByName("OtherIndecision", obstructions);
         indecision.location = "Nowhere";
         other.location = "Nowhere";
       }
