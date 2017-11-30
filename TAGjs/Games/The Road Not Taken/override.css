@@ -25,6 +25,7 @@ body {
   border-color: DarkGoldenRod;
   color: black;
   font-family: custom;
+  height: 6.5em;
 }
 #inputBackground {
   background-color: lightgrey;

@@ -10,7 +10,7 @@ var SYNONYMS = {
   talk: ["talk","ask","say","shout","speak"],
   take: ["take","pick up","steal"]
 };
-var USE_IMAGES = false;
+var USE_IMAGES = true;
 var USE_SOUND = false;
 var STARTING_ROOM = "Crossroads";
 //Player------------------------------------------------------------------------
@@ -98,7 +98,7 @@ var ROOM_ARRAY = [
   ),
   //Road
   new Room("Crossroads",
-    "",
+    "https://joanneeddy.files.wordpress.com/2015/08/two-paths-in-the-woods-copy.jpg",
     "",
     "Two roads diverge in a yellow wood.",
     {
@@ -108,7 +108,7 @@ var ROOM_ARRAY = [
     "Two Roads Diverge in a Yellow Wood"
   ),
   new Room("One Path",
-    "",
+    "https://images.fineartamerica.com/images-medium/old-fashioned-mantle-clock-sarah-broadmeadow-thomas.jpg",
     "",
     "So then, in leaves no step had trodden black, you left the other path \
     behind. Oh, you left it for another day, but knowing how way leads on to \
@@ -123,7 +123,13 @@ var obstructionArray = [
   new Obstruction("Indecision","Crossroads",
     {
       nothing: function() {
-        output("You can't do that.");
+        output("You look down one path as far as you can, to where it bends in the \
+          undergrowth.");
+        output("You feel more ready to make a decision.");
+        var indecision = findByName("Indecision", getEntities());
+        var other = findByName("OtherIndecision", getEntities());
+        indecision.location = "Nowhere";
+        other.location = "Nowhere";
       }
     },
     ["first","you are sorry you cannot travel both;"],
@@ -135,8 +141,11 @@ var obstructionArray = [
         output("You look down one path as far as you can, to where it bends in the \
           undergrowth.");
         output("You feel more ready to make a decision.");
-        this.parent.location = "Nowhere";
-        var other = findByName("OtherIndecision", getEntities());
+        var obstructions = getObstructions();
+        var indecision = findByName("Indecision", obstructions);
+        var other = findByName("OtherIndecision", obstructions);
+        indecision.location = "Nowhere";
+        other.location = "Nowhere";
       }
     },
     ["other","being one traveler, long you stand."],
