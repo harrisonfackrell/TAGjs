@@ -404,7 +404,7 @@ function getCurrentExits() {
   return room.exits;
 }
 function getRooms() {
-  return ROOM_ARRAY;
+  return roomArray;
 }
 //Movement----------------------------------------------------------------------
 function warp(entity, roomName) {
