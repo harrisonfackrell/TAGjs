@@ -281,7 +281,7 @@ function updateRoomDisplay(room) {
   var description = "";
   description += describe(room);
   if (entities.length > 0) {
-    description += " There's " + describeEntities(room) + ".";
+    description += " You see " + describeEntities(room);
   }
   if (exitKeys.length > 0) {
     description += " You can " + describeExits(exitKeys, exits);
@@ -307,7 +307,8 @@ function describeEntities(room) {
     var entityDescription = embolden(entity.description, entity.givenName);
     description += manageEntityGrammar(entityDescription, narrowedEntities.length, i);
   }
-    return description;
+  description += "."
+  return description;
 }
 function describeExits(keys, exits) {
   var description = "";
@@ -322,6 +323,7 @@ function describeExits(keys, exits) {
       description += " or " + exitDescription;
     }
   }
+  description += "."
   return(description);
 }
 function describeObstructions(room) {
@@ -337,6 +339,7 @@ function describeObstructions(room) {
     }
     description += manageEntityGrammar(entityDescription, length, i);
   }
+  description += "."
   return description;
 }
 function manageEntityGrammar(entityDescription, length, i) {
