@@ -32,7 +32,7 @@ var Player = new Entity("player",
   "player"
 );
 //Data Containers---------------------------------------------------------------
-var ROOM_ARRAY = [
+var roomArray = [
   //System
   new Room("Inventory",
     "https://goo.gl/LbCU99",
@@ -329,7 +329,7 @@ function listElements() {
   var currentRoom = findByName(player.location, getRooms());
   var entities = getEntities();
   var undiscovered = narrowEntitiesByLocation(entities, "Nowhere");
-  output(describeEntities(currentRoom) + ". Elements Remaining: " + undiscovered.length);
+  output(describeEntities(currentRoom) + " Elements Remaining: " + undiscovered.length);
 }
 //Execution---------------------------------------------------------------------
 setup();

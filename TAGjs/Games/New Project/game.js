@@ -70,7 +70,7 @@ var Player = new Entity("player",
   "player"
 );
 //Data Containers---------------------------------------------------------------
-var ROOM_ARRAY = [
+var roomArray = [
   //System
   new Room("Inventory",
     "https://goo.gl/LbCU99",
