@@ -23,7 +23,7 @@ body {
   display: block;
   margin: auto;
   width: 95%;
-  height: 300px;
+  height: 30%;
 }
 #audio {
   position:absolute;
@@ -44,12 +44,13 @@ body {
   margin-left: auto;
   margin-right: auto;
   border: 3px solid;
-  height: 400px;
+  height: 35%;
   font-family: reformedEllar;
   font-size: 250%;
   overflow-y: scroll;
   padding: 5px;
   margin-bottom: 0.5em;
+  margin-top: 0.5em;
   text-indent: 1em;
 }
 #inputBackground {
