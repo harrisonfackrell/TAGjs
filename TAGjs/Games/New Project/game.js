@@ -8,7 +8,9 @@ var SYNONYMS = {
   open: ["open"],
   close: ["close","shut"],
   talk: ["talk","ask","say","shout","speak"],
-  take: ["take","pick up","steal"]
+  take: ["take","pick up","steal"],
+  unequip: ["unequip","take off"],
+  equip: ["equip","put on","wear"]
 };
 var USE_IMAGES = false;
 var USE_SOUND = false;

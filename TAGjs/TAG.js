@@ -319,7 +319,7 @@ function describeExits(keys, exits) {
     } else if (i < keys.length - 1) {
       description += ", " + exitDescription;
     } else if (i >= keys.length - 1) {
-      description += " or " + exitDescription;
+      description += ", or " + exitDescription;
     }
   }
   description += "."

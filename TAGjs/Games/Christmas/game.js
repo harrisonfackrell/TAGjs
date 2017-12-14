@@ -2,15 +2,24 @@
 var SYNONYMS = {
   look: ["look","examine"],
   attack: ["attack","kick","punch","fight","destroy","crush","break","smash"],
-  move: ["move","go","walk","run"],
+  move: ["move","go","walk","run","step"],
   throw: ["throw","toss"],
   use: ["use"],
-  open: ["open"],
+  open: ["open","search"],
   close: ["close","shut"],
   talk: ["talk","ask","say","shout","speak"],
   take: ["take","pick up","steal"],
   unequip: ["unequip","take off"],
-  equip: ["equip","put on","wear"]
+  equip: ["equip","put on","wear"],
+  hang: ["hang","put"],
+  snowdrift: ["snowdrift","snow"],
+  toolbox: ["toolbox","tools","box"],
+  snowshovel: ["snowshovel","shovel"],
+  "blue ornament": ["blue", "ornament"],
+  "red ornament": ["red", "ornament"],
+  mailbox: ["mail"],
+  fireplace: ["fire"],
+  put: ["put","throw","toss"]
 };
 var USE_IMAGES = true;
 var USE_SOUND = false;
@@ -33,7 +42,7 @@ var Player = new Entity("player",
       var inventory = findByName("Inventory", getRooms());
       var description = describeEntities(inventory);
       if (description.length > 0) {
-        output("You have " + describeEntities(inventory) + ".");
+        output("You have " + describeEntities(inventory));
       } else {
         output("You have nothing.");
       }
@@ -116,7 +125,7 @@ var roomArray = [
     "The reading room is rather large; sometimes, you wonder why anyone \
     would ever dedicate that much space to something as boring as books.",
     {
-      "living room": ["home.livingroom","go out the door to the living room"]
+      "out": ["home.livingroom","go out the door to the living room"]
     },
     "Reading Room"
   ),
@@ -134,9 +143,7 @@ var roomArray = [
   new Room("home.garage",
     "http://3.bp.blogspot.com/-Rz3_aplVzII/TVPoIoafgJI/AAAAAAAAEgs/krhJgtZjF68/s1600/car%2Bin%2Bgarage.jpg",
     "",
-    "The garage is a little more drab than the rest of the house. As you look \
-    around, you can't help but think that the night sky looks remarkably \
-    bright through the garage door.",
+    "The garage is a little more drab than the rest of the house.",
     {
       "kitchen": ["home.kitchen","go in to the kitchen"],
       "out": ["home.outside","out through the garage door"]
@@ -150,10 +157,21 @@ var roomArray = [
     ever seen. That honor goes to the inflatable pumpkin your family once \
     put up for Halloween and then forgot to take down by December.",
     {
-      "living room": ["home.livingroom","go to the living room through the front door"],
+      "inside": ["home.livingroom","go inside to the living room"],
       "garage": ["home.garage","step into the garage"]
     },
     "Outside"
+  ),
+  new Room("space.junction",
+    "https://i.ytimg.com/vi/p2Poiu1tBpc/maxresdefault.jpg",
+    "",
+    "You're flying high in sky on a rocket powered tree. Who needs cheap \
+    thrills like skiing?",
+    {
+      "home": ["home.livingroom","fly home"],
+      "north pole": ["northpole.landing","head to the north pole"]
+    },
+    "Flying on a Rocket Tree"
     )
 ];
 var entityArray = [
@@ -164,8 +182,6 @@ var entityArray = [
     {
       nothing: function() {
         output("What should I do with the coat?");
-        output("<em>You can view your inventory items with the \
-          <strong>inventory</strong> command.");
       },
       unequip: function() {
         if (this.parent.isOn) {
@@ -179,8 +195,6 @@ var entityArray = [
       },
       equip: function() {
         output("You put on your coat. You can probably go outside now.");
-        output("<em>You can view your inventory items with the \
-          <strong>inventory</strong> command.");
         this.parent.isOn = true
       }
     },
@@ -204,6 +218,42 @@ var entityArray = [
         output("You summon all of your martial wisdom and engage the tree \
           in an honorable duel.");
         output("Nothing really happens.");
+      },
+      hang: function() {
+        var input = getInput();
+        if (inventoryContains("home.redornament")) {
+          if (testForWord(input, "red ornament")) {
+            var red = findByName("home.redornament", getInteractables());
+            red.location = "Nowhere";
+            this.parent.red = true;
+            output("You hang the red ornament on the tree.");
+          } else {
+            alert("Don't have red");
+            output("Hang what on the tree?");
+          }
+        } else if (testForWord(input, "blue ornament")) {
+          if (inventoryContains("home.blueornament")) {
+            var blue = findByName("home.blueornament", getInteractables());
+            blue.location = "Nowhere";
+            this.parent.blue = true;
+            output("You hang the blue ornament on the tree.");
+          } else {
+            alert("Don't have blue");
+            output("Hang what on the tree?");
+          }
+        } else {
+          alert("Didn't say valid input");
+          output("Hang what on the tree?");
+        }
+        if (this.parent.red && this.parent.blue) {
+          output("A little banner pops up. It says, \"MISSILE-TOE COMMERCIAL \
+            ROCKET - ON STANDBY\". A small button appears on the trunk of the \
+            tree.");
+          output("<em>If you want to see what's changed, you can \
+            <strong>look</strong> around.</em>");
+          var button = findByName("home.button", getInterceptors());
+          button.location = "home.livingroom";
+        }
       }
     },
     "tree"
@@ -218,10 +268,8 @@ var entityArray = [
         <strong>examine</strong> or <strong>look</strong> commands.</em>");
       },
       look: function() {
-        output("As you look through the presents, you realize with mounting \
-          horror that none of them are labeled with your name.");
-        output("This is going to require a visit to Santa, if you can just \
-          figure out how to get to him.");
+        output("You search and search, and eventually give up. None of these \
+          presents have your name on them.")
       },
       attack: function() {
         output("Why would anyone *attack* presents?");
@@ -244,7 +292,46 @@ var entityArray = [
           <strong>lighter</strong> and two pieces of tinder.");
       },
       light: function() {
-        output("But you don't have a <strong>lighter</strong>!");
+        if (inventoryContains("home.lighter")) {
+          if (this.parent.letter && this.parent.book) {
+            output("You get just enough of a spark going to light the fire. It \
+              really changes the place, having a fire going--in fact, you're \
+              almost certain that something's changed about the \
+              <strong>tree</strong>.");
+            var livingroom = findByName("home.livingroom", getRooms());
+            this.parent.lit = true;
+            livingroom.image = "https://i.ytimg.com/vi/qQQtECJ-grI/maxresdefault.jpg";
+            updateImageDisplay(livingroom.image);
+          } else {
+            output("You do your best to light the fire, but there's just not \
+              enough material. Try finding something to put in it.");
+          }
+        } else {
+          output("But you don't have a <strong>lighter</strong>!");
+        }
+      },
+      put: function() {
+        var input = getInput();
+        if (inventoryContains("home.catalog")) {
+          if (testForWord(input, "catalog")) {
+            output("You toss the catalog into the fireplace.");
+            var catalog = findByName("home.catalog", getEntities());
+            catalog.location = "nowhere";
+            this.parent.letter = true;
+            return;
+          }
+        }
+        if (inventoryContains("home.book")) {
+          if (testForWord(input, "book")) {
+            output("You toss the book into the fireplace.");
+            var book = findByName("home.book", getEntities());
+            book.location = "nowhere";
+            this.parent.book = true;
+            return;
+          }
+        }
+        output("That probably won't make very good tinder.");
+        return;
       }
     },
     "fireplace"
@@ -262,18 +349,203 @@ var entityArray = [
       },
       talk: function() {
         output("You ask the elf how you can get to Santa.");
-        output("He laughs, tosses you a paper candy cane ornament, and \
-          scampers off.");
-        this.parent.location = "Nowhere"
+        output("He smiles and mimes eating something.")
       },
-      examine: function() {
+      look: function() {
         output("Surely this elf knows how to get to Santa. You should ask \
           him about it.");
       },
+      give: function() {
+        if (inventoryContains("home.peppermint")) {
+          var input = getInput();
+          if (testForWord(input, "peppermint")) {
+            output("He laughs, tosses you a <strong>red ornament</strong>, and \
+              scampers off.");
+            var ornament = findByName("home.redornament", getEntities());
+            var peppermint = findByName("home.peppermint", getEntities());
+            ornament.location = "Inventory";
+            peppermint.location = "Nowhere";
+            this.parent.location = "Nowhere";
+          } else {
+            output("He regards your gift and then shakes his head.");
+          }
+        }
+      }
     },
     "elf"
-  )
-
+  ),
+  new Entity("home.peppermint",
+    "home.readingroom",
+    "a delicious peppermint",
+    {
+      nothing: function() {
+        output("What should I do with the peppermint?");
+      },
+      take: function() {
+        output("You take the peppermint.");
+        this.parent.location = "Inventory";
+      },
+      eat: function() {
+        output("You already brushed your teeth, though. It would taste gross!");
+      }
+    },
+    "peppermint"
+  ),
+  new Entity("home.redornament",
+    "Nowhere",
+    "a shiny red ornament",
+    {
+      nothing: function() {
+        output("What should I do with the ornament?");
+      },
+      hang: function() {
+        output("Hang it on what?");
+      }
+    },
+    "red ornament"
+  ),
+  new Entity("home.blueornament",
+    "home.garage",
+    "a dull blue ornament",
+    {
+      nothing: function() {
+        output("What should I do with the ornament?");
+      },
+      take: function() {
+        if (this.parent.location == "Inventory") {
+          this.nothing();
+        } else {
+          output("You take the blue ornament");
+          this.parent.location = "Inventory";
+        }
+      },
+      hang: function() {
+        output("Hang it on what?");
+      }
+    },
+    "blue ornament"
+  ),
+  new Entity("home.toolbox",
+    "home.garage",
+    "a toolbox",
+    {
+      nothing: function() {
+        output("This toolbox is really quite heavy.");
+        output("Maybe you should try opening it.");
+      },
+      attack: function() {
+        output("Well, that's one way to get it open.");
+        this.open();
+      },
+      open: function() {
+        if (inventoryContains("home.lighter")) {
+          output("You find nothing else worthy of note in the toolbox.")
+        } else {
+          output("You rifle through the toolbox and find a <strong>lighter</strong>.");
+          output("That might come in handy for the fireplace.");
+          var lighter = findByName("home.lighter", getEntities());
+          lighter.location = "Inventory";
+        }
+      }
+    },
+    "toolbox"
+  ),
+  new Entity("home.lighter",
+    "Nowhere",
+    "a red and black lighter",
+    {
+      nothing: function() {
+        output("Do what with the lighter?");
+      }
+    },
+    "lighter"
+  ),
+  new Entity("home.catalog",
+    "Nowhere",
+    "a catalog",
+    {
+      nothing: function() {
+        output("Do what with the catalog?");
+      }
+    },
+    "catalog"
+  ),
+  new Entity("home.snowdrift",
+    "home.outside",
+    "an enormous snowdrift",
+    {
+      nothing: function() {
+        output("Do what with the snowdrift?");
+      },
+      attack: function() {
+        output("You attack the snowdrift, but all you really succeed in doing \
+          is getting snow inside your hood.");
+      },
+      shovel: function() {
+        if (inventoryContains("home.shovel")) {
+          output("You clear away the snow, revealing the <strong>mailbox</strong>");
+          output("<em>If you want to see what's changed, you can \
+            <strong>look</strong> around.</em>");
+          var mailbox = findByName("home.mailbox", getEntities());
+          mailbox.location = "home.outside";
+          this.parent.location = "Nowhere";
+        } else {
+          output("But you don't have a snowshovel!");
+        }
+      }
+    },
+    "snowdrift"
+  ),
+  new Entity("home.shovel",
+    "home.garage",
+    "a snowshovel",
+    {
+      nothing: function() {
+        output("Do what with the snowshovel?");
+      },
+      take: function() {
+        output("You take the snowshovel with you.");
+        this.parent.location = "Inventory";
+      }
+    },
+    "snowshovel"
+  ),
+  new Entity("home.mailbox",
+    "Nowhere",
+    "the mailbox",
+    {
+      nothing: function() {
+        output("Do what with the mailbox?");
+      },
+      open: function() {
+        output("Inside the mailbox, you find a present <strong>catalog</strong>. \
+          Looks flammable.");
+        output("You take the catalog with you.");
+        var catalog = findByName("home.catalog", getEntities());
+        catalog.location = "Inventory";
+      }
+    },
+    "mailbox"
+  ),
+  new Entity("home.book",
+    "home.readingroom",
+    "a book labeled <em>Celsius 233</em>",
+    {
+      nothing: function() {
+        output("Do what with <em>Celsius 233</em>?");
+      },
+      look: function() {
+        output("It's <em>Celsius 233</em>, by Bray Radberry.");
+        output("You don't like it much, but the reviews are on fire.");
+      },
+      take: function() {
+        output("You pick up <em>Celsius 233</em>. You would say it's a cool  \
+          book, but the cover depicts flames.");
+        this.parent.location = "Inventory";
+      }
+    },
+    "book"
+    )
 ];
 var obstructionArray = [
   new Obstruction("home.livingroom.nocoat",
@@ -286,13 +558,14 @@ var obstructionArray = [
           movePlayerByInput(getInput());
         } else {
           output("You can't go <strong>out</strong> unless you're wearing \
-            your <strong>coat</strong>.");
+            your coat.");
+          output("<em>You can view your items with the \
+            <strong>inventory</strong> command.");
         }
       }
     },
     {
-      "out": ["home.outside","You can't go out unless you're wearing your <strong>coat</strong>"],
-      "kitchen": ["home.kitchen","the kitchen is closed for renovations"]
+      "out": ["home.outside","You can't go out unless you're wearing your coat"]
     },
     "out"
   ),
@@ -306,22 +579,50 @@ var obstructionArray = [
           movePlayerByInput(getInput());
         } else {
           output("You can't go <strong>out</strong> unless you're wearing \
-            your <strong>coat</strong>.");
+            your coat.");
+          output("<em>You can view your items with the \
+            <strong>inventory</strong> command.");
         }
       }
     },
-    ["out","You can't go out unless you're wearing your <strong>coat</strong>"],
+    {
+      "out": ["home.outside","You can't go out unless you're wearing your coat"]
+    },
     "out"
     )
 ];
-var interceptorArray = [];
+var interceptorArray = [
+  new Obstruction("home.button",
+    "Nowhere",
+    {
+      nothing: function() {
+        var fireplace = findByName("home.fireplace", getEntities());
+        output("You press the button.");
+        if (fireplace.lit) {
+          output("The rocket-tree blasts off, and you make sure to grab a \
+            branch!");
+          movePlayerByInput(getInput());
+        } else {
+          output("Another banner pops up. It says, \"LIGHT FIRE TO CONTINUE\".");
+        }
+      },
+    },
+    {
+      "button": ["space.junction", "press the <strong>rocket button</strong>"]
+    },
+    "button"
+  ),
+];
 //Functions---------------------------------------------------------------------
 function init() {
   output("It's Christmas day, and you're feeling very excited to get \
     on with it. Unfortunately, you've been told that \"opening presents at \
-    3 in the morning is ridiculous\" Well, fine, but that's not going to stop \
+    3 in the morning is ridiculous\". Well, fine, but that's not going to stop \
     you from waking up early to get a sneak peek. After some fumbling, you \
     manage to find the lightswitch.")
+    output("As you look through the presents, you realize with rising \
+      horror that none of them are labeled with your name. This is going to \
+      require a visit to Santa.");
 }
 //Execution---------------------------------------------------------------------
 setup();
