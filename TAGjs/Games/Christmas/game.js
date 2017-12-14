@@ -290,7 +290,10 @@ var obstructionArray = [
         }
       }
     },
-    ["out","You can't go out unless you're wearing your <strong>coat</strong>"],
+    {
+      "out": ["home.outside","You can't go out unless you're wearing your <strong>coat</strong>"],
+      "kitchen": ["home.kitchen","the kitchen is closed for renovations"]
+    },
     "out"
   ),
   new Obstruction("home.garage.nocoat",

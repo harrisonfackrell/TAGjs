@@ -133,7 +133,7 @@ function parseInput(input) {
 
   //Get the interactable entities here.
   var location = getPlayerLocation();
-  var entities = getEntities().concat(getObstructions());
+  var entities = getInteractables();
   entities = narrowEntitiesByLocation(entities, location);
   //Find the subject.
   var subject = detectEntity(input, entities);
@@ -276,8 +276,7 @@ function updateRoomDisplay(room) {
   var exits = getCurrentExits();
   var exitKeys = Object.keys(exits);
   var obstructions = narrowEntitiesByLocation(getObstructions(), room.name);
-  var interceptorExits = getInterceptorExits(room);
-  var interceptorKeys = Object.keys(interceptorExits);
+  var interceptors = narrowEntitiesByLocation(getInterceptors(), room.name);
   var description = "";
   description += describe(room);
   if (entities.length > 0) {
@@ -286,11 +285,11 @@ function updateRoomDisplay(room) {
   if (exitKeys.length > 0) {
     description += " You can " + describeExits(exitKeys, exits);
   }
-  if (obstructions.length > 0) {
-    description += " However, " + describeObstructions(room);
+  if (interceptors.length > 0) {
+    description += " You can also " + describeObstructions(interceptors);
   }
-  if (interceptorKeys.length > 0) {
-    description += " You can also " + describeExits(interceptorKeys, interceptorExits);
+  if (obstructions.length > 0) {
+    description += " However, " + describeObstructions(obstructions);
   }
   output(description);
 }
@@ -326,18 +325,19 @@ function describeExits(keys, exits) {
   description += "."
   return(description);
 }
-function describeObstructions(room) {
+function describeObstructions(obstructions) {
   var description = ""
-  var entities = getObstructions();
-  var playerLocation = getPlayerLocation();
-  var narrowedEntities = narrowEntitiesByLocation(entities, room.name);
-  for (var i = 0; i < narrowedEntities.length; i++) {
-    var entity = narrowedEntities[i];
-    var entityDescription = embolden(entity.exit[1], entity.givenName);
-    if (testForWord(entityDescription, entity.exit[0])) {
-      var entityDescription = embolden(entityDescription, entity.exit[0]);
+  for (var i = 0; i < obstructions.length; i++) {
+    var entity = obstructions[i];
+    var exitKeys = Object.keys(entity.exits);
+    for (var j = 0; j < exitKeys.length; j++) {
+      var exit = entity.exits[exitKeys[j]];
+      var entityDescription = embolden(exit[1], entity.givenName);
+      if (testForWord(entityDescription, exitKeys[j])) {
+        var entityDescription = embolden(entityDescription, exitKeys[j]);
+      }
+      description += manageEntityGrammar(entityDescription, length, j);
     }
-    description += manageEntityGrammar(entityDescription, length, i);
   }
   description += "."
   return description;
@@ -428,32 +428,46 @@ function moveEntity(entity, direction) {
   }
 }
 function movePlayerByInput(input) {
+  //Moves the player according to their input.
+
+  //Gather information on the player's movement.
   var player = getPlayer();
   var currentRoom = findByName(player.location, getRooms());
-  var obstruction = testForObstructions(getInput(), currentRoom);
   var direction = testForExits(getInput(), currentRoom);
-  if (obstruction) {
-    var description = embolden(obstruction.exit[1], obstruction.exit[0]);
-    description = embolden(description, obstruction.givenName);
-    output(description);
-    return;
-  }
+  var obstruction = testForObstructions(getInput(), currentRoom);
+  //See if they entered a valid direction
   if (direction) {
-    moveEntity(player, direction);
-    var newRoom = findByName(player.location, getRooms());
-    updateRoomDisplay(newRoom);
-    changeMusic(newRoom.music);
-    return;
+    //Make sure there's not an obstruction
+    if (obstruction) {
+      var description = embolden(obstruction[1], direction);
+      description = embolden(description, obstruction.givenName) + ".";
+      output(description);
+      return;
+    //If there isn't an obstruction, move them.
+    } else {
+      moveEntity(player, direction);
+      var newRoom = findByName(player.location, getRooms());
+      updateRoomDisplay(newRoom);
+      changeMusic(newRoom.music);
+      return;
+    }
+  //If they didn't enter a valid direction, tell them.
+  } else {
+    output("You can't go that way.");
   }
-  output("You can't go that way.");
 }
 function testForObstructions(input, room) {
+  //Returns the exit that prevented movement.
+  var player = getPlayer();
   var obstructions = getObstructions();
   obstructions = narrowEntitiesByLocation(obstructions, room.name);
   for (var i = 0; i < obstructions.length; i++) {
-    var exit = obstructions[i].exit[0];
-    if (testForWord(getInput(), exit)) {
-      return obstructions[i];
+    var exits = Object.keys(obstructions[i].exits);
+    for (var j = 0; j < exits.length; j++) {
+      var exit = exits[j]
+      if (testForWord(input, exit)) {
+        return obstructions[i].exits[exit];
+      }
     }
   }
   return false;
@@ -470,7 +484,10 @@ function testForExits(input, room) {
   }
   return false;
 }
-//Objects-----------------------------------------------------------------------
+//Interactables-----------------------------------------------------------------
+function getInteractables() {
+  return getEntities().concat(getObstructions(), getInterceptors());
+}
 //Entities----------------------------------------------------------------------
 function Entity(name, location, description, methods, givenName) {
   this.name = name;
@@ -514,22 +531,17 @@ function isPresent(name) {
   return false;
 }
 //Obstructions------------------------------------------------------------------
-function Obstruction(name, location, methods, exit, givenName) {
+function Obstruction(name, location, methods, exits, givenName) {
   this.name = name;
   this.location = location;
   this.methods = methods;
-  this.exit = exit;
+  this.exits = exits;
   this.givenName = givenName;
 }
 function getObstructions() {
   return obstructionArray;
 }
 //Interceptors------------------------------------------------------------------
-function Interceptor(name, location, exits) {
-  this.name = name;
-  this.location = location;
-  this.exits = exits;
-}
 function getInterceptors() {
   return interceptorArray;
 }

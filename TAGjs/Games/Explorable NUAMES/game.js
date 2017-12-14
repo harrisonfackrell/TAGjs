@@ -317,7 +317,9 @@ var obstructionArray = [
         playSound("Sound/kaboom.ogg");
       },
     },
-    ["left","a two-ton boulder is blocking your path to the left"],
+    {
+      "left": ["Outside - Bus Stop","a two-ton boulder is blocking your path to the left"],
+    },
     "boulder"
   ),
   new Obstruction("Bus Stop Boulder","Outside - Bus Stop",
@@ -334,7 +336,9 @@ var obstructionArray = [
         otherBoulder.location = "Nowhere";
       },
     },
-    ["right","a two-ton boulder is blocking your path to the right"],
+    {
+      "right": ["Outside - Gym Field","a two-ton boulder is blocking your path to the right"],
+    },
     "boulder"
   ),
   new Obstruction("D3 Front Lock","Outside - In Front of D3",
@@ -343,7 +347,9 @@ var obstructionArray = [
         output("I don't think that will work.");
       }
     },
-    ["in","there is a lock on the door, and you cannot go in"],
+    {
+      "in": ["undefined","there is a lock on the door, and you cannot go in"],
+    },
     "lock"
   ),
   new Obstruction("D2 Front Lock","Outside - In Front of D2",
@@ -352,7 +358,9 @@ var obstructionArray = [
         output("I don't think that will work.");
       }
     },
-    ["in","there is a lock on the door, and you cannot go in"],
+    {
+      "in": ["undefined","there is a lock on the door, and you cannot go in"],
+    },
     "lock"
   ),
   new Obstruction("D3 Back Lock","Outside - Behind D3",
@@ -361,7 +369,9 @@ var obstructionArray = [
         output("I don't think that will work.");
       }
     },
-    ["in","there is a lock on the door, and you cannot go in"],
+    {
+      "in": ["undefined","there is a lock on the door, and you cannot go in"],
+    },
     "lock"
   ),
   new Obstruction("D3 Lunch Area Lock","Outside - Shaded Lunch Area",
@@ -370,7 +380,9 @@ var obstructionArray = [
         output("I don't think that will work.");
       }
     },
-    ["in","there is a lock on the door, and you cannot go in"],
+    {
+      "in": ["undefined","there is a lock on the door, and you cannot go in"],
+    },
     "lock"
   ),
   new Obstruction("D13 Front Lock","Outside - In Front of D13",
@@ -379,7 +391,9 @@ var obstructionArray = [
         output("I don't think that will work.");
       }
     },
-    ["in","there is a lock on the door, and you cannot go in"],
+    {
+      "in": ["undefined","there is a lock on the door, and you cannot go in"],
+    },
     "lock"
   ),
   new Obstruction("Seminary Lock","Outside - In Front of Seminary",
@@ -388,20 +402,34 @@ var obstructionArray = [
         output("I don't think that will work.");
       }
     },
-    ["in","there is a lock on the door, and you cannot go in"],
+    {
+      "in": ["undefined","there is a lock on the door, and you cannot go in"],
+    },
     "lock"
   )
 ];
 var interceptorArray = [
-  new Interceptor("Portal to D13","Outside - In Front of D3",
+  new Obstruction("Portal to D13","Outside - In Front of D3",
+    {
+      nothing: function() {
+        output("What should I do with the portal?");
+      }
+    },
     {
       right: ["Outside - In Front of D13","go right through a handy portal"]
-    }
+    },
+    "portal"
   ),
-  new Interceptor("Portal to D3","Outside - In Front of D13",
+  new Obstruction("Portal to D3","Outside - In Front of D13",
     {
-      left: ["Outside - In Front of D3","go left through a handy portal"]
-    }
+      nothing: function() {
+        output("What should I do with the portal?");
+      }
+    },
+    {
+      "left": ["Outside - In Front of D3","go left through a handy portal"]
+    },
+    "portal"
   )
 ];
 //Functions---------------------------------------------------------------------
