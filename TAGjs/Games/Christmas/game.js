@@ -168,8 +168,8 @@ var roomArray = [
     "You're flying high in sky on a rocket powered tree. Who needs cheap \
     thrills like skiing?",
     {
-      "home": ["home.livingroom","fly home"],
-      "north pole": ["northpole.landing","head to the north pole"]
+      "home": ["home.livingroom","fly home"]//,
+//      "north pole": ["northpole.landing","head to the north pole"]
     },
     "Flying on a Rocket Tree"
     )
