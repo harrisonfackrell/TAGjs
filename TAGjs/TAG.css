@@ -8,7 +8,7 @@ body {
 #roomDisplay {
   border: 3px solid;
   margin: auto;
-  max-width: 50%;
+  max-width: 700px;
   font-family: reformedEllar;
   font-size: 200%;
 }
@@ -32,7 +32,8 @@ body {
   cursor: default;
   position: relative;
   font: 3em reformedEllar;
-  bottom: 1em;
+  bottom: 1.5em;
+  margin-left: 0.5em;
 }
 #audio img {
   position: relative;
