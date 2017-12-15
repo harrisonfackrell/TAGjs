@@ -1,7 +1,7 @@
 //Constants---------------------------------------------------------------------
 var SYNONYMS = {
   look: ["look","examine"],
-  attack: ["attack","kick","punch","fight","destroy","explode","crush","break","smash"],
+  attack: ["attack","kick","punch","fight","destroy","explode","crush","break","smash","ram"],
   move: ["move","go","walk","run"],
   throw: ["throw","toss"],
   use: ["use"],
@@ -308,7 +308,7 @@ var obstructionArray = [
         output("Do what with the boulder?");
       },
       attack: function() {
-        output("It broke! You must have a two-ton boulder arm!");
+        output("It broke!");
         var obstructions = getObstructions();
         var boulder = findByName("Gym Field Boulder", obstructions);
         var otherBoulder = findByName("Bus Stop Boulder", obstructions);
@@ -316,6 +316,10 @@ var obstructionArray = [
         otherBoulder.location = "Nowhere";
         playSound("Sound/kaboom.ogg");
       },
+      talk: function() {
+        output("You try to talk with the boulder.");
+        output("The boulder is stoic and stone-faced.");
+      }
     },
     {
       "left": ["Outside - Bus Stop","a two-ton boulder is blocking your path to the left"],
