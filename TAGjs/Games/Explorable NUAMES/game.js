@@ -319,6 +319,9 @@ var obstructionArray = [
       talk: function() {
         output("You try to talk with the boulder.");
         output("The boulder is stoic and stone-faced.");
+      },
+      eat: function() {
+        output("Um... no.");
       }
     },
     {
@@ -339,6 +342,13 @@ var obstructionArray = [
         boulder.location = "Nowhere";
         otherBoulder.location = "Nowhere";
       },
+      talk: function() {
+        output("You try to talk with the boulder.");
+        output("The boulder is stoic and stone-faced.");
+      },
+      eat: function() {
+        output("Um... no.");
+      }
     },
     {
       "right": ["Outside - Gym Field","a two-ton boulder is blocking your path to the right"],
