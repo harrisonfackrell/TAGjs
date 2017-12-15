@@ -162,16 +162,60 @@ var roomArray = [
     },
     "Outside"
   ),
+  //Space
   new Room("space.junction",
-    "https://i.ytimg.com/vi/p2Poiu1tBpc/maxresdefault.jpg",
+    "https://mir-s3-cdn-cf.behance.net/project_modules/max_3840/f9ea4049763237.56086a279ef25.png",
     "",
-    "You're flying high in sky on a rocket powered tree. Who needs cheap \
+    "You're flying high in sky on a Christmas tree rocket. Who needs cheap \
     thrills like skiing?",
     {
-      "home": ["home.livingroom","fly home"]//,
-//      "north pole": ["northpole.landing","head to the north pole"]
+      "home": ["home.livingroom","fly home"],
+      "north pole": ["northpole.landing","head to the north pole"]
     },
     "Flying on a Rocket Tree"
+  ),
+  //northpole
+  new Room("northpole.landing",
+    "http://www.lovethispic.com/uploaded_images/35074-Christmas-Tree-In-The-Snow.jpg",
+    "",
+    "This is where you've landed your rocket-tree. You're shocked by the sheer \
+    number of other trees - how is there a forest in the north pole?",
+    {
+      "fly": ["space.junction","fly up on your rocket-tree"],
+      "through": ["northpole.workshopout","you can head through the trees"]
+    },
+    "North Pole Landing"
+  ),
+  new Room("northpole.workshopout",
+    "http://citycreekconstruction.com/wp-content/uploads/2016/12/santas-workshop-862x504.jpg",
+    "",
+    "This is the outside of some kind of workshop. Looking in, you think you \
+    can see some red and white.",
+    {
+      "towards": ["northpole.alaskasign","head towards the workshop"],
+      "back": ["northpole.landing","go back to your rocket-tree"]
+    },
+    "Workshop Exterior"
+  ),
+  new Room("northpole.alaskasign",
+    "https://i1.wp.com/www.thedailychronic.net/wp-content/uploads/2015/06/North-Pole-Alaska.jpg?fit=1600%2C1200",
+    "",
+    "OH. THIS ISN'T WHERE YOU MEANT TO GO AT ALL.",
+    {
+      "back": ["northpole.workshopout","go back in the direction of your tree"]
+    },
+    "ALASKA SIGN"
+  ),
+  new Room("truenorth.landing",
+    "https://ak0.picdn.net/shutterstock/videos/7750630/thumb/1.jpg",
+    "",
+    "If this sign is any indication, you've made it where you meant to go. \
+    Granted, the *last* north pole sign you saw wasn't the most helpful.",
+    {
+      "fly": ["space.junction","fly up on your rocket-tree"],
+      "south": ["truenorth.workshopout","go south. It is mathematically impossible to go in any other direction"]
+    },
+    "True North Pole Landing"
     )
 ];
 var entityArray = [
@@ -300,6 +344,7 @@ var entityArray = [
               <strong>tree</strong>.");
             var livingroom = findByName("home.livingroom", getRooms());
             this.parent.lit = true;
+            this.parent.description = "a roaring fireplace";
             livingroom.image = "https://i.ytimg.com/vi/qQQtECJ-grI/maxresdefault.jpg";
             updateImageDisplay(livingroom.image);
           } else {
@@ -323,7 +368,7 @@ var entityArray = [
         }
         if (inventoryContains("home.book")) {
           if (testForWord(input, "book")) {
-            output("You toss the book into the fireplace.");
+            output("You toss the <em>Celsius 233</em> into the fireplace.");
             var book = findByName("home.book", getEntities());
             book.location = "nowhere";
             this.parent.book = true;
@@ -545,6 +590,28 @@ var entityArray = [
       }
     },
     "book"
+  ),
+  //northpole
+  new Entity("northpole.coordinates",
+    "northpole.alaskasign",
+    "a paper with the coordinates of the real north pole",
+    {
+      nothing: function() {
+        output("Do what with the coordinates?");
+      },
+      look: function() {
+        output("Longitude: 0, Latitude: 90");
+        var interceptor = findByName("space.truenorth", getInterceptors());
+        interceptor.location = "space.junction";
+      },
+      take: function() {
+        output("You take the coordinates. You should be able to fly to the \
+          real north pole now.");
+        var interceptor = findByName("space.truenorth", getInterceptors());
+        interceptor.location = "space.junction";
+      }
+    },
+    "coordinates"
     )
 ];
 var obstructionArray = [
@@ -592,6 +659,7 @@ var obstructionArray = [
     )
 ];
 var interceptorArray = [
+  //home
   new Obstruction("home.button",
     "Nowhere",
     {
@@ -599,8 +667,7 @@ var interceptorArray = [
         var fireplace = findByName("home.fireplace", getEntities());
         output("You press the button.");
         if (fireplace.lit) {
-          output("The rocket-tree blasts off, and you make sure to grab a \
-            branch!");
+          output("The tree turns into a rocket.");
           movePlayerByInput(getInput());
         } else {
           output("Another banner pops up. It says, \"LIGHT FIRE TO CONTINUE\".");
@@ -612,6 +679,19 @@ var interceptorArray = [
     },
     "button"
   ),
+  //space
+  new Obstruction("space.truenorth",
+    "Nowhere",
+    {
+      nothing: function() {
+        movePlayerByInput(getInput());
+      }
+    },
+    {
+      "true north": ["truenorth.landing","fly to true north"]
+    },
+    "true north"
+  )
 ];
 //Functions---------------------------------------------------------------------
 function init() {
