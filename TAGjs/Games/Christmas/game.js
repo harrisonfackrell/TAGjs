@@ -206,16 +206,51 @@ var roomArray = [
     },
     "ALASKA SIGN"
   ),
+  //truenorth
   new Room("truenorth.landing",
     "https://ak0.picdn.net/shutterstock/videos/7750630/thumb/1.jpg",
     "",
     "If this sign is any indication, you've made it where you meant to go. \
-    Granted, the *last* north pole sign you saw wasn't the most helpful.",
+    Granted, the *last* north pole sign you saw wasn't the most helpful. \
+    In any case, it doesn't look like Santa's Workshop is right here, so \
+    you'll have to do some searching.",
     {
       "fly": ["space.junction","fly up on your rocket-tree"],
-      "south": ["truenorth.workshopout","go south. It is mathematically impossible to go in any other direction"]
+      "south": ["truenorth.bearroom","go south. It is mathematically impossible to go in any other direction"]
     },
     "True North Pole Landing"
+  ),
+  new Room("truenorth.bearroom",
+    "https://sites.google.com/a/waunakee.k12.wi.us/rickett-class-biosphere-site/_/rsrc/1394131401524/frozen-tundra-1/images%20%282%29.jpg",
+    "",
+    "As you walk out into the frozen tundra, you start to feel grateful for \
+    your coat.",
+    {
+      "north": ["truenorth.landing","go north to the landing site"],
+      "east": ["truenorth.lake","east to a lake"],
+      "west": ["truenorth.igloo","west to an igloo"],
+      "south": ["truenorth.workshopout","south to what looks like Santa's Workshop."]
+    },
+    "Frozen Tundra"
+  ),
+  new Room("truenorth.igloo",
+    "http://snowmanworld.fi/wp-content/uploads/2014/09/snowman-world-igloo-hotel-arctic-circle-rovaniemi-lapland-finland-santa-claus-village.jpg",
+    "",
+    "You step inside the igloo to find a surprisingly well-crafted interior.",
+    {
+      "out": ["truenorth.bearroom","step out of the igloo."]
+    },
+    "Igloo"
+  ),
+  new Room("truenorth.lake",
+    "https://i0.wp.com/bumped.org/psublog/wp-content/uploads/2012/06/Frozen-Tundra-2.jpg",
+    "",
+    "Incredibly, the lake you saw is surrounded by trees. It's an oasis in the \
+    frozen tundra",
+    {
+      "back": ["truenorth.bearroom","go back where you came from"]
+    },
+    "Oasis"
     )
 ];
 var entityArray = [
@@ -612,9 +647,32 @@ var entityArray = [
       }
     },
     "coordinates"
+  ),
+  //truenorth
+  new Entity("truenorth.snowman",
+    "truenorth.igloo",
+    "a snowman here. For some reason, he's holding the number 4.",
+    {
+      nothing: function() {
+        output("What should I do with the snowman?");
+      },
+      look: function() {
+        output("It's a snowman, inset in the wall. It's got a top hat, coal \
+          eyes, and a carrot nose. Pretty standard fare, if you ask me.");
+      },
+      talk: function() {
+        output("You ask the snowman about the number 4 in his hand.");
+        output("The snowman says it's there for snow reason.");
+      },
+      attack: function() {
+        output("The snowman tells you to take a chill pill.");
+      }
+    },
+    "snowman"
     )
 ];
 var obstructionArray = [
+  //home
   new Obstruction("home.livingroom.nocoat",
     "home.livingroom",
     {
@@ -656,6 +714,22 @@ var obstructionArray = [
       "out": ["home.outside","You can't go out unless you're wearing your coat"]
     },
     "out"
+  ),
+  //truenorth
+  new Obstruction("truenorth.polarbear",
+    "truenorth.bearroom",
+    {
+      nothing: function() {
+        output("What should I do with the bear?");
+      },
+      attack: function() {
+        output("I'm not sure attacking a *polar bear* is a good idea.");
+      }
+    },
+    {
+      "south": ["turenorth.workshopout","you cannot go south because a polar bear is blocking your path."]
+    },
+    "bear"
     )
 ];
 var interceptorArray = [
@@ -700,9 +774,10 @@ function init() {
     3 in the morning is ridiculous\". Well, fine, but that's not going to stop \
     you from waking up early to get a sneak peek. After some fumbling, you \
     manage to find the lightswitch.")
-    output("As you look through the presents, you realize with rising \
-      horror that none of them are labeled with your name. This is going to \
-      require a visit to Santa.");
+  output("As you look through the presents, you realize with rising \
+    horror that none of them are labeled with your name. Pragmatic \
+    10-year-old that you are, you decide that this will require a visit to \
+    Santa.");
 }
 //Execution---------------------------------------------------------------------
 setup();
