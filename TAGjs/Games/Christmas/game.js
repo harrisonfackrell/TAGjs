@@ -19,11 +19,13 @@ var SYNONYMS = {
   "red ornament": ["red", "ornament"],
   mailbox: ["mail"],
   fireplace: ["fire"],
-  put: ["put","throw","toss"]
+  put: ["put","throw","toss"],
+  "fishing pole": ["pole"],
+  "space helmet": ["helmet"]
 };
 var USE_IMAGES = true;
 var USE_SOUND = false;
-var STARTING_ROOM = "home.livingroom";
+var STARTING_ROOM = "truenorth.landing";
 //Player------------------------------------------------------------------------
 var Player = new Entity("player",
   STARTING_ROOM,
@@ -221,15 +223,15 @@ var roomArray = [
     "True North Pole Landing"
   ),
   new Room("truenorth.bearroom",
-    "https://sites.google.com/a/waunakee.k12.wi.us/rickett-class-biosphere-site/_/rsrc/1394131401524/frozen-tundra-1/images%20%282%29.jpg",
+    "https://polarbearsinternational.org/media/3075/ct_110915-23.jpg",
     "",
     "As you walk out into the frozen tundra, you start to feel grateful for \
     your coat.",
     {
       "north": ["truenorth.landing","go north to the landing site"],
-      "east": ["truenorth.lake","east to a lake"],
+      "east": ["truenorth.oasis","east to a lake"],
       "west": ["truenorth.igloo","west to an igloo"],
-      "south": ["truenorth.workshopout","south to what looks like Santa's Workshop."]
+      "south": ["truenorth.workshopout","south to what looks like Santa's Workshop"]
     },
     "Frozen Tundra"
   ),
@@ -242,10 +244,10 @@ var roomArray = [
     },
     "Igloo"
   ),
-  new Room("truenorth.lake",
+  new Room("truenorth.oasis",
     "https://i0.wp.com/bumped.org/psublog/wp-content/uploads/2012/06/Frozen-Tundra-2.jpg",
     "",
-    "Incredibly, the lake you saw is surrounded by trees. It's an oasis in the \
+    "Incredibly, this place is surrounded by trees. It's an oasis in the \
     frozen tundra",
     {
       "back": ["truenorth.bearroom","go back where you came from"]
@@ -260,7 +262,7 @@ var entityArray = [
     "a warm winter coat",
     {
       nothing: function() {
-        output("What should I do with the coat?");
+        output("Do what with the coat?");
       },
       unequip: function() {
         if (this.parent.isOn) {
@@ -285,7 +287,7 @@ var entityArray = [
     "a heavily ornamented tree",
     {
       nothing: function() {
-        output("What should I do with the tree?");
+        output("Do what with the tree?");
       },
       look: function() {
         output("The tree really is quite beautiful. You feel proud of the \
@@ -342,7 +344,7 @@ var entityArray = [
     "a stack of presents",
     {
       nothing: function() {
-        output("What should I do with the presents?");
+        output("Do what with the presents?");
         output("<em>If you want to take a closer look, you can use the \
         <strong>examine</strong> or <strong>look</strong> commands.</em>");
       },
@@ -361,7 +363,7 @@ var entityArray = [
     "a depressingly empty fireplace",
     {
       nothing: function() {
-        output("What should I do with the fireplace?");
+        output("Do what with the fireplace?");
         output("<em>If you want to take a closer look, you can use the \
         <strong>examine</strong> or <strong>look</strong> commands.</em>");
       },
@@ -459,7 +461,7 @@ var entityArray = [
     "a delicious peppermint",
     {
       nothing: function() {
-        output("What should I do with the peppermint?");
+        output("Do what with the peppermint?");
       },
       take: function() {
         output("You take the peppermint.");
@@ -476,7 +478,7 @@ var entityArray = [
     "a shiny red ornament",
     {
       nothing: function() {
-        output("What should I do with the ornament?");
+        output("Do what with the ornament?");
       },
       hang: function() {
         output("Hang it on what?");
@@ -489,7 +491,7 @@ var entityArray = [
     "a dull blue ornament",
     {
       nothing: function() {
-        output("What should I do with the ornament?");
+        output("Do what with the ornament?");
       },
       take: function() {
         if (this.parent.location == "Inventory") {
@@ -654,7 +656,7 @@ var entityArray = [
     "a snowman here. For some reason, he's holding the number 4.",
     {
       nothing: function() {
-        output("What should I do with the snowman?");
+        output("Do what with the snowman?");
       },
       look: function() {
         output("It's a snowman, inset in the wall. It's got a top hat, coal \
@@ -669,6 +671,58 @@ var entityArray = [
       }
     },
     "snowman"
+  ),
+  new Entity("truenorth.lake",
+    "truenorth.oasis",
+    "the lake, which remarkably isn't frozen over",
+    {
+      nothing: function() {
+        output("Do what with the lake?");
+      },
+      attack: function() {
+        output("Good luck with that, Caligula.");
+        output("<em>Now you have to go look up Caligula. Ha.</em>");
+      },
+      fish: function() {
+        if (inventoryContains("truenorth.fishingpole")) {
+          output("You stick your fishing pole in the water and wait.");
+          output("You don't catch anything because the fish haven't been programmed yet.");
+        }
+        output("You need a fishing pole");
+      }
+    },
+    "lake"
+  ),
+  new Entity("truenorth.fishingpole",
+    "Nowhere",
+    "a fishing pole",
+    {
+      fish: function() {
+        output("Fish in what?");
+      }
+    },
+    "fishing pole"
+  ),
+  new Entity("truenorth.spacehelmet",
+    "truenorth.igloo",
+    "a space helmet",
+    {
+      nothing: function() {
+        output("Do what with the space helmet?");
+      },
+      take: function() {
+        output("You take the space helmet. You could probably go to space if \
+          you put it on.");
+        this.parent.location = "Inventory";
+      },
+      equip: function() {
+        output("You put the space helmet on. If only you had a rocket to go to \
+          space in. Oh, that's right - despite the astronomical odds, you do.");
+        this.parent.location = "Inventory";
+        this.parent.on = true;
+      }
+    },
+    "space helmet"
     )
 ];
 var obstructionArray = [
@@ -720,17 +774,17 @@ var obstructionArray = [
     "truenorth.bearroom",
     {
       nothing: function() {
-        output("What should I do with the bear?");
+        output("Do what with the bear?");
       },
       attack: function() {
         output("I'm not sure attacking a *polar bear* is a good idea.");
       }
     },
     {
-      "south": ["turenorth.workshopout","you cannot go south because a polar bear is blocking your path."]
+      "south": ["turenorth.workshopout","you cannot go south because a polar bear is blocking your path"]
     },
     "bear"
-    )
+  )
 ];
 var interceptorArray = [
   //home
