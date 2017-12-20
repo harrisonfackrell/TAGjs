@@ -21,7 +21,8 @@ var SYNONYMS = {
   fireplace: ["fire"],
   put: ["put","throw","toss"],
   "fishing pole": ["pole"],
-  "space helmet": ["helmet"]
+  "space helmet": ["helmet"],
+  "space worm": ["worm"]
 };
 var USE_IMAGES = true;
 var USE_SOUND = false;
@@ -176,6 +177,25 @@ var roomArray = [
     },
     "Flying on a Rocket Tree"
   ),
+  new Room("space.station",
+    "http://www.boeing.com/resources/boeingdotcom/space/international_space_station/images/iss_gallery_med_02_960x600.jpg",
+    "",
+    "You've made it to the International Space Station. Nifty.",
+    {
+      "in": ["space.stationin","head in to the station"],
+      "down": ["space.junction","fly back down to earth"]
+    },
+    "International Space Station"
+  ),
+  new Room("space.stationin",
+    "https://upload.wikimedia.org/wikipedia/commons/6/68/Destiny_as_just_installed.jpg",
+    "The inside of the space station is just as robotic and filled-with-computers \
+    as you imagined it.",
+    {
+      "out": ["space.station","go out the hatch"]
+    },
+    "Inside the ISS"
+  ),
   //northpole
   new Room("northpole.landing",
     "http://www.lovethispic.com/uploaded_images/35074-Christmas-Tree-In-The-Snow.jpg",
@@ -245,10 +265,10 @@ var roomArray = [
     "Igloo"
   ),
   new Room("truenorth.oasis",
-    "https://i0.wp.com/bumped.org/psublog/wp-content/uploads/2012/06/Frozen-Tundra-2.jpg",
+    "https://s-media-cache-ak0.pinimg.com/originals/3a/6e/aa/3a6eaa13ce18985c33b8f65e102d3948.jpg",
     "",
     "Incredibly, this place is surrounded by trees. It's an oasis in the \
-    frozen tundra",
+    frozen tundra.",
     {
       "back": ["truenorth.bearroom","go back where you came from"]
     },
@@ -723,6 +743,81 @@ var entityArray = [
       }
     },
     "space helmet"
+  ),
+  new Entity("space.cosmonaut",
+    "space.station",
+    "a cosmonaut",
+    {
+      nothing: function() {
+        output("Do what with the cosmonaut?");
+      },
+      talk: function() {
+        output("You can't understand the cosmonaut. For whatever reason, he \
+          gives you a <strong>space worm</strong> and mimes a fish swimming \
+          with his hand.");
+        var worm = findByName("space.spaceworm", getEntities());
+        worm.location = "Inventory";
+      }
+    },
+    "cosmonaut"
+  ),
+  new Entity("space.spaceworm",
+    "Nowhere",
+    "a space worm",
+    {
+      nothing: function() {
+        output("Do what with the space worm?");
+      },
+      put: function() {
+        if (inventoryContains("truenorth.fishingpole")) {
+          output("You attach the space worm to your fishing pole.");
+        } else {
+          this.nothing();
+        }
+      },
+      eat: function() {
+        output("Um... no.");
+      }
+    },
+    "space worm"
+  ),
+  new Entity("space.coupon",
+    "space.stationin",
+    "a coupon for a fishing pole",
+    {
+      nothing: function() {
+        output("Do what with the coupon?");
+      },
+      take: function() {
+        output("You the coupon");
+        this.parent.location = "Inventory";
+      },
+      use: function() {
+        output("Give the coupon to who?");
+      },
+      give: function() {
+        output("Give the coupon to who?");
+      }
+    },
+    "coupon"
+  ),
+  new Entity("space.sign",
+    "space.stationin",
+    "a sign that says \"Take one\". That's decidedly strange";
+    {
+      output: function() {
+        output("Do what with the sign?");
+      },
+      take: function() {
+        output("That seems annoying to carry.");
+        output("<em>Says the person carrying a snowshovel everywhere.</em>");
+      },
+      attack: function() {
+        output("Fortunately for the ISS, it's actually really difficult to \
+          attack things when you're floating in space.");
+      }
+    },
+    "sign"
     )
 ];
 var obstructionArray = [
@@ -819,7 +914,19 @@ var interceptorArray = [
       "true north": ["truenorth.landing","fly to true north"]
     },
     "true north"
-  )
+  ),
+  new Obstruction("space.hashelmet",
+    "Nowhere",
+    {
+      nothing: function() {
+        movePlayerByInput(getInput());
+      }
+    },
+    {
+      "space": ["space.station","go to space"]
+    },
+    "space"
+    )
 ];
 //Functions---------------------------------------------------------------------
 function init() {
