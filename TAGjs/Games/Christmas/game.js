@@ -22,7 +22,9 @@ var SYNONYMS = {
   put: ["put","throw","toss"],
   "fishing pole": ["pole"],
   "space helmet": ["helmet"],
-  "space worm": ["worm"]
+  "space worm": ["worm"],
+  "fishing pole": ["pole"],
+  "polar bear": ["bear"]
 };
 var USE_IMAGES = true;
 var USE_SOUND = false;
@@ -224,9 +226,20 @@ var roomArray = [
     "",
     "OH. THIS ISN'T WHERE YOU MEANT TO GO AT ALL.",
     {
+      "in": ["northpole.fishingstore","in to the nearby fishing utility shop"],
       "back": ["northpole.workshopout","go back in the direction of your tree"]
     },
     "ALASKA SIGN"
+  ),
+  new Room("northpole.fishingstore",
+    "http://reedsburgtruevaluehardwarestore.com/wp-content/uploads/2012/04/fishing-rods-reels.jpg",
+    "",
+    "Welcome to Fish Upon a Star, the greatest fishing utility shop in North \
+    Pole, Alaska.",
+    {
+      "out": ["northpole.alaskasign","head out the door"]
+    },
+    "Fish Upon a Star"
   ),
   //truenorth
   new Room("truenorth.landing",
@@ -670,6 +683,54 @@ var entityArray = [
     },
     "coordinates"
   ),
+  new Entity("northpole.fishingcashier",
+    "northpole.fishingstore",
+    "a cashier at the counter",
+    {
+      nothing: function() {
+        output("The cashier looks at you quizzically.");
+      },
+      talk: function() {
+        output("Like any 10-year-old would, you ask for free stuff. He asks, \
+          \"Do you have a coupon?\"");
+      },
+      give: function() {
+        if (testForWord("coupon", getInput()) && inventoryContains("space.coupon")) {
+          this.coupon();
+        } else {
+          this.nothing();
+        }
+      },
+      coupon: function() {
+        if (inventoryContains("space.coupon")) {
+          output("He looks at your coupon and nods his head. \"I see you've \
+            been to the ISS. It's pretty cool, huh? Anyways, here's your \
+            complimentary fishing pole. Come to <em>Fish Upon a Star</em> \
+            again!");
+          var fishingpole = findByName("northpole.fishingpole", getEntities());
+          var coupon = findByName("space.coupon", getEntities());
+          fishingpole.location = "Inventory";
+          coupon.location = "Nowhere";
+        } else {
+          output("You don't have a coupon!");
+        }
+      }
+    },
+    "cashier"
+  ),
+  new Entity("northpole.fishingpole",
+    "Nowhere",
+    "a blue fishing pole",
+    {
+      nothing: function() {
+        output("Do what with the fishing pole?");
+      },
+      fish: function() {
+        output("Fish in what?");
+      }
+    },
+    "fishing pole"
+  ),
   //truenorth
   new Entity("truenorth.snowman",
     "truenorth.igloo",
@@ -704,25 +765,28 @@ var entityArray = [
         output("<em>Now you have to go look up Caligula. Ha.</em>");
       },
       fish: function() {
-        if (inventoryContains("truenorth.fishingpole")) {
-          output("You stick your fishing pole in the water and wait.");
-          output("You don't catch anything because the fish haven't been programmed yet.");
+        if (inventoryContains("northpole.fishingpole") && inventoryContains("space.spaceworm")) {
+          output("You stick your fishing pole in the water and wait. Before \
+            too long, you get a nibble, and you expertly catch it.");
+          output("You now have a fish.");
+          var fish = findByName("truenorth.fish", getEntities());
+          fish.location = "Inventory";
         }
         output("You need a fishing pole");
       }
     },
     "lake"
   ),
-  new Entity("truenorth.fishingpole",
+  new Entity("truenorth.fish",
     "Nowhere",
-    "a fishing pole",
+    "a fish",
     {
-      fish: function() {
-        output("Fish in what?");
+      nothing: function() {
+        output("Do what with the fish?");
       }
     },
-    "fishing pole"
-  ),
+    "fish"
+    )
   new Entity("truenorth.spacehelmet",
     "truenorth.igloo",
     "a space helmet",
@@ -744,6 +808,7 @@ var entityArray = [
     },
     "space helmet"
   ),
+  //space
   new Entity("space.cosmonaut",
     "space.station",
     "a cosmonaut",
@@ -769,7 +834,7 @@ var entityArray = [
         output("Do what with the space worm?");
       },
       put: function() {
-        if (inventoryContains("truenorth.fishingpole")) {
+        if (inventoryContains("northpole.fishingpole")) {
           output("You attach the space worm to your fishing pole.");
         } else {
           this.nothing();
@@ -873,12 +938,23 @@ var obstructionArray = [
       },
       attack: function() {
         output("I'm not sure attacking a *polar bear* is a good idea.");
+      },
+      fish: function() {
+        if (inventoryContains("truenorth.fish")) {
+          output("You throw the fish at the bear, and it lumbers away.");
+          var bearroom = findByName("truenorth.bearroom", getRooms());
+          this.location = "Nowhere";
+          bearroom.image = "https://sites.google.com/a/waunakee.k12.wi.us/rickett-class-biosphere-site/_/rsrc/1394131401524/frozen-tundra-1/images%20%282%29.jpg";
+          updateImageDisplay(bearroom.image);
+        } else {
+          output("You don't have a fish!");
+        }
       }
     },
     {
-      "south": ["turenorth.workshopout","you cannot go south because a polar bear is blocking your path"]
+      "south": ["truenorth.workshopout","you cannot go south because a polar bear is blocking your path"]
     },
-    "bear"
+    "polar bear"
   )
 ];
 var interceptorArray = [
