@@ -166,10 +166,10 @@ var roomArray = [
   ),
   //Space
   new Room("space.junction",
-    "https://mir-s3-cdn-cf.behance.net/project_modules/max_3840/f9ea4049763237.56086a279ef25.png",
+    "https://www.nasa.gov/sites/default/files/thumbnails/image/sls_block1_noeas_afterburner_engmarkings_sm.jpg",
     "",
-    "You're flying high in sky on a Christmas tree rocket. Who needs cheap \
-    thrills like skiing?",
+    "You're flying high in sky on a Christmas tree rocket. The rocket form is \
+    decidedly less festive than you were expecting.",
     {
       "home": ["home.livingroom","fly home"],
       "north pole": ["northpole.landing","head to the north pole"]
@@ -210,7 +210,7 @@ var roomArray = [
   ),
   //truenorth
   new Room("truenorth.landing",
-    "https://ak0.picdn.net/shutterstock/videos/7750630/thumb/1.jpg",
+    "http://i.huffpost.com/gen/1497396/images/o-NORTH-POLE-facebook.jpg",
     "",
     "If this sign is any indication, you've made it where you meant to go. \
     Granted, the *last* north pole sign you saw wasn't the most helpful. \
