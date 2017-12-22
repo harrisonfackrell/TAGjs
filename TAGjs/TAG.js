@@ -161,7 +161,7 @@ function executeParsedInput(parsedInput) {
 function inputSetup() {
   //Finds the inputBox and assigns the necessary handler to it.
   var inputBox = document.getElementById("inputBox");
-  inputBox.onkeydown = function() {listenForKey(event, "Enter", enterHandler);};
+  inputBox.onkeydown = function(event) {listenForKey(event, "Enter", enterHandler);};
   inputBox.focus();
 }
 function imageSetup(room) {
