@@ -20,7 +20,7 @@ var SYNONYMS = {
   mailbox: ["mail"],
   fireplace: ["fire"],
   put: ["put","throw","toss"],
-  "fishing pole": ["pole"],
+  "fishing pole": ["pole", "fish"],
   "space helmet": ["helmet"],
   "space worm": ["worm"],
   "fishing pole": ["pole"],
@@ -29,7 +29,7 @@ var SYNONYMS = {
 };
 var USE_IMAGES = true;
 var USE_SOUND = false;
-var STARTING_ROOM = "truenorth.workshopout";
+var STARTING_ROOM = "home.livingroom";
 //Player------------------------------------------------------------------------
 var Player = new Entity("player",
   STARTING_ROOM,
@@ -710,7 +710,7 @@ var entityArray = [
         output("You take the coordinates. You should be able to fly to the \
           real north pole now.");
         var interceptor = findByName("space.truenorth", getInterceptors());
-        this.location = "Inventory";
+        this.parent.location = "Inventory";
         interceptor.location = "space.junction";
       }
     },
