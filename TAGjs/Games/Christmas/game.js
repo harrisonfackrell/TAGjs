@@ -2,7 +2,7 @@
 var SYNONYMS = {
   look: ["look","examine"],
   attack: ["attack","kick","punch","fight","destroy","crush","break","smash"],
-  move: ["move","go","walk","run","step"],
+  move: ["move","go","walk","run","step","fly","head"],
   throw: ["throw","toss"],
   use: ["use"],
   open: ["open","search"],
@@ -24,11 +24,12 @@ var SYNONYMS = {
   "space helmet": ["helmet"],
   "space worm": ["worm"],
   "fishing pole": ["pole"],
-  "polar bear": ["bear"]
+  "polar bear": ["bear"],
+  "santa claus": ["santa"]
 };
 var USE_IMAGES = true;
 var USE_SOUND = false;
-var STARTING_ROOM = "truenorth.landing";
+var STARTING_ROOM = "truenorth.workshopout";
 //Player------------------------------------------------------------------------
 var Player = new Entity("player",
   STARTING_ROOM,
@@ -191,6 +192,7 @@ var roomArray = [
   ),
   new Room("space.stationin",
     "https://upload.wikimedia.org/wikipedia/commons/6/68/Destiny_as_just_installed.jpg",
+    "",
     "The inside of the space station is just as robotic and filled-with-computers \
     as you imagined it.",
     {
@@ -211,25 +213,25 @@ var roomArray = [
     "North Pole Landing"
   ),
   new Room("northpole.workshopout",
-    "http://citycreekconstruction.com/wp-content/uploads/2016/12/santas-workshop-862x504.jpg",
+    "http://www.harbinice.com/public/richfiles/photos/harbin/China-Snow-Town/20120104152507311-8743.jpg",
     "",
-    "This is the outside of some kind of workshop. Looking in, you think you \
-    can see some red and white.",
+    "You seem to be standing near a village.",
     {
-      "towards": ["northpole.alaskasign","head towards the workshop"],
+      "towards": ["northpole.alaskasign","head towards the village"],
       "back": ["northpole.landing","go back to your rocket-tree"]
     },
-    "Workshop Exterior"
+    "Village"
   ),
   new Room("northpole.alaskasign",
     "https://i1.wp.com/www.thedailychronic.net/wp-content/uploads/2015/06/North-Pole-Alaska.jpg?fit=1600%2C1200",
     "",
-    "OH. THIS ISN'T WHERE YOU MEANT TO GO AT ALL.",
+    "Okay. This is North Pole, Alaska. Probably not where Santa lives, but it \
+    might be worth exploring.",
     {
-      "in": ["northpole.fishingstore","in to the nearby fishing utility shop"],
+      "in": ["northpole.fishingstore","in to a nearby store"],
       "back": ["northpole.workshopout","go back in the direction of your tree"]
     },
-    "ALASKA SIGN"
+    "North Pole, Alaska"
   ),
   new Room("northpole.fishingstore",
     "http://reedsburgtruevaluehardwarestore.com/wp-content/uploads/2012/04/fishing-rods-reels.jpg",
@@ -273,7 +275,7 @@ var roomArray = [
     "",
     "You step inside the igloo to find a surprisingly well-crafted interior.",
     {
-      "out": ["truenorth.bearroom","step out of the igloo."]
+      "out": ["truenorth.bearroom","step out of the igloo"]
     },
     "Igloo"
   ),
@@ -286,7 +288,35 @@ var roomArray = [
       "back": ["truenorth.bearroom","go back where you came from"]
     },
     "Oasis"
-    )
+  ),
+  new Room("truenorth.workshopout",
+    "http://homesoftherich.net/wp-content/uploads/2015/01/Screen-Shot-2015-01-26-at-6.36.14-AM.png",
+    "",
+    "This is it. Santa's workshop is right here.",
+    {
+      "in": ["truenorth.workshop","go in"],
+      "back": ["truenorth.bearroom","head back"]
+    },
+    "Santa's Workshop"
+  ),
+  new Room("truenorth.workshop",
+    "https://www.thesun.co.uk/wp-content/uploads/2017/10/nintchdbpict000290312198.jpg?strip=all&w=960",
+    "",
+    "After all that work, you've made it.",
+    {
+      "out": ["truenorth.workshopout","go out if you want, but I don't see why you would"]
+    },
+    "Santa Claus"
+  ),
+  new Room("endroom",
+    "http://cdn1.theodysseyonline.com/files/2015/12/20/635861698837468427-2074246347_2.jpg",
+    "",
+    "Sure enough, there are presents there for you in the morning, not the \
+    least of which is a text adventure game for your computer. Neat!",
+    {
+    },
+    "THE END"
+  ),
 ];
 var entityArray = [
   //inventory
@@ -671,6 +701,8 @@ var entityArray = [
       },
       look: function() {
         output("Longitude: 0, Latitude: 90");
+        output("Knowing this, you should be able to fly to the real north \
+          pole now.")
         var interceptor = findByName("space.truenorth", getInterceptors());
         interceptor.location = "space.junction";
       },
@@ -678,6 +710,7 @@ var entityArray = [
         output("You take the coordinates. You should be able to fly to the \
           real north pole now.");
         var interceptor = findByName("space.truenorth", getInterceptors());
+        this.location = "Inventory";
         interceptor.location = "space.junction";
       }
     },
@@ -694,19 +727,15 @@ var entityArray = [
         output("Like any 10-year-old would, you ask for free stuff. He asks, \
           \"Do you have a coupon?\"");
       },
-      give: function() {
-        if (testForWord("coupon", getInput()) && inventoryContains("space.coupon")) {
-          this.coupon();
-        } else {
-          this.nothing();
-        }
-      },
       coupon: function() {
         if (inventoryContains("space.coupon")) {
           output("He looks at your coupon and nods his head. \"I see you've \
             been to the ISS. It's pretty cool, huh? Anyways, here's your \
             complimentary fishing pole. Come to <em>Fish Upon a Star</em> \
-            again!");
+            again!\"");
+          output("\"Oh, and hey - if you need any <strong>bait</strong>, just \
+            ask someone at the station. They've got space worms running out \
+            their ears.\"")
           var fishingpole = findByName("northpole.fishingpole", getEntities());
           var coupon = findByName("space.coupon", getEntities());
           fishingpole.location = "Inventory";
@@ -734,7 +763,7 @@ var entityArray = [
   //truenorth
   new Entity("truenorth.snowman",
     "truenorth.igloo",
-    "a snowman here. For some reason, he's holding the number 4.",
+    "a snowman here - for some reason, he's holding the number 4 -",
     {
       nothing: function() {
         output("Do what with the snowman?");
@@ -771,8 +800,9 @@ var entityArray = [
           output("You now have a fish.");
           var fish = findByName("truenorth.fish", getEntities());
           fish.location = "Inventory";
+        } else {
+          output("You need a fishing pole.");
         }
-        output("You need a fishing pole");
       }
     },
     "lake"
@@ -786,7 +816,7 @@ var entityArray = [
       }
     },
     "fish"
-    )
+  ),
   new Entity("truenorth.spacehelmet",
     "truenorth.igloo",
     "a space helmet",
@@ -795,18 +825,40 @@ var entityArray = [
         output("Do what with the space helmet?");
       },
       take: function() {
-        output("You take the space helmet. You could probably go to space if \
-          you put it on.");
-        this.parent.location = "Inventory";
+        this.equip();
       },
       equip: function() {
         output("You put the space helmet on. If only you had a rocket to go to \
           space in. Oh, that's right - despite the astronomical odds, you do.");
         this.parent.location = "Inventory";
         this.parent.on = true;
+        var hashelmet = findByName("space.hashelmet", getInterceptors());
+        hashelmet.location = "space.junction";
       }
     },
     "space helmet"
+  ),
+  new Entity("truenorth.santaclaus",
+    "truenorth.workshop",
+    "Santa Claus himself, broadly grinning a grandfatherly smile",
+    {
+      nothing: function() {
+        output("Santa looks at you quizzically");
+      },
+      attack: function() {
+        output("You do your best to attack Santa. He seems unharmed, but he \
+          frowns and puts you on next year's naughty list.");
+      },
+      talk: function() {
+        output("<br>>You ask Santa where all your presents went.");
+        output("\"You don't have any presents?\" he asks. \"Well that's a concern! I'll \
+          go talk to my elves and get this all sorted out. In the meantime, \
+          you can go home. Your presents should be there in the morning.\"");
+        warp(getPlayer(), "endroom");
+        updateRoomDisplay(findByName("endroom", getRooms()));
+      }
+    },
+    "Santa Claus"
   ),
   //space
   new Entity("space.cosmonaut",
@@ -842,6 +894,11 @@ var entityArray = [
       },
       eat: function() {
         output("Um... no.");
+      },
+      look: function() {
+        output("The space worm is just like a regular worm, but it has an \
+          antenna. Quite frankly, an antenna in space doesn't seem very \
+          practical, but who are you to judge?");
       }
     },
     "space worm"
@@ -854,7 +911,8 @@ var entityArray = [
         output("Do what with the coupon?");
       },
       take: function() {
-        output("You the coupon");
+        output("You take the coupon. It says it's for a place called \"Fish \
+          Upon a Star\".");
         this.parent.location = "Inventory";
       },
       use: function() {
@@ -868,7 +926,7 @@ var entityArray = [
   ),
   new Entity("space.sign",
     "space.stationin",
-    "a sign that says \"Take one\". That's decidedly strange";
+    "a sign that says \"Take one\"",
     {
       output: function() {
         output("Do what with the sign?");
@@ -943,7 +1001,7 @@ var obstructionArray = [
         if (inventoryContains("truenorth.fish")) {
           output("You throw the fish at the bear, and it lumbers away.");
           var bearroom = findByName("truenorth.bearroom", getRooms());
-          this.location = "Nowhere";
+          this.parent.location = "Nowhere";
           bearroom.image = "https://sites.google.com/a/waunakee.k12.wi.us/rickett-class-biosphere-site/_/rsrc/1394131401524/frozen-tundra-1/images%20%282%29.jpg";
           updateImageDisplay(bearroom.image);
         } else {

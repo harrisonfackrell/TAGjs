@@ -286,10 +286,10 @@ function updateRoomDisplay(room) {
     description += " You can " + describeExits(exitKeys, exits);
   }
   if (interceptors.length > 0) {
-    description += " You can also " + describeObstructions(interceptors);
+    description += " You can also " + describeObstructions(interceptors, "or");
   }
   if (obstructions.length > 0) {
-    description += " However, " + describeObstructions(obstructions);
+    description += " However, " + describeObstructions(obstructions, "and");
   }
   output(description);
 }
@@ -297,36 +297,30 @@ function describe(room) {
   return room.description;
 }
 function describeEntities(room) {
-  var description = ""
+  var descriptionArray = [];
   var entities = getEntities();
   var playerLocation = getPlayerLocation();
   var narrowedEntities = narrowEntitiesByLocation(entities, room.name);
   for (var i = 0; i < narrowedEntities.length; i++) {
     var entity = narrowedEntities[i];
     var entityDescription = embolden(entity.description, entity.givenName);
-    description += manageEntityGrammar(entityDescription, narrowedEntities.length, i);
+    descriptionArray.push(entityDescription);
   }
-  description += "."
+  description = manageListGrammar(descriptionArray, "and") + ".";
   return description;
 }
 function describeExits(keys, exits) {
-  var description = "";
+  var descriptionArray = []
   for (var i = 0; i < keys.length; i++) {
     var key = keys[i];
     var exitDescription = embolden(exits[key][1], key);
-    if (i == 0) {
-      description += exitDescription;
-    } else if (i < keys.length - 1) {
-      description += ", " + exitDescription;
-    } else if (i >= keys.length - 1) {
-      description += ", or " + exitDescription;
-    }
+    descriptionArray.push(exitDescription);
   }
-  description += "."
-  return(description);
+  description = manageListGrammar(descriptionArray, "or") + ".";
+  return description;
 }
-function describeObstructions(obstructions) {
-  var description = ""
+function describeObstructions(obstructions, delimiter) {
+  var descriptionArray = [];
   for (var i = 0; i < obstructions.length; i++) {
     var entity = obstructions[i];
     var exitKeys = Object.keys(entity.exits);
@@ -336,20 +330,24 @@ function describeObstructions(obstructions) {
       if (testForWord(entityDescription, exitKeys[j])) {
         var entityDescription = embolden(entityDescription, exitKeys[j]);
       }
-      description += manageEntityGrammar(entityDescription, length, j);
+      descriptionArray.push(entityDescription);
     }
   }
-  description += "."
+  description = manageListGrammar(descriptionArray, delimiter) + ".";
   return description;
 }
-function manageEntityGrammar(entityDescription, length, i) {
-  if (i == 0) {
-    return entityDescription;
-  } else if (i < length - 1) {
-    return ", " + entityDescription;
-  } else if (i >= length - 1) {
-    return " and " + entityDescription;
+function manageListGrammar(elements, delimiter) {
+  var description = " ";
+  for (var i = 0; i < elements.length; i++) {
+    if (i == 0) {
+      description += elements[i];
+    } else if (i < elements.length - 1) {
+      description += ", " + elements[i];
+    } else if (i >= elements.length - 1) {
+      description += " " + delimiter + " " + elements[i];
+    }
   }
+  return description;
 }
 function embolden(string, substr) {
   //Bolds a substring within a string. If the string does not contain the
@@ -490,10 +488,18 @@ function getInteractables() {
 }
 //Entities----------------------------------------------------------------------
 function Entity(name, location, description, methods, givenName) {
+  this.methods = {
+    nothing: function() {
+      output("Do what with the " + givenName + "?");
+    },
+    look: function() {
+      output("It's " + description + ".");
+    }
+  }
   this.name = name;
   this.description = description;
   this.location = location;
-  this.methods = methods;
+  Object.assign(this.methods, methods);
   this.givenName = givenName;
 }
 function getEntities() {
@@ -532,9 +538,14 @@ function isPresent(name) {
 }
 //Obstructions------------------------------------------------------------------
 function Obstruction(name, location, methods, exits, givenName) {
+  this.methods = {
+    nothing: function() {
+      output("Do what with the " + givenName + "?");
+    }
+  }
   this.name = name;
   this.location = location;
-  this.methods = methods;
+  Object.assign(this.methods, methods);
   this.exits = exits;
   this.givenName = givenName;
 }
