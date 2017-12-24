@@ -35,15 +35,6 @@ var Player = new Entity("player",
   STARTING_ROOM,
   "you",
   {
-    "do a barrel roll": function() {
-      output("Press Z or R twice!");
-    },
-    zz: function() {
-      output("You have done a barrel roll");
-    },
-    rr: function() {
-      output("You have done a barrel roll");
-    },
     inventory: function() {
       var inventory = findByName("Inventory", getRooms());
       var description = describeEntities(inventory);
@@ -326,6 +317,8 @@ var entityArray = [
     {
       nothing: function() {
         output("Do what with the coat?");
+        output("<em>You can view your items with the \
+          <strong>inventory</strong> command.");
       },
       unequip: function() {
         if (this.parent.isOn) {
@@ -335,11 +328,20 @@ var entityArray = [
         }
       },
       use: function() {
-        this.equip
+        this.equip();
       },
       equip: function() {
-        output("You put on your coat. You can probably go outside now.");
-        this.parent.isOn = true
+        if (this.parent.isOn) {
+          output("You're already wearing your coat!");
+        } else {
+          output("You put on your coat. You can probably go outside now.");
+          this.parent.isOn = true;
+        }
+        output("<em>You can view your items with the \
+          <strong>inventory</strong> command.");
+      },
+      look: function() {
+        output("It's a warm winter coat. It's blue, your favorite color.");
       }
     },
     "coat"
@@ -521,20 +523,24 @@ var entityArray = [
   ),
   new Entity("home.peppermint",
     "home.readingroom",
-    "a delicious peppermint",
+    "a delicious sugar plum",
     {
       nothing: function() {
-        output("Do what with the peppermint?");
+        output("Do what with the sugar plum?");
       },
       take: function() {
-        output("You take the peppermint.");
+        output("You take the sugar plum.");
         this.parent.location = "Inventory";
       },
       eat: function() {
         output("You already brushed your teeth, though. It would taste gross!");
+      },
+      look: function() {
+        output("It's a sugar plum. Normally you'd eat this in a \
+          heartbeat, but you've already brushed your teeth.")
       }
     },
-    "peppermint"
+    "sugar plum"
   ),
   new Entity("home.redornament",
     "Nowhere",
@@ -587,10 +593,13 @@ var entityArray = [
           output("You find nothing else worthy of note in the toolbox.")
         } else {
           output("You rifle through the toolbox and find a <strong>lighter</strong>.");
-          output("That might come in handy for the fireplace.");
+          output("You take the lighter. It might come in handy for the fireplace.");
           var lighter = findByName("home.lighter", getEntities());
           lighter.location = "Inventory";
         }
+      },
+      look: function() {
+        output("It's a heavy, black-and-orange toolbox.");
       }
     },
     "toolbox"
@@ -611,6 +620,10 @@ var entityArray = [
     {
       nothing: function() {
         output("Do what with the catalog?");
+      },
+      look: function() {
+        output("It's a catalog for the local toy store. There's not really a \
+          whole lot of use for it now that Christmas is here.");
       }
     },
     "catalog"
@@ -637,6 +650,9 @@ var entityArray = [
         } else {
           output("But you don't have a snowshovel!");
         }
+      },
+      look: function() {
+        output("It's a huge snowdrift, left here by the plows.");
       }
     },
     "snowdrift"
@@ -651,6 +667,9 @@ var entityArray = [
       take: function() {
         output("You take the snowshovel with you.");
         this.parent.location = "Inventory";
+      },
+      look: function() {
+        output("It's a snowshovel. The right edge is slightly chipped.");
       }
     },
     "snowshovel"
@@ -663,11 +682,20 @@ var entityArray = [
         output("Do what with the mailbox?");
       },
       open: function() {
-        output("Inside the mailbox, you find a present <strong>catalog</strong>. \
-          Looks flammable.");
-        output("You take the catalog with you.");
-        var catalog = findByName("home.catalog", getEntities());
-        catalog.location = "Inventory";
+        if (inventoryContains("home.catalog")) {
+          output("You find nothing else worthy of note in the mailbox.");
+        } else {
+          output("Inside the mailbox, you find a present <strong>catalog</strong>. \
+            Looks flammable.");
+          output("You take the catalog with you.");
+          var catalog = findByName("home.catalog", getEntities());
+          catalog.location = "Inventory";
+        }
+      },
+      look: function() {
+        output("It's your mailbox. Once, one of your neighbors knocked it over \
+          accidentally while distributing Christmas cookies. The mail had to \
+          be delivered to your door for the next two weeks.");
       }
     },
     "mailbox"
@@ -770,7 +798,7 @@ var entityArray = [
       },
       look: function() {
         output("It's a snowman, inset in the wall. It's got a top hat, coal \
-          eyes, and a carrot nose. Pretty standard fare, if you ask me.");
+          eyes and a carrot nose. Pretty standard fare, if you ask me.");
       },
       talk: function() {
         output("You ask the snowman about the number 4 in his hand.");
@@ -795,13 +823,18 @@ var entityArray = [
       },
       fish: function() {
         if (inventoryContains("northpole.fishingpole") && inventoryContains("space.spaceworm")) {
-          output("You stick your fishing pole in the water and wait. Before \
-            too long, you get a nibble, and you expertly catch it.");
-          output("You now have a fish.");
-          var fish = findByName("truenorth.fish", getEntities());
-          fish.location = "Inventory";
+          if (roomContains("Nowhere", "truenorth.fish")) {
+            output("You stick your fishing pole in the water and wait. Before \
+              too long, you get a nibble, and you expertly catch it.");
+            output("You now have a <strong>fish</strong>.");
+            var fish = findByName("truenorth.fish", getEntities());
+            fish.location = "Inventory";
+          } else {
+            output("Despite your best efforts, you can't seem to catch \
+              anything else.");
+          }
         } else {
-          output("You need a fishing pole.");
+          output("You need a fishing pole and some bait.");
         }
       }
     },
@@ -813,6 +846,16 @@ var entityArray = [
     {
       nothing: function() {
         output("Do what with the fish?");
+      },
+      look: function() {
+        output("You're no fishing expert, but you're pretty sure this fish \
+          isn't one that you'd find back home.");
+      },
+      eat: function() {
+        output("I'm pretty sure they only eat raw fish in Japan.");
+      },
+      talk: function() {
+        output("The fish just stares at you, like... well, like a dead fish.");
       }
     },
     "fish"
@@ -834,6 +877,9 @@ var entityArray = [
         this.parent.on = true;
         var hashelmet = findByName("space.hashelmet", getInterceptors());
         hashelmet.location = "space.junction";
+      },
+      look: function() {
+        output("It's a black-and-white space helmet, straight out of 1969");
       }
     },
     "space helmet"
@@ -856,6 +902,9 @@ var entityArray = [
           you can go home. Your presents should be there in the morning.\"");
         warp(getPlayer(), "endroom");
         updateRoomDisplay(findByName("endroom", getRooms()));
+      },
+      look: function() {
+        output("It's Santa Claus, with a full white beard and a jolly red cap.");
       }
     },
     "Santa Claus"
@@ -866,7 +915,7 @@ var entityArray = [
     "a cosmonaut",
     {
       nothing: function() {
-        output("Do what with the cosmonaut?");
+        output("The cosmonaut just mumbles something in Russian.");
       },
       talk: function() {
         output("You can't understand the cosmonaut. For whatever reason, he \
@@ -874,6 +923,10 @@ var entityArray = [
           with his hand.");
         var worm = findByName("space.spaceworm", getEntities());
         worm.location = "Inventory";
+      },
+      look: function() {
+        output("It's a Russian cosmonaut. You can tell he's Russian because \
+          you can't understand a word he says.");
       }
     },
     "cosmonaut"
@@ -920,6 +973,10 @@ var entityArray = [
       },
       give: function() {
         output("Give the coupon to who?");
+      },
+      look: function() {
+        output("It's a coupton for a fishing pole, redeemable at Fish Upon a \
+          Star in North Pole, Alaska.");
       }
     },
     "coupon"
@@ -938,6 +995,10 @@ var entityArray = [
       attack: function() {
         output("Fortunately for the ISS, it's actually really difficult to \
           attack things when you're floating in space.");
+      },
+      look: function() {
+        output("The sign is old and weathered, but it still clearly says that \
+          you're in Alaska.");
       }
     },
     "sign"
@@ -1030,6 +1091,9 @@ var interceptorArray = [
           output("Another banner pops up. It says, \"LIGHT FIRE TO CONTINUE\".");
         }
       },
+      look: function() {
+        output("It's a large red button, clearly labled \"LAUNCH ROCKET\".")
+      }
     },
     {
       "button": ["space.junction", "press the <strong>rocket button</strong>"]
