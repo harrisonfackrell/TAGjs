@@ -20,15 +20,6 @@ var Player = new Entity("player",
   STARTING_ROOM,
   "you",
   {
-    "do a barrel roll": function() {
-      output("Press Z or R twice!");
-    },
-    zz: function() {
-      output("You have done a barrel roll");
-    },
-    rr: function() {
-      output("You have done a barrel roll");
-    },
     inventory: function() {
       var inventory = findByName("Inventory", getRooms());
       var description = describeEntities(inventory);
@@ -64,9 +55,6 @@ var Player = new Entity("player",
     },
     use: function() {
       output("Use what?");
-    },
-    throw: function() {
-      output("Throw what?");
     },
   },
   "player"

@@ -206,6 +206,16 @@ function init() {
 
   updateRoomDisplay(STARTING_ROOM);
 }
+function preloadImages() {
+  //Preloads images, if they exist.
+  if (USE_IMAGES) {
+    var rooms = getRooms();
+    for (var i = 0; i < rooms.length; i++) {
+      var room = rooms[i];
+      new Image().src = room.image;
+    }
+  }
+}
 function setup() {
   //Runs necessary setup functions.
   var startingRoom = findByName(STARTING_ROOM, getRooms());
@@ -214,6 +224,7 @@ function setup() {
   audioSetup();
   changeMusic(startingRoom.music);
   addMethodParents();
+  preloadImages();
   //init() is defined in game.js
   init();
 }

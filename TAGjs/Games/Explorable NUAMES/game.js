@@ -21,15 +21,6 @@ var Player = new Entity("player",
   STARTING_ROOM,
   "you",
   {
-    "do a barrel roll": function() {
-      output("Press Z or R twice!");
-    },
-    zz: function() {
-      output("You have done a barrel roll");
-    },
-    rr: function() {
-      output("You have done a barrel roll");
-    },
     inventory: function() {
       var inventory = findByName("Inventory", getRooms());
       var description = describeEntities(inventory);
@@ -76,7 +67,7 @@ var Player = new Entity("player",
 var roomArray = [
   //System
   new Room("Inventory",
-    "https://goo.gl/LbCU99",
+    "",
     "",
     "Somehow, you have managed to place *yourself* inside of that magical \
     non-space you call an inventory. All your items are here, but then, \
@@ -88,7 +79,7 @@ var roomArray = [
     "Inventory"
   ),
   new Room("Nowhere",
-    "https://goo.gl/thCGRv",
+    "",
     "",
     "Somehow, you've made it to a secret room where entities are placed when \
     they aren't needed. Either you're a clever hacker, or something's gone \
@@ -102,7 +93,7 @@ var roomArray = [
   //Outside
   new Room("Outside - Crosswalk",
     "Images/Outside/Outside - Crosswalk.jpg",
-    "",
+    "Music/Baltic Levity.mp3",
     "You are on the grass near the crosswalk between D2 and D3",
     {
       left: ["Outside - In Front of D2", "go left to D2"],
@@ -123,7 +114,7 @@ var roomArray = [
   ),
   new Room("Outside - In Front of D2",
     "Images/Outside/Outside - In Front of D2.jpg",
-    "",
+    "Music/Baltic Levity.mp3",
     "You are stainding outside of D2. It's not as fancy as D3, unfortunately, \
     but it's still quite impressive.",
     {
@@ -135,7 +126,7 @@ var roomArray = [
   ),
   new Room("Outside - Gym Field",
     "Images/Outside/Outside - Gym Field.jpg",
-    "",
+    "Music/Baltic Levity.mp3",
     "The field you're standing in us frequently used for gym activities. \
     Amusingly, the room that the 'Fit for Life' class meets in is labeled \
     'Engineering' - needless to say, they don't actually do a lot of their \
@@ -149,7 +140,7 @@ var roomArray = [
   ),
   new Room("Outside - Basketball Court",
     "Images/Outside/Outside - Basketball Court.jpg",
-    "",
+    "Music/Baltic Levity.mp3",
     "This basketball court is strangely circular - clearly, it wasn't meant \
     for serious competitive play.",
     {
@@ -160,7 +151,7 @@ var roomArray = [
   ),
   new Room("Outside - Forked Path",
     "Images/Outside/Outside - Forked Path.jpg",
-    "",
+    "Music/Baltic Levity.mp3",
     "You're standing along the walkway between D2 and D3.",
     {
       forward: ["Outside - Behind D3", "go forward to D3"],
@@ -171,7 +162,7 @@ var roomArray = [
   ),
   new Room("Outside - Behind D3",
     "Images/Outside/Outside - Behind D3.jpg",
-    "",
+    "Music/Baltic Levity.mp3",
     "You're standing behind D3, on a concrete bridge.",
     {
       left: ["Outside - Forked Path", "go left towards the basketball court"],
@@ -182,7 +173,7 @@ var roomArray = [
   ),
   new Room("Outside - Shaded Lunch Area",
     "Images/Outside/Outside - Shaded Lunch Area.jpg",
-    "",
+    "Music/Baltic Levity.mp3",
     "You're standing just outside D3, in a place that many students like to \
     eat lunch. Though a lot of students go to Northridge for a \
     meal, some students bring their own, or buy one from the local vendors, \
@@ -195,7 +186,7 @@ var roomArray = [
   ),
   new Room("Outside - In Front of Seminary",
     "Images/Outside/Outside - In Front of Seminary.jpg",
-    "",
+    "Music/Baltic Levity.mp3",
     "You're standing outside of the seminary building, which may or may not be \
     an official part of campus.",
     {
@@ -206,7 +197,7 @@ var roomArray = [
   ),
   new Room("Outside - Bus Stop",
     "Images/Outside/Outside - Bus Stop.jpg",
-    "",
+    "Music/Baltic Levity.mp3",
     "You're standing at the bus stop. unfortunately, you seem to have \
     forgotten your bus pass, so you won't be using public transportation to \
     go anywhere anytime soon. It's a good thing you have your own car.",
@@ -218,7 +209,7 @@ var roomArray = [
   ),
   new Room("Outside - Trampled Field",
     "Images/Outside/Outside - Trampled Field.jpg",
-    "",
+    "Music/Baltic Levity.mp3",
     "The field you're standing in is used by most if not all NUAMES students \
     to get between D13 and the other buildings. It's not very healthy for the \
     grass, and a clear path is worn, but the sidewalk is just too slow.",
@@ -230,7 +221,7 @@ var roomArray = [
   ),
   new Room("Outside - In Front of D13",
     "Images/Outside/Outside - In Front of D13.jpg",
-    "",
+    "Music/Baltic Levity.mp3",
     "Welcome to D13, famed for its incredible distance from the other two \
     buildings. You get used to the walk after a while, but for the first \
     couple of days you kinda' wonder why it's so far away.",

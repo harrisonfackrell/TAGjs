@@ -108,7 +108,7 @@ var roomArray = [
   new Room("home.livingroom",
     "",
     "",
-    "This is the living room, all set up and ready for Christmas.",
+    "You're in the living room, which is set up for Christmas.",
     {
       "kitchen": ["home.kitchen","go down the hall to the kitchen"],
       "reading room": ["home.readingroom","down the hall to the reading room"],
