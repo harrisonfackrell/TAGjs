@@ -1121,7 +1121,7 @@ var interceptorArray = [
 ];
 //Functions---------------------------------------------------------------------
 function init() {
-  updateRoomDisplay(STARTING_ROOM);
+
   output("It's Christmas day, and you're feeling very excited to get \
     on with it. Unfortunately, you've been told that \"opening presents at \
     3 in the morning is ridiculous\". Well, fine, but that's not going to stop \
@@ -1131,6 +1131,7 @@ function init() {
     horror that none of them are labeled with your name. Pragmatic \
     10-year-old that you are, you decide that this will require a visit to \
     Santa.");
+  updateRoomDisplay(STARTING_ROOM);
 }
 //Execution---------------------------------------------------------------------
 setup();

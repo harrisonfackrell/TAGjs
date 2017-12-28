@@ -164,12 +164,13 @@ function inputSetup() {
   inputBox.onkeydown = function(event) {listenForKey(event, "Enter", enterHandler);};
   inputBox.focus();
 }
-function imageSetup(room) {
+function imageSetup() {
   //Finds the imageDisplay and configures it according to USE_IMAGES
   var image = document.getElementById("imageDisplay");
   //If USE_IMAGES is true
   if (USE_IMAGES) {
     //Update it.
+    var room = findByName(STARTING_ROOM, getRooms());
     updateImageDisplay(room.image);
   } else {
     //If not make the imageDisplay disappear.
@@ -209,12 +210,12 @@ function setup() {
   //Runs necessary setup functions.
   var startingRoom = findByName(STARTING_ROOM, getRooms());
   inputSetup();
-  imageSetup(startingRoom);
+  imageSetup();
   audioSetup();
-  //init() is defined in game.js
-  init();
   changeMusic(startingRoom.music);
   addMethodParents();
+  //init() is defined in game.js
+  init();
 }
 //Sound-------------------------------------------------------------------------
 function toggleSoundElement(elementName) {
@@ -272,30 +273,18 @@ function updateNameDisplay(str) {
   var nameDisplay = document.getElementById("roomNameDisplay");
   nameDisplay.innerHTML = str;
 }
-function updateRoomDisplay(room) {
-  var givenName = room.givenName;
-  var image = room.image;
-  updateNameDisplay(givenName);
-  updateImageDisplay(image);
-  var entities = narrowEntitiesByLocation(getEntities(), room.name);
-  var exits = getCurrentExits();
-  var exitKeys = Object.keys(exits);
-  var obstructions = narrowEntitiesByLocation(getObstructions(), room.name);
-  var interceptors = narrowEntitiesByLocation(getInterceptors(), room.name);
-  var description = "";
-  description += describe(room);
-  if (entities.length > 0) {
-    description += " You see " + describeEntities(room);
-  }
-  if (exitKeys.length > 0) {
-    description += " You can " + describeExits(exitKeys, exits);
-  }
-  if (interceptors.length > 0) {
-    description += " You can also " + describeObstructions(interceptors, "or");
-  }
-  if (obstructions.length > 0) {
-    description += " However, " + describeObstructions(obstructions, "and");
-  }
+function updateRoomDisplay(roomName) {
+  //Updates the name window, the image, the output box and the music to
+  //reflect the given location.
+
+  //Get the room
+  var room = findByName(roomName, getRooms());
+  //Update the roomDisplay field
+  updateNameDisplay(room.givenName);
+  updateImageDisplay(room.image);
+  changeMusic(room.music);
+  //Build and output a description of the room.
+  var description = buildCompleteDescription(room);
   output(description);
 }
 function describe(room) {
@@ -304,7 +293,6 @@ function describe(room) {
 function describeEntities(room) {
   var descriptionArray = [];
   var entities = getEntities();
-  var playerLocation = getPlayerLocation();
   var narrowedEntities = narrowEntitiesByLocation(entities, room.name);
   for (var i = 0; i < narrowedEntities.length; i++) {
     var entity = narrowedEntities[i];
@@ -341,8 +329,35 @@ function describeObstructions(obstructions, delimiter) {
   description = manageListGrammar(descriptionArray, delimiter) + ".";
   return description;
 }
+function buildCompleteDescription(room) {
+  //Builds a complete description of a room.
+
+  //Initialize all of the necessary variables.
+  var entities = narrowEntitiesByLocation(getEntities(), room.name);
+  var exits = getCurrentExits();
+  var exitKeys = Object.keys(exits);
+  var interceptors = narrowEntitiesByLocation(getInterceptors(), room.name);
+  var obstructions = narrowEntitiesByLocation(getObstructions(), room.name);
+  //Set a blank description and add each element if it applies.
+  var description = "";
+  description += describe(room);
+  if (entities.length > 0) {
+    description += " You see " + describeEntities(room);
+  }
+  if (exitKeys.length > 0) {
+    description += " You can " + describeExits(exitKeys, exits);
+  }
+  if (interceptors.length > 0) {
+    description += " You can also " + describeObstructions(interceptors, "or");
+  }
+  if (obstructions.length > 0) {
+    description += " However, " + describeObstructions(obstructions, "and");
+  }
+  //Return the description.
+  return description;
+}
 function manageListGrammar(elements, delimiter) {
-  var description = " ";
+  var description = "";
   for (var i = 0; i < elements.length; i++) {
     if (i == 0) {
       description += elements[i];
@@ -449,9 +464,7 @@ function movePlayerByInput(input) {
     //If there isn't an obstruction, move them.
     } else {
       moveEntity(player, direction);
-      var newRoom = findByName(player.location, getRooms());
-      updateRoomDisplay(newRoom);
-      changeMusic(newRoom.music);
+      updateRoomDisplay(player.location);
       return;
     }
   //If they didn't enter a valid direction, tell them.

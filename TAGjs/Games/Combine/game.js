@@ -10,15 +10,6 @@ var Player = new Entity("player",
   STARTING_ROOM,
   "you",
   {
-    "do a barrel roll": function() {
-      output("Press Z or R twice!");
-    },
-    zz: function() {
-      output("You have done a barrel roll");
-    },
-    rr: function() {
-      output("You have done a barrel roll");
-    },
     nothing: function() {
       combine();
     },
@@ -35,7 +26,7 @@ var Player = new Entity("player",
 var roomArray = [
   //System
   new Room("Inventory",
-    "https://goo.gl/LbCU99",
+    "",
     "",
     "Somehow, you have managed to place *yourself* inside of that magical \
     non-space you call an inventory. All your items are here, but then, \
@@ -47,7 +38,7 @@ var roomArray = [
     "Inventory"
   ),
   new Room("Nowhere",
-    "https://goo.gl/thCGRv",
+    "",
     "",
     "Somehow, you've made it to a secret room where entities are placed when \
     they aren't needed. Either you're a clever hacker, or something's gone \
@@ -263,7 +254,9 @@ function init() {
   output("Welcome to Combine! You can combine two elements by typing their \
   names, try again by typing <strong>restart</strong>, or see which elements \
   you have by typing <strong>list</strong>. There are 97 elements to create - \
-  good luck!")
+  good luck!");
+  var room = findByName(STARTING_ROOM, getRooms());
+  output("You have " + describeEntities(room));
   var elements = ["Ocean","Stone","Explosion","Wind","Genius","Clay","Steam",
                   "Mist","Lava","Sky","Volcano","Wave","Brick","Pottery",
                   "Cloud","Rain","Plant","Crop","Fog","Snow","House",
