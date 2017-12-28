@@ -236,8 +236,8 @@ var roomArray = [
   new Room("truenorth.landing",
     "",
     "",
-    "If the sign is any indication, you've made it where you meant to go. \
-    Granted, the *last* north pole sign you saw wasn't the most helpful. \
+    "This is probably the right North Pole. Granted, your judgement was pretty \
+    poor last time, so there's a very real and unfortunate possibility that it's not. \
     In any case, it doesn't look like Santa's Workshop is right here, so \
     you'll have to do some searching.",
     {
@@ -881,7 +881,7 @@ var entityArray = [
   ),
   new Entity("truenorth.santaclaus",
     "truenorth.workshop",
-    "Santa Claus himself, broadly grinning a grandfatherly smile",
+    "Santa Claus himself",
     {
       nothing: function() {
         output("Santa looks at you quizzically");
