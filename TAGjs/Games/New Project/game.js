@@ -75,7 +75,7 @@ var Player = new Entity("player",
 var roomArray = [
   //System
   new Room("Inventory",
-    "https://goo.gl/LbCU99",
+    "",
     "",
     "Somehow, you have managed to place *yourself* inside of that magical \
     non-space you call an inventory. All your items are here, but then, \
@@ -87,7 +87,7 @@ var roomArray = [
     "Inventory"
   ),
   new Room("Nowhere",
-    "https://goo.gl/thCGRv",
+    "",
     "",
     "Somehow, you've made it to a secret room where entities are placed when \
     they aren't needed. Either you're a clever hacker, or something's gone \
@@ -104,7 +104,7 @@ var obstructionArray = [];
 var interceptorArray = [];
 //Functions---------------------------------------------------------------------
 function init() {
-
+  updateRoomDisplay(STARTING_ROOM);
 }
 //Execution---------------------------------------------------------------------
 setup();

@@ -54,6 +54,12 @@ body {
   margin-top: 0.5em;
   text-indent: 1em;
 }
+#outputBox p {
+  text-indent: 0;
+  margin-top: 0;
+  margin-bottom: 0.4em;
+
+}
 #inputBackground {
   position: relative;
   height: 4em;

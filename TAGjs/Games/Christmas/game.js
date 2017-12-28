@@ -27,7 +27,7 @@ var SYNONYMS = {
   "polar bear": ["bear"],
   "santa claus": ["santa"]
 };
-var USE_IMAGES = true;
+var USE_IMAGES = false;
 var USE_SOUND = false;
 var STARTING_ROOM = "home.livingroom";
 //Player------------------------------------------------------------------------
@@ -81,7 +81,7 @@ var Player = new Entity("player",
 var roomArray = [
   //System
   new Room("Inventory",
-    "https://goo.gl/LbCU99",
+    "",
     "",
     "Somehow, you have managed to place *yourself* inside of that magical \
     non-space you call an inventory. All your items are here, but then, \
@@ -93,7 +93,7 @@ var roomArray = [
     "Inventory"
   ),
   new Room("Nowhere",
-    "https://goo.gl/thCGRv",
+    "",
     "",
     "Somehow, you've made it to a secret room where entities are placed when \
     they aren't needed. Either you're a clever hacker, or something's gone \
@@ -106,7 +106,7 @@ var roomArray = [
   ),
   //Home
   new Room("home.livingroom",
-    "http://founterior.com/wp-content/uploads/2014/11/Christmas-fireplace-2-with-red-and-white-socks.jpg",
+    "",
     "",
     "This is the living room, all set up and ready for Christmas.",
     {
@@ -117,7 +117,7 @@ var roomArray = [
     "Living Room"
   ),
   new Room("home.readingroom",
-    "https://engagethepews.files.wordpress.com/2013/03/book-shelves.jpg?w=512&h=415",
+    "",
     "",
     "The reading room is rather large; sometimes, you wonder why anyone \
     would ever dedicate that much space to something as boring as books.",
@@ -127,10 +127,9 @@ var roomArray = [
     "Reading Room"
   ),
   new Room("home.kitchen",
-    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT_IxkHLFHNPhaGN5Tj8K_yhr22PVWLHCOMlYcl9bjPpMKc-w-EXQ",
     "",
-    "The kitchen is nicely decorated. You're still not sure how someone \
-    managed to hang that plant from the ceiling.",
+    "",
+    "The kitchen is nicely decorated.",
     {
       "living room": ["home.livingroom","go down the hall to the living room"],
       "garage": ["home.garage","through the door to the garage"]
@@ -138,7 +137,7 @@ var roomArray = [
     "Kitchen"
   ),
   new Room("home.garage",
-    "http://3.bp.blogspot.com/-Rz3_aplVzII/TVPoIoafgJI/AAAAAAAAEgs/krhJgtZjF68/s1600/car%2Bin%2Bgarage.jpg",
+    "",
     "",
     "The garage is a little more drab than the rest of the house.",
     {
@@ -148,10 +147,10 @@ var roomArray = [
     "Garage"
   ),
   new Room("home.outside",
-    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSLwt2bg7aG2mv8GsLkPKqMmFx2cEQtWfD__yMtFWZ5KA8Q11cW",
     "",
-    "Your exterior decorations are humble, but they're not the worst you've \
-    ever seen. That honor goes to the inflatable pumpkin your family once \
+    "",
+    "You are outside. Your exterior decorations are humble, but they're not the worst you've \
+    ever seen--That honor goes to the inflatable pumpkin your family once \
     put up for Halloween and then forgot to take down by December.",
     {
       "inside": ["home.livingroom","go inside to the living room"],
@@ -161,10 +160,10 @@ var roomArray = [
   ),
   //Space
   new Room("space.junction",
-    "https://www.nasa.gov/sites/default/files/thumbnails/image/sls_block1_noeas_afterburner_engmarkings_sm.jpg",
     "",
-    "You're flying high in sky on a Christmas tree rocket. The rocket form is \
-    decidedly less festive than you were expecting.",
+    "",
+    "You're flying high in sky on a Christmas tree rocket. Who needs cheap \
+    thrills like skiing?",
     {
       "home": ["home.livingroom","fly home"],
       "north pole": ["northpole.landing","head to the north pole"]
@@ -172,7 +171,7 @@ var roomArray = [
     "Flying on a Rocket Tree"
   ),
   new Room("space.station",
-    "http://www.boeing.com/resources/boeingdotcom/space/international_space_station/images/iss_gallery_med_02_960x600.jpg",
+    "",
     "",
     "You've made it to the International Space Station. Nifty.",
     {
@@ -182,7 +181,7 @@ var roomArray = [
     "International Space Station"
   ),
   new Room("space.stationin",
-    "https://upload.wikimedia.org/wikipedia/commons/6/68/Destiny_as_just_installed.jpg",
+    "",
     "",
     "The inside of the space station is just as robotic and filled-with-computers \
     as you imagined it.",
@@ -193,10 +192,9 @@ var roomArray = [
   ),
   //northpole
   new Room("northpole.landing",
-    "http://www.lovethispic.com/uploaded_images/35074-Christmas-Tree-In-The-Snow.jpg",
     "",
-    "This is where you've landed your rocket-tree. You're shocked by the sheer \
-    number of other trees - how is there a forest in the north pole?",
+    "",
+    "This is where you've landed your rocket-tree.",
     {
       "fly": ["space.junction","fly up on your rocket-tree"],
       "through": ["northpole.workshopout","you can head through the trees"]
@@ -204,7 +202,7 @@ var roomArray = [
     "North Pole Landing"
   ),
   new Room("northpole.workshopout",
-    "http://www.harbinice.com/public/richfiles/photos/harbin/China-Snow-Town/20120104152507311-8743.jpg",
+    "",
     "",
     "You seem to be standing near a village.",
     {
@@ -214,7 +212,7 @@ var roomArray = [
     "Village"
   ),
   new Room("northpole.alaskasign",
-    "https://i1.wp.com/www.thedailychronic.net/wp-content/uploads/2015/06/North-Pole-Alaska.jpg?fit=1600%2C1200",
+    "",
     "",
     "Okay. This is North Pole, Alaska. Probably not where Santa lives, but it \
     might be worth exploring.",
@@ -225,7 +223,7 @@ var roomArray = [
     "North Pole, Alaska"
   ),
   new Room("northpole.fishingstore",
-    "http://reedsburgtruevaluehardwarestore.com/wp-content/uploads/2012/04/fishing-rods-reels.jpg",
+    "",
     "",
     "Welcome to Fish Upon a Star, the greatest fishing utility shop in North \
     Pole, Alaska.",
@@ -236,9 +234,9 @@ var roomArray = [
   ),
   //truenorth
   new Room("truenorth.landing",
-    "http://i.huffpost.com/gen/1497396/images/o-NORTH-POLE-facebook.jpg",
     "",
-    "If this sign is any indication, you've made it where you meant to go. \
+    "",
+    "If the sign is any indication, you've made it where you meant to go. \
     Granted, the *last* north pole sign you saw wasn't the most helpful. \
     In any case, it doesn't look like Santa's Workshop is right here, so \
     you'll have to do some searching.",
@@ -249,7 +247,7 @@ var roomArray = [
     "True North Pole Landing"
   ),
   new Room("truenorth.bearroom",
-    "https://polarbearsinternational.org/media/3075/ct_110915-23.jpg",
+    "",
     "",
     "As you walk out into the frozen tundra, you start to feel grateful for \
     your coat.",
@@ -262,26 +260,25 @@ var roomArray = [
     "Frozen Tundra"
   ),
   new Room("truenorth.igloo",
-    "http://snowmanworld.fi/wp-content/uploads/2014/09/snowman-world-igloo-hotel-arctic-circle-rovaniemi-lapland-finland-santa-claus-village.jpg",
     "",
-    "You step inside the igloo to find a surprisingly well-crafted interior.",
+    "",
+    "The inside of the igloo is surprisingly warm.",
     {
       "out": ["truenorth.bearroom","step out of the igloo"]
     },
     "Igloo"
   ),
   new Room("truenorth.oasis",
-    "https://s-media-cache-ak0.pinimg.com/originals/3a/6e/aa/3a6eaa13ce18985c33b8f65e102d3948.jpg",
     "",
-    "Incredibly, this place is surrounded by trees. It's an oasis in the \
-    frozen tundra.",
+    "",
+    "As it turns out, the north pole *isn't* just a big sheet of ice.",
     {
       "back": ["truenorth.bearroom","go back where you came from"]
     },
-    "Oasis"
+    "Lake"
   ),
   new Room("truenorth.workshopout",
-    "http://homesoftherich.net/wp-content/uploads/2015/01/Screen-Shot-2015-01-26-at-6.36.14-AM.png",
+    "",
     "",
     "This is it. Santa's workshop is right here.",
     {
@@ -291,7 +288,7 @@ var roomArray = [
     "Santa's Workshop"
   ),
   new Room("truenorth.workshop",
-    "https://www.thesun.co.uk/wp-content/uploads/2017/10/nintchdbpict000290312198.jpg?strip=all&w=960",
+    "",
     "",
     "After all that work, you've made it.",
     {
@@ -300,9 +297,9 @@ var roomArray = [
     "Santa Claus"
   ),
   new Room("endroom",
-    "http://cdn1.theodysseyonline.com/files/2015/12/20/635861698837468427-2074246347_2.jpg",
     "",
-    "Sure enough, there are presents there for you in the morning, not the \
+    "",
+    "Sure enough, there are presents there for you in the morning--not the \
     least of which is a text adventure game for your computer. Neat!",
     {
     },
@@ -393,7 +390,7 @@ var entityArray = [
         }
         if (this.parent.red && this.parent.blue) {
           output("A little banner pops up. It says, \"MISSILE-TOE COMMERCIAL \
-            ROCKET - ON STANDBY\". A small button appears on the trunk of the \
+            ROCKET--ON STANDBY\". A small button appears on the trunk of the \
             tree.");
           output("<em>If you want to see what's changed, you can \
             <strong>look</strong> around.</em>");
@@ -447,8 +444,6 @@ var entityArray = [
             var livingroom = findByName("home.livingroom", getRooms());
             this.parent.lit = true;
             this.parent.description = "a roaring fireplace";
-            livingroom.image = "https://i.ytimg.com/vi/qQQtECJ-grI/maxresdefault.jpg";
-            updateImageDisplay(livingroom.image);
           } else {
             output("You do your best to light the fire, but there's just not \
               enough material. Try finding something to put in it.");
@@ -761,7 +756,7 @@ var entityArray = [
             been to the ISS. It's pretty cool, huh? Anyways, here's your \
             complimentary fishing pole. Come to <em>Fish Upon a Star</em> \
             again!\"");
-          output("\"Oh, and hey - if you need any <strong>bait</strong>, just \
+          output("\"Oh, and hey--if you need any <strong>bait</strong>, just \
             ask someone at the station. They've got space worms running out \
             their ears.\"")
           var fishingpole = findByName("northpole.fishingpole", getEntities());
@@ -790,19 +785,19 @@ var entityArray = [
   ),
   //truenorth
   new Entity("truenorth.snowman",
-    "truenorth.igloo",
-    "a snowman here - for some reason, he's holding the number 4 -",
+    "truenorth.landing",
+    "a snowman here",
     {
       nothing: function() {
         output("Do what with the snowman?");
       },
       look: function() {
-        output("It's a snowman, inset in the wall. It's got a top hat, coal \
-          eyes and a carrot nose. Pretty standard fare, if you ask me.");
+        output("It's a snowman. It's got coal \
+          eyes and a carrot nose--pretty standard fare, if you ask me.");
       },
       talk: function() {
-        output("You ask the snowman about the number 4 in his hand.");
-        output("The snowman says it's there for snow reason.");
+        output("You ask the snowman where his friends are.");
+        output("He says he has snow idea.");
       },
       attack: function() {
         output("The snowman tells you to take a chill pill.");
@@ -872,7 +867,7 @@ var entityArray = [
       },
       equip: function() {
         output("You put the space helmet on. If only you had a rocket to go to \
-          space in. Oh, that's right - despite the astronomical odds, you do.");
+          space in. Oh, that's right--despite the astronomical odds, you do.");
         this.parent.location = "Inventory";
         this.parent.on = true;
         var hashelmet = findByName("space.hashelmet", getInterceptors());
@@ -1063,8 +1058,6 @@ var obstructionArray = [
           output("You throw the fish at the bear, and it lumbers away.");
           var bearroom = findByName("truenorth.bearroom", getRooms());
           this.parent.location = "Nowhere";
-          bearroom.image = "https://sites.google.com/a/waunakee.k12.wi.us/rickett-class-biosphere-site/_/rsrc/1394131401524/frozen-tundra-1/images%20%282%29.jpg";
-          updateImageDisplay(bearroom.image);
         } else {
           output("You don't have a fish!");
         }
@@ -1128,6 +1121,7 @@ var interceptorArray = [
 ];
 //Functions---------------------------------------------------------------------
 function init() {
+  updateRoomDisplay(STARTING_ROOM);
   output("It's Christmas day, and you're feeling very excited to get \
     on with it. Unfortunately, you've been told that \"opening presents at \
     3 in the morning is ridiculous\". Well, fine, but that's not going to stop \

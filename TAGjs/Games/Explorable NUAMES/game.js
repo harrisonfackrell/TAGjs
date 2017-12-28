@@ -448,6 +448,7 @@ var interceptorArray = [
 ];
 //Functions---------------------------------------------------------------------
 function init() {
+  updateRoomDisplay(STARTING_ROOM);
 }
 //Execution---------------------------------------------------------------------
 setup();

@@ -175,6 +175,7 @@ var interceptorArray = [];
 function init() {
   output("<em>Did you know that Vozhd Kalashnikov once had a \
   brother?</em>");
+  updateRoomDisplay(STARTING_ROOM);
 }
 //Execution---------------------------------------------------------------------
 setup();

@@ -1,13 +1,13 @@
 body {
-  background-color: grey;
+  background-color: FireBrick;
 }
 @font-face {
   font-family: custom;
   src: url("../../Fonts/Reformed Ellar.ttf");
 }
 #roomDisplay {
-  background-color: Gainsboro;
-  border-color: dimgrey;
+  background-color: green;
+  border-color: darkgreen;
 }
 #roomNameDisplay {
   font-family: custom;
@@ -27,12 +27,12 @@ body {
   font-family: custom;
 }
 #inputBackground {
-  background-color: lightgrey;
-  border-color: dimgrey;
+  background-color: green;
+  border-color: darkgreen;
 }
 #inputBox {
   background-color: ghostwhite;
-  border-color: dimgrey;
+  border-color: gainsboro;
   color: black;
   font-family: custom;
 }

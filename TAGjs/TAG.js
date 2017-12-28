@@ -40,7 +40,7 @@ function output(str) {
   //Get the output box
   var outputBox = document.getElementById("outputBox");
   //Append the string onto the output box's content and scroll to the bottom.
-  outputBox.innerHTML += "<br>>" + str;
+  outputBox.innerHTML += "<p>>" + str + "</p>";
   outputBox.scrollTop = outputBox.scrollHeight;
 }
 function listenForKey(e, key, callback) {
@@ -186,8 +186,8 @@ function audioSetup() {
     var musicControls = document.getElementById("musicControls");
     var soundControls = document.getElementById("soundControls");
     //Apply handlers to them.
-    musicControls.onclick = function() {musicControlsClick();};
-    soundControls.onclick = function() {soundControlsClick();};
+    musicControls.onclick = function() {toggleSoundElement("music");};
+    soundControls.onclick = function() {toggleSoundElement("sound");};
   } else {
     //Otherwise
     //Find the actual audio fields and their containing div
@@ -200,6 +200,11 @@ function audioSetup() {
     audio.style.display = "none";
   }
 }
+function init() {
+  //This function exists to support game.js files with no init function.
+
+  updateRoomDisplay(STARTING_ROOM);
+}
 function setup() {
   //Runs necessary setup functions.
   var startingRoom = findByName(STARTING_ROOM, getRooms());
@@ -208,50 +213,50 @@ function setup() {
   audioSetup();
   //init() is defined in game.js
   init();
-  updateRoomDisplay(startingRoom);
   changeMusic(startingRoom.music);
   addMethodParents();
 }
 //Sound-------------------------------------------------------------------------
-function musicControlsClick() {
-  var musicControls = document.getElementById("musicControls");
+function toggleSoundElement(elementName) {
+  //Toggles the given sound controls
+
+  //Get the music controls
+  var musicControls = document.getElementById(elementName + "Controls");
+  //If they're muted
   if (musicControls.muted) {
-    musicControls.muted = 0;
+    //unmute them
+    musicControls.muted = false;
     musicControls.src = "../../Sound.png";
-    var music = document.getElementById("music");
+    var music = document.getElementById(elementName);
     music.volume = 1;
+  //otherwise
   } else {
-    musicControls.muted = 1;
+    //mute them
+    musicControls.muted = true;
     musicControls.src = "../../Muted.png";
-    var music = document.getElementById("music");
+    var music = document.getElementById(elementName);
     music.volume = 0;
   }
 }
 function changeMusic(song) {
+  //Changes the currently playing song
+
+  //Get the music player
   var music = document.getElementById("music");
   var currentSong = music.currentSong;
-  if (song == currentSong || song == "") {
+  //If it's current song matches the song we want
+  if (song == currentSong) {
+    //don't interrupt it
     return;
+  //Otherwise
   } else {
+    //Change the song
     music.src = song;
     music.currentSong = song;
   }
 }
-function soundControlsClick() {
-  var soundControls = document.getElementById("soundControls");
-  if (soundControls.muted) {
-    soundControls.muted = 0;
-    soundControls.src = "../../Sound.png";
-    var sound = document.getElementById("sound");
-    sound.volume = 1;
-  } else {
-    soundControls.muted = 1;
-    soundControls.src = "../../Muted.png";
-    var sound = document.getElementById("sound");
-    sound.volume = 0;
-  }
-}
 function playSound(sound) {
+  //Plays a sound effect
   var soundPlayer = document.getElementById("sound");
   soundPlayer.src = sound;
   soundPlayer.play();
