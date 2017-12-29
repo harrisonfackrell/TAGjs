@@ -25,7 +25,8 @@ var SYNONYMS = {
   "space worm": ["worm"],
   "fishing pole": ["pole"],
   "polar bear": ["bear"],
-  "santa claus": ["santa"]
+  "santa claus": ["santa"],
+  "sugar plum": ["plum"]
 };
 var USE_IMAGES = false;
 var USE_SOUND = false;
