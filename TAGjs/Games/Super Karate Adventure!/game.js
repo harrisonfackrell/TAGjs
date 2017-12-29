@@ -22,20 +22,12 @@ var Player = new Entity("player",
   STARTING_ROOM,
   "you",
   {
-    "do a barrel roll": function() {
-      output("Press Z or R twice!");
-    },
-    zz: function() {
-      output("You have done a barrel roll");
-    },
-    rr: function() {
-      output("You have done a barrel roll");
-    },
     inventory: function() {
       var inventory = findByName("Inventory", getRooms());
-      var description = describeEntities(inventory);
-      if (description.length > 0) {
-        output("You have " + describeEntities(inventory) + ".");
+      var entities = narrowEntitiesByLocation(getEntities(), "Inventory");
+      if (entities.length > 0) {
+        var description = describeEntities(inventory);
+        output("You have " + describeEntities(inventory));
       } else {
         output("You have nothing.");
       }
@@ -49,7 +41,7 @@ var Player = new Entity("player",
         var exit = exits[i].toLowerCase();
         if(input == exit) {
           var player = getPlayer();
-          player.methods.move();
+          this.move();
           return;
         }
       }
@@ -61,14 +53,10 @@ var Player = new Entity("player",
     },
     look: function() {
       var player = getPlayer();
-      var currentRoom = findByName(player.location, getRooms());
-      updateRoomDisplay(currentRoom);
+      updateRoomDisplay(player.location);
     },
     use: function() {
       output("Use what?");
-    },
-    throw: function() {
-      output("Throw what?");
     },
   },
   "player"
@@ -77,7 +65,7 @@ var Player = new Entity("player",
 var roomArray = [
   //System
   new Room("Inventory",
-    "https://goo.gl/LbCU99",
+    "",
     "",
     "Somehow, you have managed to place *yourself* inside of that magical \
     non-space you call an inventory. All your items are here, but then, \
@@ -89,7 +77,7 @@ var roomArray = [
     "Inventory"
   ),
   new Room("Nowhere",
-    "https://goo.gl/thCGRv",
+    "",
     "",
     "Somehow, you've made it to a secret room where entities are placed when \
     they aren't needed. Either you're a clever hacker, or something's gone \

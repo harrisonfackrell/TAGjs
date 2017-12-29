@@ -8,7 +8,7 @@ var SYNONYMS = {
   open: ["open","search"],
   close: ["close","shut"],
   talk: ["talk","ask","say","shout","speak"],
-  take: ["take","pick up","steal"],
+  take: ["take","pick up","steal","get"],
   unequip: ["unequip","take off"],
   equip: ["equip","put on","wear"],
   hang: ["hang","put"],
@@ -37,8 +37,9 @@ var Player = new Entity("player",
   {
     inventory: function() {
       var inventory = findByName("Inventory", getRooms());
-      var description = describeEntities(inventory);
-      if (description.length > 0) {
+      var entities = narrowEntitiesByLocation(getEntities(), "Inventory");
+      if (entities.length > 0) {
+        var description = describeEntities(inventory);
         output("You have " + describeEntities(inventory));
       } else {
         output("You have nothing.");
@@ -305,7 +306,7 @@ var roomArray = [
 var entityArray = [
   //inventory
   new Entity("inventory.coat",
-    "Inventory",
+    "home.livingroom",
     "a warm winter coat",
     {
       nothing: function() {
@@ -324,6 +325,9 @@ var entityArray = [
         this.equip();
       },
       equip: function() {
+        if (!inventoryContains("inventory.coat")) {
+          this.take();
+        }
         if (this.parent.isOn) {
           output("You're already wearing your coat!");
         } else {
@@ -333,6 +337,14 @@ var entityArray = [
       },
       look: function() {
         output("It's a warm winter coat. It's blue, your favorite color.");
+      },
+      take: function() {
+        if (inventoryContains("inventory.coat")) {
+          output("I'm afraid I don't understand");
+        } else {
+          output("You pick up your coat.");
+          this.parent.location = "Inventory";
+        }
       }
     },
     "coat"
@@ -365,7 +377,6 @@ var entityArray = [
             this.parent.red = true;
             output("You hang the red ornament on the tree.");
           } else {
-            alert("Don't have red");
             output("Hang what on the tree?");
           }
         } else if (testForWord(input, "blue ornament")) {
@@ -375,11 +386,9 @@ var entityArray = [
             this.parent.blue = true;
             output("You hang the blue ornament on the tree.");
           } else {
-            alert("Don't have blue");
             output("Hang what on the tree?");
           }
         } else {
-          alert("Didn't say valid input");
           output("Hang what on the tree?");
         }
         if (this.parent.red && this.parent.blue) {
@@ -424,9 +433,13 @@ var entityArray = [
         <strong>examine</strong> or <strong>look</strong> commands.</em>");
       },
       look: function() {
-        output("The fireplace really needs some fire. You should <strong>\
-          light</strong> it; you figure you can probably manage with a \
-          <strong>lighter</strong> and two pieces of tinder.");
+        if (this.parent.lit) {
+          output("The fire is roaring now. That's much better.");
+        } else {
+          output("The fireplace really needs some fire. You should <strong>\
+            light</strong> it; you figure you can probably manage with a \
+            <strong>lighter</strong> and two pieces of tinder.");
+        }
       },
       light: function() {
         if (inventoryContains("home.lighter")) {
@@ -671,7 +684,7 @@ var entityArray = [
         output("Do what with the mailbox?");
       },
       open: function() {
-        if (inventoryContains("home.catalog")) {
+        if (this.parent.empty) {
           output("You find nothing else worthy of note in the mailbox.");
         } else {
           output("Inside the mailbox, you find a present <strong>catalog</strong>. \
@@ -679,6 +692,7 @@ var entityArray = [
           output("You take the catalog with you.");
           var catalog = findByName("home.catalog", getEntities());
           catalog.location = "Inventory";
+          this.parent.empty = true;
         }
       },
       look: function() {

@@ -8,7 +8,7 @@ var SYNONYMS = {
   open: ["open"],
   close: ["close","shut"],
   talk: ["talk","ask","say","shout","speak"],
-  take: ["take","pick up","steal"],
+  take: ["take","pick up","steal","get"],
   unequip: ["unequip","take off"],
   equip: ["equip","put on","wear"]
 };
@@ -22,8 +22,9 @@ var Player = new Entity("player",
   {
     inventory: function() {
       var inventory = findByName("Inventory", getRooms());
-      var description = describeEntities(inventory);
-      if (description.length > 0) {
+      var entities = narrowEntitiesByLocation(getEntities(), "Inventory");
+      if (entities.length > 0) {
+        var description = describeEntities(inventory);
         output("You have " + describeEntities(inventory));
       } else {
         output("You have nothing.");

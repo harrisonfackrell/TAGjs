@@ -23,8 +23,9 @@ var Player = new Entity("player",
   {
     inventory: function() {
       var inventory = findByName("Inventory", getRooms());
-      var description = describeEntities(inventory);
-      if (description.length > 0) {
+      var entities = narrowEntitiesByLocation(getEntities(), "Inventory");
+      if (entities.length > 0) {
+        var description = describeEntities(inventory);
         output("You have " + describeEntities(inventory));
       } else {
         output("You have nothing.");

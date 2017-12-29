@@ -542,11 +542,11 @@ function Entity(name, location, description, methods, givenName) {
 function getEntities() {
   return entityArray;
 }
-function narrowEntitiesByLocation(entities, location) {
+function narrowEntitiesByLocation(entities, roomName) {
   var narrowedEntities = [];
   for (var i = 0; i < entities.length; i++) {
     var entity = entities[i];
-    if (entity.location == location) {
+    if (entity.location == roomName) {
       narrowedEntities.push(entity);
     }
   }
