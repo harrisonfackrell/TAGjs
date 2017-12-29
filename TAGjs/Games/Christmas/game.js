@@ -505,15 +505,15 @@ var entityArray = [
           him about it.");
       },
       give: function() {
-        if (inventoryContains("home.peppermint")) {
+        if (inventoryContains("home.sugarplum")) {
           var input = getInput();
-          if (testForWord(input, "peppermint")) {
+          if (testForWord(input, "sugar plum")) {
             output("He laughs, tosses you a <strong>red ornament</strong>, and \
               scampers off.");
             var ornament = findByName("home.redornament", getEntities());
-            var peppermint = findByName("home.peppermint", getEntities());
+            var sugarplum = findByName("home.sugarplum", getEntities());
             ornament.location = "Inventory";
-            peppermint.location = "Nowhere";
+            sugarplum.location = "Nowhere";
             this.parent.location = "Nowhere";
           } else {
             output("He regards your gift and then shakes his head.");
