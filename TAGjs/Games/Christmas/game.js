@@ -505,20 +505,17 @@ var entityArray = [
         output("Surely this elf knows how to get to Santa. You should ask \
           him about it.");
       },
-      give: function() {
+      "sugar plum": function() {
         if (inventoryContains("home.sugarplum")) {
-          var input = getInput();
-          if (testForWord(input, "sugar plum")) {
-            output("He laughs, tosses you a <strong>red ornament</strong>, and \
-              scampers off.");
-            var ornament = findByName("home.redornament", getEntities());
-            var sugarplum = findByName("home.sugarplum", getEntities());
-            ornament.location = "Inventory";
-            sugarplum.location = "Nowhere";
-            this.parent.location = "Nowhere";
-          } else {
-            output("He regards your gift and then shakes his head.");
-          }
+          output("He laughs, tosses you a <strong>red ornament</strong>, and \
+            scampers off.");
+          var ornament = findByName("home.redornament", getEntities());
+          var sugarplum = findByName("home.sugarplum", getEntities());
+          ornament.location = "Inventory";
+          sugarplum.location = "Nowhere";
+          this.parent.location = "Nowhere";
+        } else {
+          output("You don't have a sugar plum!");
         }
       }
     },
