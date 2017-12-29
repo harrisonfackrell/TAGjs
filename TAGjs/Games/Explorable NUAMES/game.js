@@ -25,7 +25,7 @@ var Player = new Entity("player",
       var inventory = findByName("Inventory", getRooms());
       var description = describeEntities(inventory);
       if (description.length > 0) {
-        output("You have " + describeEntities(inventory) + ".");
+        output("You have " + describeEntities(inventory));
       } else {
         output("You have nothing.");
       }
@@ -39,7 +39,7 @@ var Player = new Entity("player",
         var exit = exits[i].toLowerCase();
         if(input == exit) {
           var player = getPlayer();
-          player.methods.move();
+          this.move();
           return;
         }
       }
@@ -51,14 +51,10 @@ var Player = new Entity("player",
     },
     look: function() {
       var player = getPlayer();
-      var currentRoom = findByName(player.location, getRooms());
-      updateRoomDisplay(currentRoom);
+      updateRoomDisplay(player.location);
     },
     use: function() {
       output("Use what?");
-    },
-    throw: function() {
-      output("Throw what?");
     },
   },
   "player"

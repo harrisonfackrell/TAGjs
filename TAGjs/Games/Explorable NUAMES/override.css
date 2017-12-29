@@ -1,6 +1,11 @@
 body {
   background-color: MediumPurple;
 }
+@keyframes emphasizeName {
+    0%   {color: Gainsboro;}
+    50%  {color: grey;}
+    100% {color: Gainsboro;}
+}
 @font-face {
   font-family: custom;
   src: url("../../Fonts/Reformed Ellar.ttf");

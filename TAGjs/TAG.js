@@ -158,6 +158,12 @@ function executeParsedInput(parsedInput) {
   subject.methods[action]();
 }
 //Setup-------------------------------------------------------------------------
+function nameSetup() {
+  var nameDisplay = document.getElementById("roomNameDisplay");
+  nameDisplay.addEventListener("webkitAnimationEnd", function(event) {
+    nameDisplay.className = "";
+  });
+}
 function inputSetup() {
   //Finds the inputBox and assigns the necessary handler to it.
   var inputBox = document.getElementById("inputBox");
@@ -219,6 +225,7 @@ function preloadImages() {
 function setup() {
   //Runs necessary setup functions.
   var startingRoom = findByName(STARTING_ROOM, getRooms());
+  nameSetup();
   inputSetup();
   imageSetup();
   audioSetup();
@@ -283,6 +290,7 @@ function updateImageDisplay(image) {
 function updateNameDisplay(str) {
   var nameDisplay = document.getElementById("roomNameDisplay");
   nameDisplay.innerHTML = str;
+  nameDisplay.className = "emphasizeName";
 }
 function updateRoomDisplay(roomName) {
   //Updates the name window, the image, the output box and the music to

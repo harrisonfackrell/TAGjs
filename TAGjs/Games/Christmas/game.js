@@ -65,14 +65,10 @@ var Player = new Entity("player",
     },
     look: function() {
       var player = getPlayer();
-      var currentRoom = findByName(player.location, getRooms());
-      updateRoomDisplay(currentRoom);
+      updateRoomDisplay(player.location);
     },
     use: function() {
       output("Use what?");
-    },
-    throw: function() {
-      output("Throw what?");
     },
   },
   "player"
@@ -150,7 +146,7 @@ var roomArray = [
     "",
     "",
     "You are outside. Your exterior decorations are humble, but they're not the worst you've \
-    ever seen--That honor goes to the inflatable pumpkin your family once \
+    ever seen--that honor goes to the inflatable pumpkin your family once \
     put up for Halloween and then forgot to take down by December.",
     {
       "inside": ["home.livingroom","go inside to the living room"],
@@ -334,8 +330,6 @@ var entityArray = [
           output("You put on your coat. You can probably go outside now.");
           this.parent.isOn = true;
         }
-        output("<em>You can view your items with the \
-          <strong>inventory</strong> command.");
       },
       look: function() {
         output("It's a warm winter coat. It's blue, your favorite color.");
@@ -1121,7 +1115,6 @@ var interceptorArray = [
 ];
 //Functions---------------------------------------------------------------------
 function init() {
-
   output("It's Christmas day, and you're feeling very excited to get \
     on with it. Unfortunately, you've been told that \"opening presents at \
     3 in the morning is ridiculous\". Well, fine, but that's not going to stop \
