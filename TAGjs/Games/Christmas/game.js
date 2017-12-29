@@ -524,7 +524,7 @@ var entityArray = [
     },
     "elf"
   ),
-  new Entity("home.peppermint",
+  new Entity("home.sugarplum",
     "home.readingroom",
     "a delicious sugar plum",
     {
