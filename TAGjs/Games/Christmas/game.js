@@ -26,7 +26,8 @@ var SYNONYMS = {
   "fishing pole": ["pole"],
   "polar bear": ["bear"],
   "santa claus": ["santa"],
-  "sugar plum": ["plum"]
+  "sugar plum": ["plum"],
+  book: ["book", "celsius"]
 };
 var USE_IMAGES = false;
 var USE_SOUND = false;
@@ -343,7 +344,8 @@ var entityArray = [
         if (inventoryContains("inventory.coat")) {
           output("I'm afraid I don't understand");
         } else {
-          output("You pick up your coat.");
+          output("You pick up your coat. You can view your inventory items \
+            with the <strong>inventory</strong> command.");
           this.parent.location = "Inventory";
         }
       }
