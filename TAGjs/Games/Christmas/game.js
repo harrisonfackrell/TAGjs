@@ -5,7 +5,7 @@ var SYNONYMS = {
   move: ["move","go","walk","run","step","fly","head"],
   throw: ["throw","toss"],
   use: ["use"],
-  open: ["open","search"],
+  open: ["open","search","check"],
   close: ["close","shut"],
   talk: ["talk","ask","say","shout","speak"],
   take: ["take","pick up","steal","get"],
@@ -19,15 +19,16 @@ var SYNONYMS = {
   "red ornament": ["red", "ornament"],
   mailbox: ["mail"],
   fireplace: ["fire"],
-  put: ["put","throw","toss"],
-  "fishing pole": ["pole", "fish"],
+  put: ["put","throw","toss","place"],
   "space helmet": ["helmet"],
   "space worm": ["worm"],
-  "fishing pole": ["pole"],
   "polar bear": ["bear"],
   "santa claus": ["santa"],
   "sugar plum": ["plum"],
-  book: ["book", "celsius"]
+  book: ["book", "celsius"],
+  enter: ["enter","type"],
+  keypad: ["keypad","enter","type","24351"],
+  "space fish": ["fish"]
 };
 var USE_IMAGES = false;
 var USE_SOUND = false;
@@ -185,9 +186,19 @@ var roomArray = [
     "The inside of the space station is just as robotic and filled-with-computers \
     as you imagined it.",
     {
+      "back": ["space.stationback","journey to the back of the station"],
       "out": ["space.station","go out the hatch"]
     },
     "Inside the ISS"
+  ),
+  new Room("space.stationback",
+    "",
+    "",
+    "The back of the station is also robotic and filled-with-computers.",
+    {
+      "front": ["space.stationin","go to the front of the station"]
+    },
+    "Back of the ISS"
   ),
   //northpole
   new Room("northpole.landing",
@@ -773,6 +784,9 @@ var entityArray = [
         } else {
           output("You don't have a coupon!");
         }
+      },
+      attack: function() {
+        output("The cashier bends over to grab something and dodges your strike");
       }
     },
     "cashier"
@@ -827,10 +841,13 @@ var entityArray = [
         if (inventoryContains("northpole.fishingpole") && inventoryContains("space.spaceworm")) {
           if (roomContains("Nowhere", "truenorth.fish")) {
             output("You stick your fishing pole in the water and wait. Before \
-              too long, you get a nibble, and you expertly catch it.");
-            output("You now have a <strong>fish</strong>.");
-            var fish = findByName("truenorth.fish", getEntities());
-            fish.location = "Inventory";
+            too long, you get a nibble, and you expertly catch it.");
+            output("You caught a... piece of paper. And it somehow ate your space worm. It's \
+            labeled \"ISS SECRET CODE <strong>HINTS</strong>\".");
+            var hints = findByName("truenorth.hints", getEntities());
+            var worm = findByName("space.spaceworm", getEntities());
+            hints.location = "Inventory";
+            worm.location = "Nowhere";
           } else {
             output("Despite your best efforts, you can't seem to catch \
               anything else.");
@@ -842,25 +859,56 @@ var entityArray = [
     },
     "lake"
   ),
-  new Entity("truenorth.fish",
+  new Entity("truenorth.hints",
     "Nowhere",
-    "a fish",
+    "ISS SECRET CODE HINTS",
     {
-      nothing: function() {
-        output("Do what with the fish?");
-      },
       look: function() {
-        output("You're no fishing expert, but you're pretty sure this fish \
-          isn't one that you'd find back home.");
+        output("********************");
+        output("CLUE 1: The code consists of the numbers 1 through 5, with no repeats.");
+        output("CLUE 2: 5 is next to 1.");
+        output("CLUE 3: There is exactly one digit between 3 and 2.");
+        output("CLUE 4: 1 is not next to 3.");
+        output("CLUE 5: 3 is neither the first digit nor the last digit.");
+        output("CLUE 6: 2 comes before 4.");
+        output("********************");
       },
-      eat: function() {
-        output("I'm pretty sure they only eat raw fish in Japan.");
-      },
-      talk: function() {
-        output("The fish just stares at you, like... well, like a dead fish.");
+      read: function() {
+        this.look();
       }
     },
-    "fish"
+    "HINTS"
+  ),
+  new Entity("truenorth.fish",
+    "Nowhere",
+    "a space fish",
+    {
+      nothing: function() {
+        output("Do what with the space fish?");
+      },
+      look: function() {
+        output("You're no fishing expert, but you're pretty sure this space fish \
+          isn't one that you'd find back home. It's remarkably fresh.");
+      },
+      take: function() {
+        if (inventoryContains("truenorth.fish")) {
+          output("I'm afraid I don't understand");
+        } else {
+          output("You take the space fish along with you.");
+          this.parent.location = "Inventory";
+        }
+      },
+      eat: function() {
+        output("I'm pretty sure they only eat raw space fish in Japan.");
+      },
+      talk: function() {
+        output("The space fish just stares at you, like... well, like a dead fish.");
+      },
+      attack: function() {
+        output("The space fish is too intimidating to attack.");
+      }
+    },
+    "space fish"
   ),
   new Entity("truenorth.spacehelmet",
     "truenorth.igloo",
@@ -894,14 +942,16 @@ var entityArray = [
         output("Santa looks at you quizzically");
       },
       attack: function() {
-        output("You do your best to attack Santa. He seems unharmed, but he \
-          frowns and puts you on next year's naughty list.");
+        output("You do your best to attack Santa. He seems unharmed, likely \
+        due to some holiday magic, but he frowns and puts you on next year's \
+        naughty list.");
       },
       talk: function() {
-        output("<br>>You ask Santa where all your presents went.");
+        output("********************");
+        output("You ask Santa where all your presents went.");
         output("\"You don't have any presents?\" he asks. \"Well that's a concern! I'll \
-          go talk to my elves and get this all sorted out. In the meantime, \
-          you can go home. Your presents should be there in the morning.\"");
+        go talk to my elves and get this all sorted out. In the meantime, \
+        you can go home. Your presents should be there in the morning.\"");
         warp(getPlayer(), "endroom");
         updateRoomDisplay("endroom");
       },
@@ -1004,7 +1054,41 @@ var entityArray = [
       }
     },
     "sign"
-    )
+  ),
+  new Entity("space.keypad",
+    "space.stationback",
+    "a keypad with a label above it that says, \"TYPE THE SECRET CODE, WIN A \
+    PRIZE!\" Beneath this label is a sticky note that says, \"The hints for \
+    today's secret code have been lost. We apologize for the inconvenience.\" \
+    That's too bad",
+    {
+      attack: function() {
+        output("Fortunately for the ISS, it's really difficult to attack \
+        things in zero-gravity.");
+      },
+      nothing: function() {
+        this.enter();
+      },
+      enter: function() {
+        var input = getInput();
+        if (testForWord(input, "24351")) {
+          output("The keypad's display says, \"That's the code! here is your \
+          prize!\"");
+          output("A small hatch opens, and a <strong>space fish</strong>, somehow \
+          still fresh, floats out into the room.");
+          var fish = findByName("truenorth.fish", getEntities());
+          fish.location = this.parent.location;
+        } else {
+          output("The keypad's display says, \"That's not the code! Try again!\"");
+        }
+      },
+      take: function() {
+        output("You do your best to dislodge it from the wall, but you can't \
+        muster the leverage.");
+      }
+    },
+    "keypad"
+  ),
 ];
 var obstructionArray = [
   //home
@@ -1062,7 +1146,7 @@ var obstructionArray = [
       },
       fish: function() {
         if (inventoryContains("truenorth.fish")) {
-          output("You throw the fish at the bear, and it lumbers away.");
+          output("You throw the space fish at the bear, and it lumbers away.");
           var bearroom = findByName("truenorth.bearroom", getRooms());
           this.parent.location = "Nowhere";
         } else {
