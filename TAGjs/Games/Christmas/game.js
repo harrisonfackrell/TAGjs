@@ -437,7 +437,7 @@ var entityArray = [
       },
       look: function() {
         if (this.parent.lit) {
-          output("The fire is roaring now. That's much better.");
+          output("The fire is burning now. That's much better.");
         } else {
           output("The fireplace really needs some fire. You should <strong>\
             light</strong> it; you figure you can probably manage with a \
@@ -447,10 +447,9 @@ var entityArray = [
       light: function() {
         if (inventoryContains("home.lighter")) {
           if (this.parent.letter && this.parent.book) {
-            output("You get just enough of a spark going to light the fire. It \
-              really changes the place, having a fire going--in fact, you're \
-              almost certain that something's changed about the \
-              <strong>tree</strong>.");
+            output("You get just enough of a spark going to light the fire. As \
+            the flames take hold, you hear a little jingle, kind of like a \
+            computer's startup sound.");
             var livingroom = findByName("home.livingroom", getRooms());
             this.parent.lit = true;
             this.parent.description = "a roaring fireplace";
@@ -475,7 +474,7 @@ var entityArray = [
         }
         if (inventoryContains("home.book")) {
           if (testForWord(input, "book")) {
-            output("You toss the <em>Celsius 233</em> into the fireplace.");
+            output("You toss <em>Celsius 233</em> into the fireplace.");
             var book = findByName("home.book", getEntities());
             book.location = "nowhere";
             this.parent.book = true;
@@ -904,7 +903,7 @@ var entityArray = [
           go talk to my elves and get this all sorted out. In the meantime, \
           you can go home. Your presents should be there in the morning.\"");
         warp(getPlayer(), "endroom");
-        updateRoomDisplay(findByName("endroom", getRooms()));
+        updateRoomDisplay("endroom");
       },
       look: function() {
         output("It's Santa Claus, with a full white beard and a jolly red cap.");
