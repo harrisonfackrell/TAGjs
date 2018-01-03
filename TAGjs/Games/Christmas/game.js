@@ -1210,6 +1210,9 @@ var interceptorArray = [
     "space"
     )
 ];
+var conversationArray = [
+  
+]
 //Functions---------------------------------------------------------------------
 function init() {
   output("It's Christmas day, and you're feeling very excited to get \

@@ -163,6 +163,9 @@ function nameSetup() {
   nameDisplay.addEventListener("webkitAnimationEnd", function(event) {
     nameDisplay.className = "";
   });
+  nameDisplay.addEventListener("animationend", function(event) {
+    nameDisplay.className = "";
+  });
 }
 function inputSetup() {
   //Finds the inputBox and assigns the necessary handler to it.
@@ -449,6 +452,7 @@ function getRooms() {
 //Movement----------------------------------------------------------------------
 function warp(entity, roomName) {
   if (roomName) {
+    entity.prevLocation = entity.location;
     entity.location = roomName;
   };
 }
@@ -519,9 +523,47 @@ function testForExits(input, room) {
   }
   return false;
 }
+//Conversations-----------------------------------------------------------------
+function Conversation(name, topics) {
+  this.name = name;
+  this.location = "Nowhere";
+  var keys = Object.keys(topics);
+  this.methods = {};
+  for (var i = 0; i < keys.length; i++) {
+    var key = keys[i];
+    var paragraph = topics[key];
+    addTopic(this, key, paragraph);
+  }
+  this.methods.goodbye = function() {
+    endConversation(name);
+  }
+  this.givenName = "";
+}
+function getConversations() {
+  return conversationArray;
+}
+function startConversation(conversationName) {
+  var player = getPlayer();
+  var conversation = findByName(conversationName, getConversations());
+  warp(player, "Conversing");
+  warp(conversation, "Conversing");
+  var key = Object.keys(conversation.methods)[0];
+  conversation.methods[key]();
+}
+function endConversation(conversationName) {
+  var player = getPlayer();
+  var conversation = findByName(conversationName, getConversations());
+  warp(player, player.prevLocation);
+  warp(conversation, conversation.prevLocation);
+}
+function addTopic(conversation, key, paragraph) {
+  conversation.methods[key] = function() {
+    output(paragraph);
+  }
+}
 //Interactables-----------------------------------------------------------------
 function getInteractables() {
-  return getEntities().concat(getObstructions(), getInterceptors());
+  return getEntities().concat(getObstructions(), getInterceptors(), getConversations());
 }
 //Entities----------------------------------------------------------------------
 function Entity(name, location, description, methods, givenName) {
@@ -536,6 +578,7 @@ function Entity(name, location, description, methods, givenName) {
   this.name = name;
   this.description = description;
   this.location = location;
+  this.prevLocation = location;
   Object.assign(this.methods, methods);
   this.givenName = givenName;
 }
@@ -582,6 +625,7 @@ function Obstruction(name, location, methods, exits, givenName) {
   }
   this.name = name;
   this.location = location;
+  this.prevLocation = location;
   Object.assign(this.methods, methods);
   this.exits = exits;
   this.givenName = givenName;
