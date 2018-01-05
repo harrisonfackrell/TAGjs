@@ -1,7 +1,7 @@
 //Constants---------------------------------------------------------------------
 var SYNONYMS = {
   look: ["look","examine"],
-  attack: ["attack","kick","punch","fight","destroy","crush","break","smash"],
+  attack: ["attack","kick","punch","fight","destroy","crush","break","smash","kill"],
   move: ["move","go","walk","run","step","fly","head"],
   throw: ["throw","toss"],
   use: ["use"],
@@ -503,6 +503,9 @@ var entityArray = [
       nothing: function() {
         output("The elf smiles at you and waves.");
       },
+      take: function() {
+        output("That won't work. Shelf-elves are notoriously elusive.");
+      }
       attack: function() {
         output("You do your best to catch the elf, but he's always one step \
           ahead of you.");
