@@ -324,8 +324,6 @@ var entityArray = [
     {
       nothing: function() {
         output("Do what with the coat?");
-        output("<em>You can view your items with the \
-          <strong>inventory</strong> command.");
       },
       unequip: function() {
         if (this.parent.isOn) {
@@ -1103,8 +1101,6 @@ var obstructionArray = [
         } else {
           output("You can't go <strong>out</strong> unless you're wearing \
             your coat.");
-          output("<em>You can view your items with the \
-            <strong>inventory</strong> command.");
         }
       }
     },
@@ -1124,8 +1120,6 @@ var obstructionArray = [
         } else {
           output("You can't go <strong>out</strong> unless you're wearing \
             your coat.");
-          output("<em>You can view your items with the \
-            <strong>inventory</strong> command.");
         }
       }
     },
@@ -1211,7 +1205,7 @@ var interceptorArray = [
     )
 ];
 var conversationArray = [
-  
+
 ]
 //Functions---------------------------------------------------------------------
 function init() {
