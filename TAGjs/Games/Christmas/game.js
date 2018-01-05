@@ -505,7 +505,7 @@ var entityArray = [
       },
       take: function() {
         output("That won't work. Shelf-elves are notoriously elusive.");
-      }
+      },
       attack: function() {
         output("You do your best to catch the elf, but he's always one step \
           ahead of you.");
