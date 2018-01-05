@@ -1,7 +1,7 @@
 //Constants---------------------------------------------------------------------
 var SYNONYMS = {
   look: ["look","examine"],
-  attack: ["attack","kick","punch","fight","destroy","crush","break","smash","kill"],
+  attack: ["attack","kick","punch","fight","destroy","crush","break","smash","kill","bite"],
   move: ["move","go","walk","run","step","fly","head"],
   throw: ["throw","toss"],
   use: ["use"],
