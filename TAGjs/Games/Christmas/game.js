@@ -8,7 +8,7 @@ var SYNONYMS = {
   open: ["open","search","check"],
   close: ["close","shut"],
   talk: ["talk","ask","say","shout","speak"],
-  take: ["take","pick up","steal","get"],
+  take: ["take","pick up","steal","get","keep"],
   unequip: ["unequip","take off"],
   equip: ["equip","put on","wear"],
   hang: ["hang","put"],
@@ -28,7 +28,9 @@ var SYNONYMS = {
   book: ["book", "celsius"],
   enter: ["enter","type"],
   keypad: ["keypad","enter","type","24351"],
-  "space fish": ["fish"]
+  "space fish": ["fish"],
+  "insult": ["stupid","dumb","idiot","hate","awful"],
+  "praise": ["cool","awesome","nerd"]
 };
 var USE_IMAGES = false;
 var USE_SOUND = false;
@@ -818,11 +820,10 @@ var entityArray = [
           eyes and a carrot nose--pretty standard fare, if you ask me.");
       },
       talk: function() {
-        output("You ask the snowman where his friends are.");
-        output("He says he has snow idea.");
+        startConversation("truenorth.snowman");
       },
       attack: function() {
-        output("The snowman tells you to take a chill pill.");
+        output("The snowman tells you to chill out.");
       }
     },
     "snowman"
@@ -1149,6 +1150,9 @@ var obstructionArray = [
         } else {
           output("You don't have a fish!");
         }
+      },
+      talk: function() {
+        startConversation("truenorth.polarbear");
       }
     },
     {
@@ -1208,7 +1212,40 @@ var interceptorArray = [
     )
 ];
 var conversationArray = [
-
+  new Conversation("truenorth.snowman",
+    {
+      "hello": "Hi! It's *ice* to meet you! Do you want to be my \
+      <strong>friend</strong>? Everybody else is giving me the *cold* shoulder, and \
+      I have *snow* idea why!",
+      "insult": "I would cry, but my tears are frozen.",
+      "friend": "You will be my friend? great! You're a *cool* person!",
+      "yes": "You will be my friend? great! You're a *cool* person!",
+      "praise": "Thanks!",
+      "no": "That's not *cool*...",
+      "pun": "I think puns are *cool*!",
+      "nothing": "I'm afraid I don't understand! But that's okay!"
+    }
+  ),
+  new Conversation("truenorth.polarbear",
+    {
+      "hello": "ROARROARRRRGROWLROAR. (Hello traveler; I am glad to meet your  \
+        acquaintence. Unfortunately, however, I find my mood to be dampened, \
+        as I am quite <strong>hungry</strong>.)",
+      "hungry": "GROOOOWWLGROWWWLGROWWLLL. (I am hungry enough that the \
+        rumblings of my yet-unsatiated stomach are nearly indistinguishable \
+        from my true voice. I am sure that this condition would be cured by a \
+        <strong>sugar plum</strong>)",
+      "sugar plum": "ROARRRYOWWNLLAGROWL (I recognize that I am unlikely to \
+        find a sugar plum at the north pole; I will eat a fish instead, if I \
+        must.)",
+      "insult": "ROOOOOOAOOAOAAAAARRRRR. (That is mean. Fortunately, I am of \
+        an even temperment, and I do not take offense to your words.)",
+      "praise": "SNARRRRRRRRLGROWLROAR. (I thank you for your compliment, \
+        friend.)",
+      "nothing": "SNARLROARGROWLLLLROAR (I'm afraid I lack the intellectual \
+        capacity to understand your statements.)"
+    }
+    )
 ]
 //Functions---------------------------------------------------------------------
 function init() {

@@ -107,6 +107,7 @@ var entityArray = [
 ];
 var obstructionArray = [];
 var interceptorArray = [];
+var conversationArray = [];
 var combinationArray = [
   ["Water","Water","Ocean"],
   ["Earth","Earth","Stone"],

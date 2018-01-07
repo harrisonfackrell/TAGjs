@@ -548,6 +548,9 @@ function startConversation(conversationName) {
   warp(player, "Conversing");
   warp(conversation, "Conversing");
   var key = Object.keys(conversation.methods)[0];
+  output("You start a conversation. <em>you can end it by saying \
+  <strong>goodbye</strong>.</em>");
+  output("**********");
   conversation.methods[key]();
 }
 function endConversation(conversationName) {
@@ -555,6 +558,8 @@ function endConversation(conversationName) {
   var conversation = findByName(conversationName, getConversations());
   warp(player, player.prevLocation);
   warp(conversation, conversation.prevLocation);
+  output("**********");
+  updateRoomDisplay(player.location);
 }
 function addTopic(conversation, key, paragraph) {
   conversation.methods[key] = function() {

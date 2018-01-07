@@ -90,6 +90,7 @@ var roomArray = [
 var entityArray = [];
 var obstructionArray = [];
 var interceptorArray = [];
+var conversationArray = [];
 //Functions---------------------------------------------------------------------
 function init() {
   updateRoomDisplay(STARTING_ROOM);
