@@ -247,7 +247,12 @@ var combinationArray = [
   ["Tool","Charcoal","Pencil"],
   ["Cavern","Writing","Cave Painting"],
   ["Diplomacy","Sound","Telephone"],
-  ["Postal Service","Internet","Email"]
+  ["Postal Service","Internet","Email"],
+  ["Sky","Water","Rain"],
+  ["Sky","Mist","Cloud"],
+  ["Sky","Fog","Cloud"],
+  ["Cloud","Earth","Fog"],
+  ["Sky","Steam","Cloud"]
 ];
 //Functions---------------------------------------------------------------------
 function init() {
