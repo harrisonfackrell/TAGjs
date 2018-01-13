@@ -454,17 +454,14 @@ function embolden(string, substr) {
   if (string.includes(substr)) {
     //Convert string into a RegExp
     var re = new RegExp(substr, "i");
-    //Find the position of the substring
-    var index = string.search(re);
-    //Split the string into two strings around the substring.
-    var strA = string.slice(0, index);
-    var strB = string.slice(index + substr.length);
-    //Reconstruct the string, but with strong tags around the substring.
-    var description = strA + "<strong>" + substr + "</strong>" + strB;
-    //Return the reconstructed string.
+    //Use string.replace to add strong tags around the substring.
+    var description = string.replace(re, function(str) {
+      return "<strong>" + str + "</strong>";
+    });
     return description;
+  } else {
+    return string;
   }
-  return string;
 }
 //Rooms-------------------------------------------------------------------------
 function Room(name, image, music, description, exits, givenName) {
