@@ -1,8 +1,63 @@
 //Player------------------------------------------------------------------------
+function PlayerEntity(methods) {
+  this.methods = {
+    nothing: function() {
+      var room = findByName(getPlayerLocation(), getRooms());
+      var exits = Object.keys(getCurrentExits());
+      exits = exits.concat(Object.keys(getInterceptorExits(room)));
+      for (var i = 0; i < exits.length; i++) {
+        var input = getInput().toLowerCase();
+        var exit = exits[i].toLowerCase();
+        if(input == exit) {
+          var player = getPlayer();
+          this.move();
+          return;
+        }
+      }
+      output("I'm afraid I don't understand.");
+    },
+    inventory: function() {
+      var inventory = findByName("Inventory", getRooms());
+      var entities = narrowEntitiesByLocation(getEntities(), "Inventory");
+      if (entities.length > 0) {
+        var description = describeEntities(inventory);
+        output("You have " + describeEntities(inventory));
+      } else {
+        output("You have nothing.");
+      }
+    },
+    move: function() {
+      var input = getInput();
+      movePlayerByInput(input);
+    },
+    look: function() {
+      var player = getPlayer();
+      updateRoomDisplay(player.location);
+    },
+    help: function() {
+      var player = getPlayer();
+      var description = "Recognized commands include ";
+      var keys = Object.keys(player.methods);
+      keys = keys.filter( function(key) {
+        return (key !== "nothing" && key !== "parent");
+      });
+      description += manageListGrammar(keys, "and");
+      for (var i in keys) {
+        description = embolden(description, keys[i]);
+      }
+      description += ". Other context-sensitive commands may be available.";
+      output(description);
+    }
+
+  }
+  Object.assign(this.methods, methods);
+  this.location = STARTING_ROOM;
+  this.prevLocation = this.location;
+}
 function getPlayer() {
   //Returns the global Player object.
+    return Player;
 
-  return Player;
 }
 function getPlayerLocation() {
   //Returns the player's location. This is mostly for convenience.

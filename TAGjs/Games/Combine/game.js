@@ -1,14 +1,13 @@
 //Constants---------------------------------------------------------------------
 var SYNONYMS = {
-  look: ["look","examine","list","element","what"]
+  look: ["look","list","element","what","combination"],
+  nothing: ["nothing","help","move","inventory"]
 };
 var USE_IMAGES = false;
 var USE_SOUND = false;
 var STARTING_ROOM = "Expanse";
 //Player------------------------------------------------------------------------
-var Player = new Entity("player",
-  STARTING_ROOM,
-  "you",
+var Player = new PlayerEntity(
   {
     nothing: function() {
       combine();
@@ -20,7 +19,6 @@ var Player = new Entity("player",
       location.reload();
     },
   },
-  "player"
 );
 //Data Containers---------------------------------------------------------------
 var roomArray = [
