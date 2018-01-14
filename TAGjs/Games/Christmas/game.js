@@ -21,13 +21,13 @@ var SYNONYMS = {
   fireplace: ["fire"],
   put: ["put","throw","toss","place"],
   "space helmet": ["helmet"],
-  "space worm": ["worm"],
+  "space crayfish": ["crayfish"],
   "polar bear": ["bear"],
   "santa claus": ["santa"],
   "sugar plum": ["plum"],
   book: ["book", "celsius"],
   enter: ["enter","type"],
-  keypad: ["keypad","enter","type","24351"],
+  keypad: ["keypad","enter","type","45271836"],
   "space fish": ["fish"],
   "insult": ["stupid","dumb","idiot","hate","awful"],
   "praise": ["cool","awesome","nerd"],
@@ -355,7 +355,7 @@ var entityArray = [
             var red = findByName("home.redornament", getInteractables());
             red.location = "Nowhere";
             this.parent.red = true;
-            output("You hang the red ornament on the tree.");
+            output("You hang the <strong>red ornament</strong> on the tree.");
           } else {
             output("Hang what on the tree?");
           }
@@ -364,7 +364,7 @@ var entityArray = [
             var blue = findByName("home.blueornament", getInteractables());
             blue.location = "Nowhere";
             this.parent.blue = true;
-            output("You hang the blue ornament on the tree.");
+            output("You hang the <strong>blue ornament</strong> on the tree.");
           } else {
             output("Hang what on the tree?");
           }
@@ -740,12 +740,9 @@ var entityArray = [
       coupon: function() {
         if (inventoryContains("space.coupon")) {
           output("He looks at your coupon and nods his head. \"I see you've \
-            been to the ISS. It's pretty cool, huh? Anyways, here's your \
-            complimentary fishing pole. Come to <em>Fish Upon a Star</em> \
-            again!\"");
-          output("\"Oh, and hey--if you need any <strong>bait</strong>, just \
-            ask someone at the station. They've got space worms running out \
-            their ears.\"")
+          been to the ISS. Here's your complimentary fishing pole. \
+          If you need any <strong>bait</strong>, just ask one \
+          of the cosmonauts. They always have a stock of space crayfish.\"");
           var fishingpole = findByName("northpole.fishingpole", getEntities());
           var coupon = findByName("space.coupon", getEntities());
           fishingpole.location = "Inventory";
@@ -790,6 +787,9 @@ var entityArray = [
       },
       attack: function() {
         output("The snowman tells you to chill out.");
+      },
+      shovel: function() {
+        this.attack();
       }
     },
     "snowman"
@@ -801,21 +801,17 @@ var entityArray = [
       nothing: function() {
         output("Do what with the lake?");
       },
-      attack: function() {
-        output("Good luck with that, Caligula.");
-        output("<em>Now you have to go look up Caligula. Ha.</em>");
-      },
       fish: function() {
-        if (inventoryContains("northpole.fishingpole") && inventoryContains("space.spaceworm")) {
+        if (inventoryContains("northpole.fishingpole") && inventoryContains("space.spacecrayfish")) {
           if (roomContains("Nowhere", "truenorth.fish")) {
             output("You stick your fishing pole in the water and wait. Before \
             too long, you get a nibble, and you expertly catch it.");
-            output("You caught a... piece of paper. And it somehow ate your space worm. It's \
-            labeled \"ISS SECRET CODE <strong>HINTS</strong>\".");
+            output("You caught a... piece of paper. And it somehow ate your space crayfish. It's \
+            labeled \"ISS SECRET CODE <strong>CLUES</strong>\".");
             var hints = findByName("truenorth.hints", getEntities());
-            var worm = findByName("space.spaceworm", getEntities());
+            var crayfish = findByName("space.spacecrayfish", getEntities());
             hints.location = "Inventory";
-            worm.location = "Nowhere";
+            crayfish.location = "Nowhere";
           } else {
             output("Despite your best efforts, you can't seem to catch \
               anything else.");
@@ -829,23 +825,23 @@ var entityArray = [
   ),
   new Entity("truenorth.hints",
     "Nowhere",
-    "ISS SECRET CODE HINTS",
+    "ISS SECRET CODE CLUES",
     {
       look: function() {
         output("********************");
-        output("CLUE 1: The code consists of the numbers 1 through 5, with no repeats.");
-        output("CLUE 2: 5 is next to 1.");
-        output("CLUE 3: There is exactly one digit between 3 and 2.");
-        output("CLUE 4: 1 is not next to 3.");
-        output("CLUE 5: 3 is neither the first digit nor the last digit.");
-        output("CLUE 6: 2 comes before 4.");
-        output("********************");
+        output("CLUE 1: The code consists of the numbers 1 through 8, with no repeats.");
+        output("CLUE 2: There is exactly one digit between 4 and 2.");
+        output("CLUE 3: The sum of the second and fifth digits is six.");
+        output("CLUE 4: The sum of the first and last digits is ten.");
+        output("CLUE 5: 6 is either the first digit or the last digit.");
+        output("CLUE 6: The product of the fifth and sixth digits is eight.");
+        output("CLUE 7: 7 is not next to a multiple of 3.");
       },
       read: function() {
         this.look();
       }
     },
-    "HINTS"
+    "CLUES"
   ),
   new Entity("truenorth.fish",
     "Nowhere",
@@ -856,7 +852,9 @@ var entityArray = [
       },
       look: function() {
         output("You're no fishing expert, but you're pretty sure this space fish \
-          isn't one that you'd find back home. It's remarkably fresh.");
+          isn't one that you'd find back home. It's remarkably fresh, and it \
+          has an antenna. Quite frankly, an antenna in space doesn't seem very \
+          practical, but who are you to judge?");
       },
       take: function() {
         if (inventoryContains("truenorth.fish")) {
@@ -889,8 +887,7 @@ var entityArray = [
         this.equip();
       },
       equip: function() {
-        output("You put the space helmet on. If only you had a rocket to go to \
-          space in. Oh, that's right--despite the astronomical odds, you do.");
+        output("You put the space helmet on. You can probably go to space now.");
         this.parent.location = "Inventory";
         this.parent.on = true;
         var hashelmet = findByName("space.hashelmet", getInterceptors());
@@ -939,28 +936,31 @@ var entityArray = [
       },
       talk: function() {
         output("You can't understand the cosmonaut. For whatever reason, he \
-          gives you a <strong>space worm</strong> and mimes a fish swimming \
+          gives you a <strong>space crayfish</strong> and mimes a fish swimming \
           with his hand.");
-        var worm = findByName("space.spaceworm", getEntities());
-        worm.location = "Inventory";
+        var crayfish = findByName("space.spacecrayfish", getEntities());
+        crayfish.location = "Inventory";
       },
       look: function() {
         output("It's a Russian cosmonaut. You can tell he's Russian because \
           you can't understand a word he says.");
+      },
+      bait: function() {
+        this.talk();
       }
     },
     "cosmonaut"
   ),
-  new Entity("space.spaceworm",
+  new Entity("space.spacecrayfish",
     "Nowhere",
-    "a space worm",
+    "a space crayfish",
     {
       nothing: function() {
-        output("Do what with the space worm?");
+        output("Do what with the space crayfish?");
       },
       put: function() {
         if (inventoryContains("northpole.fishingpole")) {
-          output("You attach the space worm to your fishing pole.");
+          output("You attach the space crayfish to your fishing pole.");
         } else {
           this.nothing();
         }
@@ -969,12 +969,12 @@ var entityArray = [
         output("Um... no.");
       },
       look: function() {
-        output("The space worm is just like a regular worm, but it has an \
+        output("The space crayfish is just like a regular crayfish, but it has an \
           antenna. Quite frankly, an antenna in space doesn't seem very \
           practical, but who are you to judge?");
       }
     },
-    "space worm"
+    "space crayfish"
   ),
   new Entity("space.coupon",
     "space.stationin",
@@ -1039,7 +1039,7 @@ var entityArray = [
       },
       enter: function() {
         var input = getInput();
-        if (testForWord(input, "24351")) {
+        if (testForWord(input, "45271836")) {
           output("The keypad's display says, \"That's the code! here is your \
           prize!\"");
           output("A small hatch opens, and a <strong>space fish</strong>, somehow \
