@@ -1,5 +1,6 @@
 //Player------------------------------------------------------------------------
-function PlayerEntity(methods) {
+function PlayerEntity(methods, turn) {
+  this.name = "player";
   this.methods = {
     nothing: function() {
       var room = findByName(getPlayerLocation(), getRooms());
@@ -48,11 +49,15 @@ function PlayerEntity(methods) {
       description += ". Other context-sensitive commands may also be available.";
       output(description);
     }
-
   }
   Object.assign(this.methods, methods);
   this.location = STARTING_ROOM;
   this.prevLocation = this.location;
+  this.givenName = "player";
+  this.advanceTurn = false;
+  if (turn) {
+    this.turn = turn;
+  }
 }
 function getPlayer() {
   //Returns the global Player object.
@@ -60,7 +65,7 @@ function getPlayer() {
 
 }
 function getPlayerLocation() {
-  //Returns the player's location. This is mostly for convenience.
+  //Returns the player's location. This is deprecated.
 
   var player = getPlayer();
   return player.location;
@@ -86,10 +91,14 @@ function enterHandler() {
   var parsedInput = parseInput(input, playerLocation);
   var subject = parsedInput[0];
   var action = parsedInput[1];
-  //Unless the subject is a sequence
-  if (!subject.sequence) {
+  //Unless the subject's displayInput is false
+  if (subject.displayInput != false) {
     //Output the player's input
     output(input);
+  }
+  //Unless the subject's advanceTurn is false
+  if (subject.advanceTurn != false) {
+    advanceTurn();
   }
   //Execute the input.
   subject.methods[action]();
@@ -602,6 +611,7 @@ function Conversation(name, topics, methods) {
     endConversation(name);
   }
   this.givenName = "";
+  this.advanceTurn = false;
 }
 function Sequence(name, sequence) {
   //A sequence is a special conversation that moves along regardless of input.
@@ -626,6 +636,8 @@ function Sequence(name, sequence) {
   this.i = 0;
   this.sequence = sequence;
   this.givenName = "";
+  this.displayInput = false;
+  this.advanceTurn = false;
 }
 function getConversations() {
   return conversationArray;
@@ -674,7 +686,7 @@ function getInteractables() {
    getConversations(), getPlayer());
 }
 //Entities----------------------------------------------------------------------
-function Entity(name, location, description, methods, givenName) {
+function Entity(name, location, description, methods, givenName, turn) {
   this.methods = {
     nothing: function() {
       output("Do what with the " + givenName + "?");
@@ -689,6 +701,9 @@ function Entity(name, location, description, methods, givenName) {
   this.prevLocation = location;
   Object.assign(this.methods, methods);
   this.givenName = givenName;
+  if (turn) {
+    this.turn = turn;
+  }
 }
 function getEntities() {
   return entityArray;
@@ -711,17 +726,13 @@ function addMethodParents() {
   }
 }
 function isPresent(name) {
-  var entities = getEntities();
-  var player = getPlayer();
-  var narrowedEntities = narrowEntitiesByLocation(entities, player.location);
-  var entity = findByName(name, narrowedEntities);
-  if(typeof entity == "object") {
+  if(roomContains(player.location, name)) {
     return true;
   }
   return false;
 }
 //Obstructions------------------------------------------------------------------
-function Obstruction(name, location, methods, exits, givenName) {
+function Obstruction(name, location, methods, exits, givenName, turn) {
   this.methods = {
     nothing: function() {
       output("Do what with the " + givenName + "?");
@@ -733,6 +744,9 @@ function Obstruction(name, location, methods, exits, givenName) {
   Object.assign(this.methods, methods);
   this.exits = exits;
   this.givenName = givenName;
+  if (turn) {
+    this.turn = turn;
+  }
 }
 function getObstructions() {
   return obstructionArray;
@@ -753,4 +767,13 @@ function getInterceptorExits(room) {
     }
   }
   return exitArray;
+}
+//Time--------------------------------------------------------------------------
+function advanceTurn() {
+  var interactables = getInteractables();
+  for (i in interactables) {
+    if (interactables[i].turn) {
+      interactables[i].turn();
+    }
+  }
 }
