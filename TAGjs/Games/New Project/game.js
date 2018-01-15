@@ -24,8 +24,8 @@ var Player = new PlayerEntity(
 var roomArray = [
   //System
   new Room("Inventory",
-    "",
-    "",
+
+
     "Somehow, you have managed to place *yourself* inside of that magical \
     non-space you call an inventory. All your items are here, but then, \
     aren't they in your bag? What happens now? Maybe you should submit a bug \
@@ -36,8 +36,8 @@ var roomArray = [
     "Inventory"
   ),
   new Room("Nowhere",
-    "",
-    "",
+
+
     "Somehow, you've made it to a secret room where entities are placed when \
     they aren't needed. Either you're a clever hacker, or something's gone \
     wrong. Maybe you should submit a bug report.",
@@ -46,7 +46,7 @@ var roomArray = [
       "south": ["South of nowhere", "south"]
     },
     "Nowhere in particular"
-  )
+  ),
 ];
 var entityArray = [];
 var obstructionArray = [];

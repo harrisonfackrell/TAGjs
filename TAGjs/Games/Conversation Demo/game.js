@@ -108,7 +108,7 @@ var entityArray = [
     "Bob",
     {
       talk: function() {
-        startConversation("bob");
+        startConversation("bobolog");
       }
     },
     "Bob"
@@ -122,6 +122,13 @@ var conversationArray = [
       "nothing": "Hello, I am Bob. I like to eat <strong>tacos</strong> n' stuff.",
       "tacos": "Oh yes, tacos are delicious!"
     }
+  ),
+  new Sequence("bobolog",
+    [
+      "Hello, I am bob.",
+      "This is a sequence",
+      "It should end now"
+    ]
     )
 ];
 //Functions---------------------------------------------------------------------

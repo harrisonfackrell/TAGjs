@@ -21,7 +21,7 @@ var SYNONYMS = {
   fireplace: ["fire"],
   put: ["put","throw","toss","place"],
   "space helmet": ["helmet"],
-  "space crayfish": ["crayfish"],
+  "space crawdad": ["crawdad"],
   "polar bear": ["bear"],
   "santa claus": ["santa"],
   "sugar plum": ["plum"],
@@ -49,8 +49,8 @@ var Player = new PlayerEntity(
 var roomArray = [
   //System
   new Room("Inventory",
-    "",
-    "",
+
+
     "Somehow, you have managed to place *yourself* inside of that magical \
     non-space you call an inventory. All your items are here, but then, \
     aren't they in your bag? What happens now? Maybe you should submit a bug \
@@ -61,8 +61,8 @@ var roomArray = [
     "Inventory"
   ),
   new Room("Nowhere",
-    "",
-    "",
+
+
     "Somehow, you've made it to a secret room where entities are placed when \
     they aren't needed. Either you're a clever hacker, or something's gone \
     wrong. Maybe you should submit a bug report.",
@@ -74,8 +74,8 @@ var roomArray = [
   ),
   //Home
   new Room("home.livingroom",
-    "",
-    "",
+
+
     "You're in the living room, which is set up for Christmas.",
     {
       "kitchen": ["home.kitchen","go down the hall to the kitchen"],
@@ -85,8 +85,8 @@ var roomArray = [
     "Living Room"
   ),
   new Room("home.readingroom",
-    "",
-    "",
+
+
     "The reading room is rather large; sometimes, you wonder why anyone \
     would ever dedicate that much space to something as boring as books.",
     {
@@ -95,8 +95,8 @@ var roomArray = [
     "Reading Room"
   ),
   new Room("home.kitchen",
-    "",
-    "",
+
+
     "The kitchen is nicely decorated.",
     {
       "living room": ["home.livingroom","go down the hall to the living room"],
@@ -105,8 +105,8 @@ var roomArray = [
     "Kitchen"
   ),
   new Room("home.garage",
-    "",
-    "",
+
+
     "The garage is a little more drab than the rest of the house.",
     {
       "kitchen": ["home.kitchen","go in to the kitchen"],
@@ -115,8 +115,8 @@ var roomArray = [
     "Garage"
   ),
   new Room("home.outside",
-    "",
-    "",
+
+
     "You are outside. Your exterior decorations are humble, but they're not the worst you've \
     ever seen--that honor goes to the inflatable pumpkin your family once \
     put up for Halloween and then forgot to take down by December.",
@@ -128,8 +128,8 @@ var roomArray = [
   ),
   //Space
   new Room("space.junction",
-    "",
-    "",
+
+
     "You're flying high in sky on a Christmas tree rocket. Who needs cheap \
     thrills like skiing?",
     {
@@ -139,8 +139,8 @@ var roomArray = [
     "Flying on a Rocket Tree"
   ),
   new Room("space.station",
-    "",
-    "",
+
+
     "You've made it to the International Space Station. Nifty.",
     {
       "in": ["space.stationin","head in to the station"],
@@ -149,8 +149,8 @@ var roomArray = [
     "International Space Station"
   ),
   new Room("space.stationin",
-    "",
-    "",
+
+
     "The inside of the space station is just as robotic and filled-with-computers \
     as you imagined it.",
     {
@@ -160,8 +160,8 @@ var roomArray = [
     "Inside the ISS"
   ),
   new Room("space.stationback",
-    "",
-    "",
+
+
     "The back of the station is also robotic and filled-with-computers.",
     {
       "front": ["space.stationin","go to the front of the station"]
@@ -170,8 +170,8 @@ var roomArray = [
   ),
   //northpole
   new Room("northpole.landing",
-    "",
-    "",
+
+
     "This is where you've landed your rocket-tree.",
     {
       "fly": ["space.junction","fly up on your rocket-tree"],
@@ -180,8 +180,8 @@ var roomArray = [
     "North Pole Landing"
   ),
   new Room("northpole.workshopout",
-    "",
-    "",
+
+
     "You seem to be standing near a village.",
     {
       "towards": ["northpole.alaskasign","head towards the village"],
@@ -190,8 +190,8 @@ var roomArray = [
     "Village"
   ),
   new Room("northpole.alaskasign",
-    "",
-    "",
+
+
     "Okay. This is North Pole, Alaska. Probably not where Santa lives, but it \
     might be worth exploring.",
     {
@@ -201,8 +201,8 @@ var roomArray = [
     "North Pole, Alaska"
   ),
   new Room("northpole.fishingstore",
-    "",
-    "",
+
+
     "Welcome to Fish Upon a Star, the greatest fishing utility shop in North \
     Pole, Alaska.",
     {
@@ -212,8 +212,8 @@ var roomArray = [
   ),
   //truenorth
   new Room("truenorth.landing",
-    "",
-    "",
+
+
     "This is probably the right North Pole. Granted, your judgement was pretty \
     poor last time, so there's a very real and unfortunate possibility that it's not. \
     In any case, it doesn't look like Santa's Workshop is right here, so \
@@ -225,8 +225,8 @@ var roomArray = [
     "True North Pole Landing"
   ),
   new Room("truenorth.bearroom",
-    "",
-    "",
+
+
     "As you walk out into the frozen tundra, you start to feel grateful for \
     your coat.",
     {
@@ -238,8 +238,8 @@ var roomArray = [
     "Frozen Tundra"
   ),
   new Room("truenorth.igloo",
-    "",
-    "",
+
+
     "The inside of the igloo is surprisingly warm.",
     {
       "out": ["truenorth.bearroom","step out of the igloo"]
@@ -247,8 +247,8 @@ var roomArray = [
     "Igloo"
   ),
   new Room("truenorth.oasis",
-    "",
-    "",
+
+
     "As it turns out, the north pole *isn't* just a big sheet of ice.",
     {
       "back": ["truenorth.bearroom","go back where you came from"]
@@ -256,8 +256,8 @@ var roomArray = [
     "Lake"
   ),
   new Room("truenorth.workshopout",
-    "",
-    "",
+
+
     "This is it. Santa's workshop is right here.",
     {
       "in": ["truenorth.workshop","go in"],
@@ -266,8 +266,8 @@ var roomArray = [
     "Santa's Workshop"
   ),
   new Room("truenorth.workshop",
-    "",
-    "",
+
+
     "After all that work, you've made it.",
     {
       "out": ["truenorth.workshopout","go out if you want, but I don't see why you would"]
@@ -275,8 +275,8 @@ var roomArray = [
     "Santa Claus"
   ),
   new Room("endroom",
-    "",
-    "",
+
+
     "Sure enough, there are presents there for you in the morning--not the \
     least of which is a text adventure game for your computer. Neat!",
     {
@@ -742,7 +742,7 @@ var entityArray = [
           output("He looks at your coupon and nods his head. \"I see you've \
           been to the ISS. Here's your complimentary fishing pole. \
           If you need any <strong>bait</strong>, just ask one \
-          of the cosmonauts. They always have a stock of space crayfish.\"");
+          of the cosmonauts. They always have a stock of space crawdad.\"");
           var fishingpole = findByName("northpole.fishingpole", getEntities());
           var coupon = findByName("space.coupon", getEntities());
           fishingpole.location = "Inventory";
@@ -802,16 +802,16 @@ var entityArray = [
         output("Do what with the lake?");
       },
       fish: function() {
-        if (inventoryContains("northpole.fishingpole") && inventoryContains("space.spacecrayfish")) {
+        if (inventoryContains("northpole.fishingpole") && inventoryContains("space.spacecrawdad")) {
           if (roomContains("Nowhere", "truenorth.fish")) {
             output("You stick your fishing pole in the water and wait. Before \
             too long, you get a nibble, and you expertly catch it.");
-            output("You caught a... piece of paper. And it somehow ate your space crayfish. It's \
+            output("You caught a... piece of paper. And it somehow ate your space crawdad. It's \
             labeled \"ISS SECRET CODE <strong>CLUES</strong>\".");
             var hints = findByName("truenorth.hints", getEntities());
-            var crayfish = findByName("space.spacecrayfish", getEntities());
+            var crawdad = findByName("space.spacecrawdad", getEntities());
             hints.location = "Inventory";
-            crayfish.location = "Nowhere";
+            crawdad.location = "Nowhere";
           } else {
             output("Despite your best efforts, you can't seem to catch \
               anything else.");
@@ -936,10 +936,10 @@ var entityArray = [
       },
       talk: function() {
         output("You can't understand the cosmonaut. For whatever reason, he \
-          gives you a <strong>space crayfish</strong> and mimes a fish swimming \
+          gives you a <strong>space crawdad</strong> and mimes a fish swimming \
           with his hand.");
-        var crayfish = findByName("space.spacecrayfish", getEntities());
-        crayfish.location = "Inventory";
+        var crawdad = findByName("space.spacecrawdad", getEntities());
+        crawdad.location = "Inventory";
       },
       look: function() {
         output("It's a Russian cosmonaut. You can tell he's Russian because \
@@ -951,16 +951,16 @@ var entityArray = [
     },
     "cosmonaut"
   ),
-  new Entity("space.spacecrayfish",
+  new Entity("space.spacecrawdad",
     "Nowhere",
-    "a space crayfish",
+    "a space crawdad",
     {
       nothing: function() {
-        output("Do what with the space crayfish?");
+        output("Do what with the space crawdad?");
       },
       put: function() {
         if (inventoryContains("northpole.fishingpole")) {
-          output("You attach the space crayfish to your fishing pole.");
+          output("You attach the space crawdad to your fishing pole.");
         } else {
           this.nothing();
         }
@@ -969,12 +969,12 @@ var entityArray = [
         output("Um... no.");
       },
       look: function() {
-        output("The space crayfish is just like a regular crayfish, but it has an \
+        output("The space crawdad is just like a regular crawdad, but it has an \
           antenna. Quite frankly, an antenna in space doesn't seem very \
           practical, but who are you to judge?");
       }
     },
-    "space crayfish"
+    "space crawdad"
   ),
   new Entity("space.coupon",
     "space.stationin",
@@ -1003,7 +1003,7 @@ var entityArray = [
   ),
   new Entity("space.sign",
     "space.stationin",
-    "a sign that says \"Take one\"",
+    "a sign that says \"Take one\" ",
     {
       output: function() {
         output("Do what with the sign?");

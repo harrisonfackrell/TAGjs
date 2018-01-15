@@ -45,7 +45,7 @@ function PlayerEntity(methods) {
       for (var i in keys) {
         description = embolden(description, keys[i]);
       }
-      description += ". Other context-sensitive commands may be available.";
+      description += ". Other context-sensitive commands may also be available.";
       output(description);
     }
 
@@ -80,12 +80,19 @@ function enterHandler() {
   var outputBox = document.getElementById("outputBox");
   //Get and display input.
   var input = getInput();
-  output(input);
   //Get the player's location.
   var playerLocation = getPlayerLocation();
-  //Parse and execute input.
+  //Parse the input.
   var parsedInput = parseInput(input, playerLocation);
-  executeParsedInput(parsedInput);
+  var subject = parsedInput[0];
+  var action = parsedInput[1];
+  //Unless the subject is a sequence
+  if (!subject.sequence) {
+    //Output the player's input
+    output(input);
+  }
+  //Execute the input.
+  subject.methods[action]();
   //Blank the input box.
   inputBox.value = "";
 }
@@ -202,15 +209,6 @@ function parseInput(input) {
   var action = detectAction(input, subject);
   //Return parsed input.
   return [subject, action];
-}
-function executeParsedInput(parsedInput) {
-  //Executes parsed input.
-
-  //Extract the subject and the action
-  var subject = parsedInput[0];
-  var action = parsedInput[1];
-  //Run subject.methods.action
-  subject.methods[action]();
 }
 //Setup-------------------------------------------------------------------------
 function nameSetup() {
@@ -464,7 +462,13 @@ function embolden(string, substr) {
   }
 }
 //Rooms-------------------------------------------------------------------------
-function Room(name, image, music, description, exits, givenName) {
+function Room(name, description, exits, givenName, image, music) {
+  if (image === undefined) {
+    var image = "";
+  }
+  if (music === undefined) {
+    var music = "";
+  }
   this.name = name;
   this.image = image;
   this.music = music;
@@ -576,7 +580,14 @@ function testForExits(input, room) {
   return false;
 }
 //Conversations-----------------------------------------------------------------
-function Conversation(name, topics) {
+function Conversation(name, topics, methods) {
+  //A conversation is a special entity. The "topics" parameter is an object
+  //with string/string pairs, which gets converted into methods that output the
+  //value. The "methods" parameter is optional, and works as expected.
+
+  if (methods === undefined) {
+    var methods = {};
+  }
   this.name = name;
   this.location = "Nowhere";
   var keys = Object.keys(topics);
@@ -586,23 +597,62 @@ function Conversation(name, topics) {
     var paragraph = topics[key];
     addTopic(this, key, paragraph);
   }
+  Object.assign(this.methods, methods);
   this.methods.goodbye = function() {
     endConversation(name);
   }
+  this.givenName = "";
+}
+function Sequence(name, sequence) {
+  //A sequence is a special conversation that moves along regardless of input.
+  //Instead of a dialog tree, it's a dialog railroad.
+  this.name = name;
+  this.location - "Nowhere";
+  this.methods = {
+    nothing: function() {
+      //If all of the sequence has been exhausted
+      if (this.parent.i >= this.parent.sequence.length) {
+        //End the conversation.
+        this.parent.i = 0;
+        endConversation(name);
+      //Otherwise
+      } else {
+        //display the next statement.
+        output("\"" + this.parent.sequence[this.parent.i] + "\"");
+        this.parent.i += 1;
+      }
+    }
+  };
+  this.i = 0;
+  this.sequence = sequence;
   this.givenName = "";
 }
 function getConversations() {
   return conversationArray;
 }
 function startConversation(conversationName) {
+  //Starts a conversation
+
+  //get the player and conversation
   var player = getPlayer();
   var conversation = findByName(conversationName, getConversations());
+  //warp them both to "Conversing". This room doesn't actually have to be
+  //defined, as none of its properties will be displayed.
   warp(player, "Conversing");
   warp(conversation, "Conversing");
-  var key = Object.keys(conversation.methods)[0];
-  output("You start a conversation. <em>you can end it by saying \
-  <strong>goodbye</strong>.</em>");
+  //If the conversation is a sequence
+  if (conversation.sequence) {
+    //Let the player know.
+    output("You start a conversation. <em>Press ENTER to advance \
+    dialog.</em>");
+  } else {
+    //instruct the player to say "goodbye".
+    output("You start a conversation. <em>you can end it by saying \
+    <strong>goodbye</strong>.</em>");
+  }
   output("**********");
+  //Display the first topic or statement.
+  var key = Object.keys(conversation.methods)[0];
   conversation.methods[key]();
 }
 function endConversation(conversationName) {
@@ -615,7 +665,7 @@ function endConversation(conversationName) {
 }
 function addTopic(conversation, key, paragraph) {
   conversation.methods[key] = function() {
-    output(paragraph);
+    output("\"" + paragraph + "\"");
   }
 }
 //Interactables-----------------------------------------------------------------
@@ -653,11 +703,7 @@ function narrowEntitiesByLocation(entities, roomName) {
   return narrowedEntities;
 }
 function addMethodParents() {
-  var entities = getEntities();
-  var obstructions = getObstructions();
-  var player = getPlayer();
-  var interactables = entities.concat(obstructions);
-  interactables.push(player);
+  var interactables = getInteractables();
   for (var i = 0; i < interactables.length; i++) {
     var interactable = interactables[i];
     interactable.methods.parent = interactable;
