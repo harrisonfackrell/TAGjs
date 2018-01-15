@@ -670,7 +670,8 @@ function addTopic(conversation, key, paragraph) {
 }
 //Interactables-----------------------------------------------------------------
 function getInteractables() {
-  return getEntities().concat(getObstructions(), getInterceptors(), getConversations());
+  return getEntities().concat(getObstructions(), getInterceptors(),
+   getConversations(), getPlayer());
 }
 //Entities----------------------------------------------------------------------
 function Entity(name, location, description, methods, givenName) {
