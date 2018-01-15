@@ -150,7 +150,7 @@ function testForWord(input, word) {
 }
 function getSynonyms(word) {
   //Returns the synonyms of a word, as defined in game.js.
-  return SYNONYMS[word];
+  return SYNONYMS[word.toLowerCase()];
 }
 function getInput() {
   //Returns the current input. Useful in entity methods.

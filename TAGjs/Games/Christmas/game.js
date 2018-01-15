@@ -72,8 +72,6 @@ var roomArray = [
   ),
   //Home
   new Room("home.livingroom",
-
-
     "You're in the living room, which is set up for Christmas.",
     {
       "kitchen": ["home.kitchen","go down the hall to the kitchen"],
