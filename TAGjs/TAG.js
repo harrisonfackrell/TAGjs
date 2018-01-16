@@ -671,7 +671,7 @@ function endConversation(conversationName) {
   var player = getPlayer();
   var conversation = findByName(conversationName, getConversations());
   warp(player, player.prevLocation);
-  warp(conversation, conversation.prevLocation);
+  warp(conversation, "Nowhere");
   output("**********");
   updateRoomDisplay(player.location);
 }
