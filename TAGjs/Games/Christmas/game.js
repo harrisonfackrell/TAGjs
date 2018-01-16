@@ -199,12 +199,12 @@ var roomArray = [
   new Room("northpole.fishingstore",
 
 
-    "Welcome to Fish Upon a Star, the greatest fishing utility shop in North \
-    Pole, Alaska.",
+    "Welcome to <em>Starfish</em>, the greatest fishing utility shop in North \
+    Pole, Alaska. It's oddly space themed.",
     {
       "out": ["northpole.alaskasign","head out the door"]
     },
-    "Fish Upon a Star"
+    "Starfish Fishing Utility Shop"
   ),
   //truenorth
   new Room("truenorth.landing",
@@ -991,8 +991,8 @@ var entityArray = [
         output("Give the coupon to who?");
       },
       look: function() {
-        output("It's a coupton for a fishing pole, redeemable at Fish Upon a \
-          Star in North Pole, Alaska.");
+        output("It's a coupton for a fishing pole, redeemable at Starfish \
+        Fishing Utility Shop in North Pole, Alaska.");
       }
     },
     "coupon"
