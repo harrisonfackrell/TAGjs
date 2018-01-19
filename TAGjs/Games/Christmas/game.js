@@ -35,7 +35,7 @@ var SYNONYMS = {
 };
 var USE_IMAGES = false;
 var USE_SOUND = false;
-var STARTING_ROOM = "truenorth.landing";
+var STARTING_ROOM = "home.livingroom";
 //Player------------------------------------------------------------------------
 var Player = new PlayerEntity(
   {
