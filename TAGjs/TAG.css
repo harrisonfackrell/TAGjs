@@ -70,7 +70,7 @@ body {
   margin-bottom: 0.3em;
 }
 #outputBox .userText {
-  
+  color: dimgrey;
 }
 #inputBackground {
   position: relative;
