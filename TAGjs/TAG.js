@@ -30,6 +30,7 @@ function PlayerEntity(methods, turn) {
     move: function() {
       var input = getInput();
       movePlayerByInput(input);
+      advanceTurn();
     },
     look: function() {
       var player = getPlayer();
@@ -48,6 +49,10 @@ function PlayerEntity(methods, turn) {
       }
       description += ". Other context-sensitive commands may also be available.";
       output(description);
+    },
+    wait: function() {
+      output("You wait around for a moment");
+      advanceTurn();
     }
   }
   Object.assign(this.methods, methods);
@@ -779,7 +784,9 @@ function getInterceptorExits(room) {
 //Time--------------------------------------------------------------------------
 function advanceTurn() {
   var interactables = getInteractables();
+  interactables = interactables.filter(function(element){return element.location != "Nowhere"});
   for (i in interactables) {
+    alert(interactables[i].name);
     if (interactables[i].turn) {
       interactables[i].turn();
     }
