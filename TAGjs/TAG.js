@@ -94,7 +94,7 @@ function enterHandler() {
   //Unless the subject's displayInput is false
   if (subject.displayInput != false) {
     //Output the player's input
-    output(input);
+    output("<span class=\"userText\">" + input + "</span>");
   }
   //Unless the subject's advanceTurn is false
   if (subject.advanceTurn != false) {
@@ -613,31 +613,38 @@ function Conversation(name, topics, methods) {
   this.givenName = "";
   this.advanceTurn = false;
 }
-function Sequence(name, sequence) {
+function Monolog(name, sequence, displayInput, advanceTurn) {
   //A sequence is a special conversation that moves along regardless of input.
   //Instead of a dialog tree, it's a dialog railroad.
   this.name = name;
   this.location - "Nowhere";
   this.methods = {
     nothing: function() {
+      var sequence = this.parent.sequence;
       //If all of the sequence has been exhausted
-      if (this.parent.i >= this.parent.sequence.length) {
+      if (sequence.i == sequence.length) {
         //End the conversation.
-        this.parent.i = 0;
         endConversation(name);
       //Otherwise
       } else {
         //display the next statement.
-        output("\"" + this.parent.sequence[this.parent.i] + "\"");
-        this.parent.i += 1;
+        sequence[sequence.i]();
+        sequence.i += 1;
       }
     }
   };
-  this.i = 0;
-  this.sequence = sequence;
+  this.sequence = makeSequence(sequence);
   this.givenName = "";
-  this.displayInput = false;
-  this.advanceTurn = false;
+  if (displayInput) {
+    this.displayInput = true;
+  } else {
+    this.displayInput = false;
+  }
+  if (advanceTurn) {
+    this.advanceTurn = true;
+  } else {
+    this.advanceTurn = false;
+  }
 }
 function getConversations() {
   return conversationArray;
@@ -652,16 +659,6 @@ function startConversation(conversationName) {
   //defined, as none of its properties will be displayed.
   warp(player, "Conversing");
   warp(conversation, "Conversing");
-  //If the conversation is a sequence
-  if (conversation.sequence) {
-    //Let the player know.
-    output("You start a conversation. <em>Press ENTER to advance \
-    dialog.</em>");
-  } else {
-    //instruct the player to say "goodbye".
-    output("You start a conversation. <em>you can end it by saying \
-    <strong>goodbye</strong>.</em>");
-  }
   output("**********");
   //Display the first topic or statement.
   var key = Object.keys(conversation.methods)[0];
@@ -670,6 +667,9 @@ function startConversation(conversationName) {
 function endConversation(conversationName) {
   var player = getPlayer();
   var conversation = findByName(conversationName, getConversations());
+  if (conversation.sequence) {
+    conversation.sequence.i = 0;
+  }
   warp(player, player.prevLocation);
   warp(conversation, "Nowhere");
   output("**********");
@@ -693,6 +693,9 @@ function Entity(name, location, description, methods, givenName, turn) {
     },
     look: function() {
       output("It's " + description + ".");
+    },
+    attack: function() {
+      output("I don't think that's wise.");
     }
   }
   this.name = name;
@@ -722,7 +725,12 @@ function addMethodParents() {
   var interactables = getInteractables();
   for (var i = 0; i < interactables.length; i++) {
     var interactable = interactables[i];
-    interactable.methods.parent = interactable;
+    if (interactable.methods) {
+      interactable.methods.parent = interactable;
+    }
+    if (interactable.sequence) {
+      interactable.sequence.parent = interactable;
+    }
   }
 }
 function isPresent(name) {
@@ -775,5 +783,22 @@ function advanceTurn() {
     if (interactables[i].turn) {
       interactables[i].turn();
     }
+  }
+}
+//Sequences---------------------------------------------------------------------
+function makeSequence(array) {
+  //Takes an array and makes everything in that array a function.
+  for (var i = 0; i < array.length; i++) {
+    if (typeof array[i] == "string") {
+      array[i] = wrapSequenceString(array[i]);
+    }
+  }
+  array.i = 0;
+  return array;
+}
+function wrapSequenceString(string) {
+  //Wraps a string from a sequence.
+  return function() {
+    output(string);
   }
 }
