@@ -786,7 +786,6 @@ function advanceTurn() {
   var interactables = getInteractables();
   interactables = interactables.filter(function(element){return element.location != "Nowhere"});
   for (i in interactables) {
-    alert(interactables[i].name);
     if (interactables[i].turn) {
       interactables[i].turn();
     }
