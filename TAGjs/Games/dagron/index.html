@@ -1,7 +1,7 @@
 <html>
 <head>
   <link rel="stylesheet" type="text/css" href="../../TAG.css">
-  <link rel="stylesheet" type="text/css" href="override.css">
+  <link rel="stylesheet" type="text/css" href="override.css" id="override">
   <script src="../../TAG.js" defer></script>
   <script src="game.js" defer></script>
   <link rel="icon" type="image/png" href="../../Favicon.png">
@@ -9,7 +9,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
-  <header id="roomDisplay">
+  <header id="roomDisplay" class="dagronColor">
     <p id="roomNameDisplay"></p>
     <image id="imageDisplay"></image>
   </header>
@@ -20,7 +20,7 @@
     <audio id="sound"></audio>
   </div>
   <div id="outputBox"></div>
-  <div id="inputBackground">
+  <div id="inputBackground" class="dagronColor">
     <input type="text" maxlength = "150" id="inputBox">
   </div>
   <footer>

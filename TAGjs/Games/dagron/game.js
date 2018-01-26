@@ -83,8 +83,10 @@ var entityArray = [
         if (inventoryContains("hut.amulet")) {
           output("You're already wearing the MAGICAL AMULET.");
         } else {
-          output("For some reason, you feel like the amulet is probably important.");
-          output("You take it with you and put it on--it's probably not cursed.");
+          output("For some reason, you feel like the amulet is probably \
+          important.");
+          output("You take it with you and put it on--it's probably not \
+          cursed.");
         }
       },
       equip: function() {
@@ -101,7 +103,8 @@ var entityArray = [
           POCKET-DIMENSIONS ARE BADNESS IF DONE TWICE IN LAYERS.");
           output("...and then he disappears. Cool.");
         } else {
-          output("You concentrate on the amulet for a moment. It starts to glow.");
+          output("You concentrate on the amulet for a moment. It starts to \
+          glow.");
           warp(player, "amulet.dagronroom");
           updateRoomDisplay(player.location);
           var amuletRoom = findByName("amulet.dagronroom", getRooms());
@@ -156,7 +159,7 @@ var entityArray = [
   ),
   new Entity("amulet.dagron",
     "Nowhere",
-    "your " + this.color + " dagron " + this.givenName + ".",
+    "your dagron",
     {
       attack: function() {
         output("You attack the dagron. You're disappointed when it doesn't \
@@ -183,13 +186,13 @@ var conversationArray = [
         var input = getInput();
         var dagron = getDagron();
         dagron.givenName = input;
-        output("The dagron's name is " + input);
+        output("The dagron's name is " + input + ".");
         output("Is this okay? (Y/N)");
       },
       function() {
         var input = getInput();
         if (testForWord(input, "n")) {
-          this.i -= 2;
+          this.i -= 3;
           this.parent.methods.nothing();
         } else {
           var dagron = getDagron();
@@ -201,20 +204,23 @@ var conversationArray = [
       function() {
         var input = getInput();
         var dagron = getDagron();
-        dagron.color = "<span style=\"color: " + input + "\">" + input + "</span>";
-        output("The dagron is " + dagron.color);
+        dagron.color = input;
+        var inputBackground = document.getElementById("inputBackground");
+        inputBackground.style.backgroundColor = input;
+        output("The dagron is " + colorize(input, input));
         output("Is this okay? (Y/N)");
       },
       function() {
         var input = getInput();
         if (testForWord(input, "n")) {
-          this.i -= 2;
+          this.i -= 3;
           this.parent.methods.nothing();
         } else {
           var dagron = getDagron();
           output("The dagron is now " + dagron.color);
           output("Have fun with " + dagron.givenName);
-          dagron.description = "your " + dagron.color + " dagron " + dagron.givenName;
+          dagron.description = colorize(dagron.color, dagron.givenName + " the \
+            dagron");
           this.parent.methods.nothing();
         }
       }

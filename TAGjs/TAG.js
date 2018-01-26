@@ -47,7 +47,8 @@ function PlayerEntity(methods, turn) {
       for (var i in keys) {
         description = embolden(description, keys[i]);
       }
-      description += ". Other context-sensitive commands may also be available.";
+      description += ". Other context-sensitive commands may also be \
+      available.";
       output(description);
     },
     wait: function() {
@@ -237,7 +238,8 @@ function nameSetup() {
 function inputSetup() {
   //Finds the inputBox and assigns the necessary handler to it.
   var inputBox = document.getElementById("inputBox");
-  inputBox.onkeydown = function(event) {listenForKey(event, "Enter", enterHandler);};
+  inputBox.onkeydown = function(event) {listenForKey(event, "Enter",
+  enterHandler);};
   inputBox.focus();
 }
 function imageSetup() {
@@ -459,16 +461,33 @@ function manageListGrammar(elements, delimiter) {
   return description;
 }
 function embolden(string, substr) {
-  //Bolds a substring within a string. If the string does not contain the
-  //substring, it returns the original string.
+  //Bolds a substring within a string. Actually just a special call of addTag.
+  if (typeof substr == "undefined") {
+    substr = string;
+  }
+  return addTag("strong", string, substr);
+}
+function colorize(color, string, substr) {
+  if (typeof substr == "undefined") {
+    substr = string;
+  }
+  return addTag("span style=\"color: " + color + "\"", string, substr);
+}
+function addTag(tagtext, string, substr) {
+  //Replaces every instance of a substring within a string with an identical
+  //copy surrounded by HTML tags with the given tagtext. If no string is
+  //provided, it simply surrounds the string with tags.
 
+  if (typeof substr == "undefined") {
+    substr = string;
+  }
   //Test for substring within string.
   if (string.includes(substr)) {
     //Convert string into a RegExp
     var re = new RegExp(substr, "i");
     //Use string.replace to add strong tags around the substring.
     var description = string.replace(re, function(str) {
-      return "<strong>" + str + "</strong>";
+      return "<" + tagtext + ">" + str + "</" + tagtext + ">";
     });
     return description;
   } else {
@@ -622,19 +641,19 @@ function Monolog(name, sequence, displayInput, advanceTurn) {
   //A sequence is a special conversation that moves along regardless of input.
   //Instead of a dialog tree, it's a dialog railroad.
   this.name = name;
-  this.location - "Nowhere";
+  this.location = "Nowhere";
   this.methods = {
     nothing: function() {
       var sequence = this.parent.sequence;
+      sequence.i += 1;
       //If all of the sequence has been exhausted
-      if (sequence.i == sequence.length) {
+      if (sequence.i - 1 == sequence.length) {
         //End the conversation.
         endConversation(name);
       //Otherwise
       } else {
         //display the next statement.
-        sequence[sequence.i]();
-        sequence.i += 1;
+        sequence[sequence.i - 1]();
       }
     }
   };
@@ -784,7 +803,9 @@ function getInterceptorExits(room) {
 //Time--------------------------------------------------------------------------
 function advanceTurn() {
   var interactables = getInteractables();
-  interactables = interactables.filter(function(element){return element.location != "Nowhere"});
+  interactables = interactables.filter(function(element){
+    return element.location != "Nowhere"
+  });
   for (i in interactables) {
     if (interactables[i].turn) {
       interactables[i].turn();
