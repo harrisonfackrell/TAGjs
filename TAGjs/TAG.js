@@ -438,11 +438,11 @@ function buildCompleteDescription(room) {
   if (exitKeys.length > 0) {
     description += " You can " + describeExits(exitKeys, exits);
   }
-  if (interceptors.length > 0) {
-    description += " You can also " + describeObstructions(interceptors, "or");
-  }
   if (obstructions.length > 0) {
     description += " However, " + describeObstructions(obstructions, "and");
+  }
+  if (interceptors.length > 0) {
+    description += " You can also " + describeObstructions(interceptors, "or");
   }
   //Return the description.
   return description;
