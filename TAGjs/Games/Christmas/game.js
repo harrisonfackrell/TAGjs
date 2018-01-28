@@ -199,12 +199,12 @@ var roomArray = [
   new Room("northpole.fishingstore",
 
 
-    "Welcome to <em>Starfish</em>, the greatest fishing utility shop in North \
+    "Welcome to <em>Star Fish</em>, the greatest fishing utility shop in North \
     Pole, Alaska. It's oddly space themed.",
     {
       "out": ["northpole.alaskasign","head out the door"]
     },
-    "Starfish Fishing Utility Shop"
+    "Star Fish Fishing Utility Shop"
   ),
   //truenorth
   new Room("truenorth.landing",
@@ -980,8 +980,8 @@ var entityArray = [
         output("Do what with the coupon?");
       },
       take: function() {
-        output("You take the coupon. It says it's for a place called \"Fish \
-          Upon a Star\".");
+        output("You take the coupon. It says it's for a place called \
+        \"Star Fish\".");
         this.parent.location = "Inventory";
       },
       use: function() {
@@ -991,7 +991,7 @@ var entityArray = [
         output("Give the coupon to who?");
       },
       look: function() {
-        output("It's a coupton for a fishing pole, redeemable at Starfish \
+        output("It's a coupton for a fishing pole, redeemable at Star Fish \
         Fishing Utility Shop in North Pole, Alaska.");
       }
     },
@@ -999,7 +999,7 @@ var entityArray = [
   ),
   new Entity("space.sign",
     "space.stationin",
-    "a sign that says \"Take one\" ",
+    "a sign that says \"Take one\"",
     {
       output: function() {
         output("Do what with the sign?");
@@ -1022,7 +1022,7 @@ var entityArray = [
   new Entity("space.keypad",
     "space.stationback",
     "a keypad with a label above it that says, \"TYPE THE SECRET CODE, WIN A \
-    PRIZE!\" Beneath this label is a sticky note that says, \"The hints for \
+    PRIZE!\" Beneath this label is a sticky note that says, \"The clues for \
     today's secret code have been lost. We apologize for the inconvenience.\" \
     That's too bad",
     {
@@ -1039,9 +1039,9 @@ var entityArray = [
           output("The keypad's display says, \"That's the code! here is your \
           prize!\"");
           output("A small hatch opens, and a <strong>space fish</strong>, somehow \
-          still fresh, floats out into the room.");
+          still fresh, floats out into the room. You take it with you.");
           var fish = findByName("truenorth.fish", getEntities());
-          fish.location = this.parent.location;
+          fish.location = "Inventory";
         } else {
           output("The keypad's display says, \"That's not the code! Try again!\"");
         }
