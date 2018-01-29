@@ -1,19 +1,22 @@
 //Constants---------------------------------------------------------------------
-var SYNONYMS = {
-  look: ["look","list","element","what","combination"],
-  nothing: ["nothing","help","move","inventory"]
-};
-var USE_IMAGES = false;
-var USE_SOUND = false;
-var STARTING_ROOM = "Expanse";
+var Configuration = {
+  synonyms: {
+    look: ["look","list","element","what","combination"],
+    nothing: ["nothing","help","move","inventory"]
+  },
+  useImages: false,
+  useMusicControls: false,
+  useSoundControls: false
+}
+
 //Player------------------------------------------------------------------------
-var Player = new PlayerEntity(
+var Player = new PlayerEntity("Expanse",
   {
     nothing: function() {
       combine();
     },
     look: function() {
-        listElements();
+      listElements();
     },
     restart: function() {
       location.reload();
@@ -24,8 +27,6 @@ var Player = new PlayerEntity(
 var roomArray = [
   //System
   new Room("Inventory",
-    "",
-    "",
     "Somehow, you have managed to place *yourself* inside of that magical \
     non-space you call an inventory. All your items are here, but then, \
     aren't they in your bag? What happens now? Maybe you should submit a bug \
@@ -36,8 +37,6 @@ var roomArray = [
     "Inventory"
   ),
   new Room("Nowhere",
-    "",
-    "",
     "Somehow, you've made it to a secret room where entities are placed when \
     they aren't needed. Either you're a clever hacker, or something's gone \
     wrong. Maybe you should submit a bug report.",
@@ -49,8 +48,6 @@ var roomArray = [
   ),
   //
   new Room("Expanse",
-    "",
-    "",
     "",
     {},
     "Combine"
@@ -259,7 +256,7 @@ function init() {
   names, try again by typing <strong>restart</strong>, or see which elements \
   you have by typing <strong>list</strong>. There are 97 elements to create - \
   good luck!");
-  var room = findByName(STARTING_ROOM, getRooms());
+  var room = findByName(getPlayer().location, getRooms());
   output("You have " + describeEntities(room));
   var elements = ["Ocean","Stone","Explosion","Wind","Genius","Clay","Steam",
                   "Mist","Lava","Sky","Volcano","Wave","Brick","Pottery",

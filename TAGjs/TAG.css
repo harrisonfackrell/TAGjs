@@ -43,6 +43,7 @@ body {
   font: 3em reformedEllar;
   bottom: 1.5em;
   margin-left: 0.5em;
+  float: left;
 }
 #audio img {
   position: relative;

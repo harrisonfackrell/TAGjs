@@ -1,11 +1,13 @@
 //Player------------------------------------------------------------------------
-function PlayerEntity(methods, turn) {
+function PlayerEntity(location, methods, turn) {
   this.name = "player";
+  this.location = location;
   this.methods = {
     nothing: function() {
-      var room = findByName(getPlayerLocation(), getRooms());
-      var exits = Object.keys(getCurrentExits());
-      exits = exits.concat(Object.keys(getInterceptorExits(room)));
+      var room = findByName(this.parent.location, getRooms());
+      var exits = Object.keys(room.exits);
+      exits = exits.concat(
+        Object.keys(getInterceptorExits(this.parent.location)));
       for (var i = 0; i < exits.length; i++) {
         var input = getInput().toLowerCase();
         var exit = exits[i].toLowerCase();
@@ -18,11 +20,10 @@ function PlayerEntity(methods, turn) {
       output("I'm afraid I don't understand.");
     },
     inventory: function() {
-      var inventory = findByName("Inventory", getRooms());
       var entities = narrowEntitiesByLocation(getEntities(), "Inventory");
       if (entities.length > 0) {
-        var description = describeEntities(inventory);
-        output("You have " + describeEntities(inventory));
+        var description = describeEntities("Inventory");
+        output("You have " + describeEntities("Inventory"));
       } else {
         output("You have nothing.");
       }
@@ -57,7 +58,6 @@ function PlayerEntity(methods, turn) {
     }
   }
   Object.assign(this.methods, methods);
-  this.location = STARTING_ROOM;
   this.prevLocation = this.location;
   this.givenName = "player";
   this.advanceTurn = false;
@@ -67,14 +67,7 @@ function PlayerEntity(methods, turn) {
 }
 function getPlayer() {
   //Returns the global Player object.
-    return Player;
-
-}
-function getPlayerLocation() {
-  //Returns the player's location. This is deprecated.
-
-  var player = getPlayer();
-  return player.location;
+    return getWorld().player;
 }
 function inventoryContains(name) {
   //Tests for an entity with a given name in the "Inventory" location. This is
@@ -92,7 +85,7 @@ function enterHandler() {
   //Get and display input.
   var input = getInput();
   //Get the player's location.
-  var playerLocation = getPlayerLocation();
+  var playerLocation = getPlayer().location;
   //Parse the input.
   var parsedInput = parseInput(input, playerLocation);
   var subject = parsedInput[0];
@@ -156,7 +149,19 @@ function testForWord(input, word) {
 }
 function getSynonyms(word) {
   //Returns the synonyms of a word, as defined in game.js.
-  return SYNONYMS[word.toLowerCase()];
+  if (word) {
+    return Configuration.synonyms[word.toLowerCase()];
+  } else {
+    return Configuration.synonyms;
+  }
+}
+function addSynonyms(word, synonyms) {
+  //Adds an array of synonyms to the synonyms object.
+  var synonymContainer = getSynonyms();
+  if (typeof synonymContainer[word] == "undefined") {
+    synonymContainer[word] = [];
+  }
+  synonymContainer[word] = synonymContainer[word].concat(synonyms);
 }
 function getInput() {
   //Returns the current input. Useful in entity methods.
@@ -209,7 +214,7 @@ function parseInput(input) {
   //entity.
 
   //Get the interactable entities here.
-  var location = getPlayerLocation();
+  var location = getPlayer().location;
   var entities = getInteractables();
   entities = narrowEntitiesByLocation(entities, location);
   //Find the subject.
@@ -243,88 +248,80 @@ function inputSetup() {
   inputBox.focus();
 }
 function imageSetup() {
-  //Finds the imageDisplay and configures it according to USE_IMAGES
-  var image = document.getElementById("imageDisplay");
-  //If USE_IMAGES is true
-  if (USE_IMAGES) {
+  //Finds the imageDisplay and configures it according to useImages
+  var imageDisplay = document.getElementById("imageDisplay");
+  //If useImages is true
+  if (Configuration.useImages) {
     //Update it.
-    var room = findByName(STARTING_ROOM, getRooms());
+    var room = findByName(getPlayer().location, getRooms());
     updateImageDisplay(room.image);
   } else {
     //If not make the imageDisplay disappear.
-    var outputBox = document.getElementById("outputBox");
-    image.style.display = "none";
+    imageDisplay.style.display = "none";
   }
 }
 function audioSetup() {
   //Sets up the audio buttons.
 
+  //Find the Buttons
+  var musicButton = document.getElementById("musicButton");
+  var soundButton = document.getElementById("soundButton");
+  //Apply handlers to them.
+  musicButton.onclick = function() {toggleSoundElement("music");};
+  soundButton.onclick = function() {toggleSoundElement("sound");};
   //If USE_SOUND is true
-  if (USE_SOUND) {
-    //Find the controls
+  if (Configuration.useMusicControls == false) {
     var musicControls = document.getElementById("musicControls");
+    musicControls.style.display = "none";
+  }
+  if (Configuration.useSoundControls == false) {
     var soundControls = document.getElementById("soundControls");
-    //Apply handlers to them.
-    musicControls.onclick = function() {toggleSoundElement("music");};
-    soundControls.onclick = function() {toggleSoundElement("sound");};
-  } else {
-    //Otherwise
-    //Find the actual audio fields and their containing div
-    var audio = document.getElementById("audio");
-    var music = document.getElementById("music");
-    var sound = document.getElementById("sound");
-    //Set their volume to 0 and set the div's display to none.
-    music.volume = 0;
-    sound.volume = 0;
-    audio.style.display = "none";
+    soundControls.style.display = "none";
   }
 }
 function init() {
   //This function exists to support game.js files with no init function.
 
-  updateRoomDisplay(STARTING_ROOM);
+  updateRoomDisplay(getPlayer().location);
 }
-function preloadImages() {
-  //Preloads images, if they exist.
-  if (USE_IMAGES) {
-    var rooms = getRooms();
-    for (var i = 0; i < rooms.length; i++) {
-      var room = rooms[i];
-      new Image().src = room.image;
+function preloadImages(images) {
+  //Preloads images.
+  for (var i = 0; i < images.length; i++) {
+    if (typeof images[i] != "undefined" && images[i] != "") {
+      new Image().src = images[i];
     }
   }
 }
 function setup() {
   //Runs necessary setup functions.
-  var startingRoom = findByName(STARTING_ROOM, getRooms());
   nameSetup();
   inputSetup();
   imageSetup();
   audioSetup();
-  changeMusic(startingRoom.music);
   addMethodParents();
-  preloadImages();
+  preloadImages(getRoomImages());
+  addLoseConversation();
   //init() is defined in game.js
   init();
 }
 //Sound-------------------------------------------------------------------------
 function toggleSoundElement(elementName) {
-  //Toggles the given sound controls
+  //Toggles the given sound Button
 
-  //Get the music controls
-  var musicControls = document.getElementById(elementName + "Controls");
+  //Get the music Button
+  var musicButton = document.getElementById(elementName + "Button");
   //If they're muted
-  if (musicControls.muted) {
+  if (musicButton.muted) {
     //unmute them
-    musicControls.muted = false;
-    musicControls.src = "../../Sound.png";
+    musicButton.muted = false;
+    musicButton.src = "../../Sound.png";
     var music = document.getElementById(elementName);
     music.volume = 1;
   //otherwise
   } else {
     //mute them
-    musicControls.muted = true;
-    musicControls.src = "../../Muted.png";
+    musicButton.muted = true;
+    musicButton.src = "../../Muted.png";
     var music = document.getElementById(elementName);
     music.volume = 0;
   }
@@ -335,7 +332,7 @@ function changeMusic(song) {
   //Get the music player
   var music = document.getElementById("music");
   var currentSong = music.currentSong;
-  //If it's current song matches the song we want
+  //If its current song matches the song we want
   if (song == currentSong) {
     //don't interrupt it
     return;
@@ -355,9 +352,7 @@ function playSound(sound) {
 //Display-----------------------------------------------------------------------
 function updateImageDisplay(image) {
   var imageDisplay = document.getElementById("imageDisplay");
-  if (USE_IMAGES == true) {
-    imageDisplay.src = image;
-  }
+  imageDisplay.src = image;
 }
 function updateNameDisplay(str) {
   var nameDisplay = document.getElementById("roomNameDisplay");
@@ -381,10 +376,10 @@ function updateRoomDisplay(roomName) {
 function describe(room) {
   return room.description;
 }
-function describeEntities(room) {
+function describeEntities(roomName) {
   var descriptionArray = [];
   var entities = getEntities();
-  var narrowedEntities = narrowEntitiesByLocation(entities, room.name);
+  var narrowedEntities = narrowEntitiesByLocation(entities, roomName);
   for (var i = 0; i < narrowedEntities.length; i++) {
     var entity = narrowedEntities[i];
     var entityDescription = embolden(entity.description, entity.givenName);
@@ -425,7 +420,7 @@ function buildCompleteDescription(room) {
 
   //Initialize all of the necessary variables.
   var entities = narrowEntitiesByLocation(getEntities(), room.name);
-  var exits = getCurrentExits();
+  var exits = room.exits;
   var exitKeys = Object.keys(exits);
   var interceptors = narrowEntitiesByLocation(getInterceptors(), room.name);
   var obstructions = narrowEntitiesByLocation(getObstructions(), room.name);
@@ -433,7 +428,7 @@ function buildCompleteDescription(room) {
   var description = "";
   description += describe(room);
   if (entities.length > 0) {
-    description += " You see " + describeEntities(room);
+    description += " You see " + describeEntities(room.name);
   }
   if (exitKeys.length > 0) {
     description += " You can " + describeExits(exitKeys, exits);
@@ -496,10 +491,10 @@ function addTag(tagtext, string, substr) {
 }
 //Rooms-------------------------------------------------------------------------
 function Room(name, description, exits, givenName, image, music) {
-  if (image === undefined) {
+  if (typeof image == "undefined") {
     var image = "";
   }
-  if (music === undefined) {
+  if (typeof music == "undefined") {
     var music = "";
   }
   this.name = name;
@@ -508,6 +503,14 @@ function Room(name, description, exits, givenName, image, music) {
   this.description = description;
   this.exits = exits;
   this.givenName = givenName;
+}
+function getRoomImages() {
+  var rooms = getRooms();
+  var images = [];
+  for (var i = 0; i < rooms.length; i++) {
+    images.push(rooms[i].image);
+  }
+  return images;
 }
 function roomContains(roomName, name) {
   //Checks the room with the given roomName for the entity with the given name.
@@ -531,29 +534,35 @@ function findByName(name, arr) {
 }
 function getCurrentExits() {
   var rooms = getRooms();
-  var location = getPlayerLocation();
+  var location = getPlayer().location;
   var room = findByName(location, rooms);
   return room.exits;
 }
 function getRooms() {
-  return roomArray;
+  return getWorld().rooms;
 }
 //Movement----------------------------------------------------------------------
 function warp(entity, roomName) {
-  if (roomName) {
+  if (roomName != entity.prevLocation) {
     entity.prevLocation = entity.location;
-    entity.location = roomName;
-  };
+  }
+  entity.location = roomName;
 }
 function moveEntity(entity, direction) {
+  //Moves an entity in the given direction. If there is no such direction, it
+  //will fail loudly.
+
   var currentRoom = findByName(entity.location, getRooms());
-  var exits = currentRoom.exits;
+  var exits = Object.assign(getInterceptorExits(entity.location),
+    currentRoom.exits);
   var interceptors = narrowEntitiesByLocation(getInterceptors, entity.location);
-  var interceptorExits = getInterceptorExits(currentRoom);
-  if (interceptorExits[direction]) {
-    warp(entity, interceptorExits[direction][0]);
-  }
-  if (exits[direction]) {
+  var obstructedExit = testForObstructions(direction, entity.location);
+  //Make sure there's not an obstruction
+  if (obstructedExit) {
+    var description = obstructedExit[1] + ".";
+    output(description);
+  //If there isn't an obstruction, move them.
+  } else {
     warp(entity, exits[direction][0]);
   }
 }
@@ -562,33 +571,21 @@ function movePlayerByInput(input) {
 
   //Gather information on the player's movement.
   var player = getPlayer();
-  var currentRoom = findByName(player.location, getRooms());
-  var direction = testForExits(getInput(), currentRoom);
-  var obstruction = testForObstructions(getInput(), currentRoom);
+  var direction = testForExits(getInput(), player.location);
   //See if they entered a valid direction
   if (direction) {
-    //Make sure there's not an obstruction
-    if (obstruction) {
-      var description = embolden(obstruction[1], direction);
-      description = embolden(description, obstruction.givenName) + ".";
-      output(description);
-      return;
-    //If there isn't an obstruction, move them.
-    } else {
-      moveEntity(player, direction);
-      updateRoomDisplay(player.location);
-      return;
-    }
+    moveEntity(player, direction);
+    updateRoomDisplay(player.location);
   //If they didn't enter a valid direction, tell them.
   } else {
     output("You can't go that way.");
   }
 }
-function testForObstructions(input, room) {
+function testForObstructions(input, roomName) {
   //Returns the exit that prevented movement.
   var player = getPlayer();
   var obstructions = getObstructions();
-  obstructions = narrowEntitiesByLocation(obstructions, room.name);
+  obstructions = narrowEntitiesByLocation(obstructions, roomName);
   for (var i = 0; i < obstructions.length; i++) {
     var exits = Object.keys(obstructions[i].exits);
     for (var j = 0; j < exits.length; j++) {
@@ -600,10 +597,11 @@ function testForObstructions(input, room) {
   }
   return false;
 }
-function testForExits(input, room) {
+function testForExits(input, roomName) {
   var player = getPlayer();
+  var room = findByName(roomName, getRooms());
   var exits = Object.keys(room.exits);
-  exits = exits.concat(Object.keys(getInterceptorExits(room)));
+  exits = exits.concat(Object.keys(getInterceptorExits(room.name)));
   for (var i = 0; i < exits.length; i++) {
     var exit = exits[i]
     if (testForWord(input, exit)) {
@@ -618,7 +616,7 @@ function Conversation(name, topics, methods) {
   //with string/string pairs, which gets converted into methods that output the
   //value. The "methods" parameter is optional, and works as expected.
 
-  if (methods === undefined) {
+  if (typeof methods == "undefined") {
     var methods = {};
   }
   this.name = name;
@@ -671,7 +669,7 @@ function Monolog(name, sequence, displayInput, advanceTurn) {
   }
 }
 function getConversations() {
-  return conversationArray;
+  return getWorld().conversations;
 }
 function startConversation(conversationName) {
   //Starts a conversation
@@ -691,20 +689,25 @@ function startConversation(conversationName) {
 function endConversation(conversationName) {
   var player = getPlayer();
   var conversation = findByName(conversationName, getConversations());
-  if (conversation.sequence) {
-    conversation.sequence.i = 0;
+  if (conversation.location == "Conversing") {
+    if (conversation.sequence) {
+      conversation.sequence.i = 0;
+    }
+    warp(player, player.prevLocation);
+    warp(conversation, "Nowhere");
+    output("**********");
+    updateRoomDisplay(player.location);
   }
-  warp(player, player.prevLocation);
-  warp(conversation, "Nowhere");
-  output("**********");
-  updateRoomDisplay(player.location);
 }
 function addTopic(conversation, key, paragraph) {
   conversation.methods[key] = function() {
-    output("\"" + paragraph + "\"");
+    output(paragraph);
   }
 }
-//Interactables-----------------------------------------------------------------
+//World-------------------------------------------------------------------------
+function getWorld() {
+  return World;
+}
 function getInteractables() {
   return getEntities().concat(getObstructions(), getInterceptors(),
    getConversations(), getPlayer());
@@ -733,7 +736,7 @@ function Entity(name, location, description, methods, givenName, turn) {
   }
 }
 function getEntities() {
-  return entityArray;
+  return getWorld().entities;
 }
 function narrowEntitiesByLocation(entities, roomName) {
   var narrowedEntities = [];
@@ -758,7 +761,7 @@ function addMethodParents() {
   }
 }
 function isPresent(name) {
-  if(roomContains(player.location, name)) {
+  if(roomContains(getPlayer().location, name)) {
     return true;
   }
   return false;
@@ -781,14 +784,14 @@ function Obstruction(name, location, methods, exits, givenName, turn) {
   }
 }
 function getObstructions() {
-  return obstructionArray;
+  return getWorld().obstructions;
 }
 //Interceptors------------------------------------------------------------------
 function getInterceptors() {
-  return interceptorArray;
+  return getWorld().interceptors;
 }
-function getInterceptorExits(room) {
-  var interceptors = narrowEntitiesByLocation(getInterceptors(), room.name);
+function getInterceptorExits(roomName) {
+  var interceptors = narrowEntitiesByLocation(getInterceptors(), roomName);
   var exitArray = {};
   for (var i = 0; i < interceptors.length; i++) {
     var interceptor = interceptors[i];
@@ -828,4 +831,38 @@ function wrapSequenceString(string) {
   return function() {
     output(string);
   }
+}
+//Losing------------------------------------------------------------------------
+function lose(message, undoMessage) {
+  if (typeof undoMessage == "undefined") {
+    var undoMessage = "You can type <strong>undo</strong> to try again.";
+  }
+  var player = getPlayer();
+  var loseConversation = findByName("Lose", getConversations());
+  addTopic(loseConversation, "message", message);
+  addTopic(loseConversation, "nothing", undoMessage);
+  startConversation("Lose");
+  updateNameDisplay("You Lose");
+  output(undoMessage);
+}
+function addLoseConversation() {
+  //Adds the "lose" conversation to the world.
+  var world = getWorld();
+  var lose = new Conversation("Lose",
+    {
+      message: "",
+      nothing: ""
+    },
+    {
+      "undo": function() {
+        endConversation("Lose");
+      },
+      "goodbye": function() {
+        this.nothing();
+      }
+    }
+  )
+  lose.displayInput = false;
+  lose.advanceTurn = false;
+  world.conversations.push(lose);
 }
