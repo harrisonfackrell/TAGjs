@@ -292,6 +292,13 @@ function preloadImages(images) {
     }
   }
 }
+function preloadAudio(audio) {
+  for (var i = 0; i < audio.length; i++) {
+    if (typeof audio[i] != "undefined" && audio[i] != "") {
+      new Audio().src = audio[i];
+    }
+  }
+}
 function setup() {
   //Runs necessary setup functions.
   nameSetup();
@@ -865,4 +872,58 @@ function addLoseConversation() {
   lose.displayInput = false;
   lose.advanceTurn = false;
   world.conversations.push(lose);
+}
+//Movies------------------------------------------------------------------------
+function Movie(name, sequence, imgSuffix, sndSuffix) {
+  //A movie is a special kind of monolog that draws images and sound effects
+  //from a dedicated folder
+
+  if (typeof imgSuffix == "undefined") {
+    var imgSuffix = "jpg";
+  }
+  if (typeof sndSuffix == "undefined") {
+    sndSuffix = "wav";
+  }
+  var monolog = new Monolog(name, sequence);
+  monolog.methods.nothing = function() {
+    var sequence = this.parent.sequence;
+    sequence.i += 1;
+    //If all of the sequence has been exhausted
+    if (sequence.i - 1 == sequence.length) {
+      //End the conversation.
+      endConversation(name);
+    //Otherwise
+    } else {
+      //display the next statement, display the next image, and play the next
+      //sound file.
+      var folder = "movies/" + this.parent.name;
+      var imgPath = folder + "/images/" + (sequence.i - 1) + "." + imgSuffix;
+      var sndPath = folder + "/audio/" + (sequence.i - 1) + "." + sndSuffix;
+      updateImageDisplay(imgPath);
+      playSound(sndPath);
+      sequence[sequence.i - 1]();
+    }
+  }
+  monolog.imgSuffix = imgSuffix;
+  monolog.sndSuffix = sndSuffix;
+  return monolog;
+}
+function preloadMovie(movieName) {
+  //Preloads a movie.
+
+  //Get the movie and its folder
+  var movie = findByName(movieName, getConversations());
+  var folder = "movies/" + movie.name;
+  //initialize image and audio arrays.
+  var images = [];
+  var audio = [];
+  //For every frame
+  for (var i = 0; i < movie.sequence.length; i++) {
+    //Add its its image and audio to the correct array
+    images.push(folder + "/images/" + i + "." + movie.imgSuffix);
+    audio.push(folder + "/audio/" + i + "." + movie.sndSuffix);
+  }
+  //preload the images and audio
+  preloadImages(images);
+  preloadAudio(audio);
 }
