@@ -22,33 +22,7 @@ var World = {
   player: new PlayerEntity("Nowhere",
     {}
   ),
-  rooms: [
-    //System
-    new Room("Inventory",
-
-
-      "Somehow, you have managed to place *yourself* inside of that magical \
-      non-space you call an inventory. All your items are here, but then, \
-      aren't they in your bag? What happens now? Maybe you should submit a bug \
-      report.",
-      {
-        "out": ["Inventory", "climb out of your bag"],
-      },
-      "Inventory"
-    ),
-    new Room("Nowhere",
-
-
-      "Somehow, you've made it to a secret room where entities are placed when \
-      they aren't needed. Either you're a clever hacker, or something's gone \
-      wrong. Maybe you should submit a bug report.",
-      {
-        "north": ["North of nowhere", "go north"],
-        "south": ["South of nowhere", "south"]
-      },
-      "Nowhere in particular"
-    ),
-  ],
+  rooms: [],
   entities: [],
   obstructions: [],
   interceptors: [],
@@ -56,7 +30,7 @@ var World = {
 }
 //Functions---------------------------------------------------------------------
 function init() {
-  updateRoomDisplay(STARTING_ROOM);
+  updateRoomDisplay(getPlayer().location);
 }
 //Execution---------------------------------------------------------------------
 setup();

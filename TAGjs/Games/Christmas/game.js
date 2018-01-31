@@ -1183,7 +1183,7 @@ var World = {
         "nothing": "SNARLROARGROWLLLLROAR (I'm afraid I lack the intellectual \
           capacity to understand your statements.)"
       }
-      )
+    )
   ]
 }
 //Functions---------------------------------------------------------------------

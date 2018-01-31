@@ -1,7 +1,7 @@
 <html>
 <head>
   <link rel="stylesheet" type="text/css" href="../../TAG.css">
-  <link rel="stylesheet" type="text/css" href="override.css" id="override">
+  <link rel="stylesheet" type="text/css" href="override.css">
   <script src="../../TAG.js" defer></script>
   <script src="game.js" defer></script>
   <link rel="icon" type="image/png" href="../../Favicon.png">
@@ -9,18 +9,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
-  <header id="roomDisplay" class="dagronColor">
+  <header id="roomDisplay">
     <p id="roomNameDisplay"></p>
     <image id="imageDisplay"></image>
   </header>
   <div id="audio">
-    <p>Music:<img id="musicControls" src="../../Sound.png"><img>
-      Sound:<img id="soundControls" src="../../Sound.png"></p>
-    <audio id="music" src=""autoplay loop></audio>
+    <p id="soundControls">Sound:<img id="soundButton" src="../../Sound.png">
+      </img></p>
+    <p id="musicControls">Music:<img id="musicButton" src="../../Sound.png">
+      </img></p>
+    <audio id="music" src="" autoplay loop></audio>
     <audio id="sound"></audio>
   </div>
   <div id="outputBox"></div>
-  <div id="inputBackground" class="dagronColor">
+  <div id="inputBackground">
     <input type="text" maxlength = "150" id="inputBox">
   </div>
   <footer>
