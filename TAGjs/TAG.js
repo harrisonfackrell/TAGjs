@@ -901,15 +901,6 @@ function addLoseConversation() {
   lose.advanceTurn = false;
   world.conversations.push(lose);
 }
-<<<<<<< HEAD
-//Unsorted----------------------------------------------------------------------
-function safelyGetProperty(object, property) {
-  if (typeof object == "undefined") {
-    return object;
-  } else {
-    return object[property];
-  }
-=======
 //Movies------------------------------------------------------------------------
 function Movie(name, sequence, imgSuffix, sndSuffix) {
   //A movie is a special kind of monolog that draws images and sound effects
@@ -963,5 +954,12 @@ function preloadMovie(movieName) {
   //preload the images and audio
   preloadImages(images);
   preloadAudio(audio);
->>>>>>> 0ec96d9e634ade7affbb2954f6a929b39beffe1a
+}
+//Unsorted----------------------------------------------------------------------
+function safelyGetProperty(object, property) {
+  if (typeof object == "undefined") {
+    return object;
+  } else {
+    return object[property];
+  }
 }
