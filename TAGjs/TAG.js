@@ -80,27 +80,14 @@ function inventoryContains(name) {
 function enterHandler() {
   //Enter handler for the input box that sets instruction execution into motion.
 
-  //Get the output box
-  var outputBox = document.getElementById("outputBox");
-  //Get and display input.
-  var input = getInput();
-  //Get the player's location.
-  var playerLocation = getPlayer().location;
-  //Parse the input.
-  var parsedInput = parseInput(input, playerLocation);
-  var subject = parsedInput[0];
-  var action = parsedInput[1];
-  //Unless the subject's displayInput is false
-  if (subject.displayInput != false) {
-    //Output the player's input
-    output("<span class=\"userText\">" + input + "</span>");
-  }
-  //Unless the subject's advanceTurn is false
-  if (subject.advanceTurn != false) {
-    advanceTurn();
-  }
-  //Execute the input.
-  subject.methods[action]();
+  //Parse and execute input
+  parseAndExecuteInput(getInput());
+  //Update the image display to that of the player's location
+  var room = findByName(getPlayer().location, getRooms());
+  updateImageDisplay(safelyGetProperty(room, "image"));
+  //Reset imageDisplay.calls
+  var imageDisplay = document.getElementById("imageDisplay");
+  imageDisplay.calls = 0;
   //Blank the input box.
   inputBox.value = "";
 }
@@ -112,6 +99,14 @@ function output(str) {
   //Append the string onto the output box's content and scroll to the bottom.
   outputBox.innerHTML += "<p>>" + str + "</p>";
   outputBox.scrollTop = outputBox.scrollHeight;
+}
+function outputUserText(str) {
+  //Sanitizes text and applies a span with the class "userText" before
+  //outputting its string.
+
+  var re = /<|>/g;
+  sanitizedStr = str.replace(re, "");
+  output("<span class=\"userText\">" + sanitizedStr + "</span>");
 }
 function listenForKey(e, key, callback) {
   //Listens for a key. "e" is an event. This function is intended to be used as
@@ -230,6 +225,26 @@ function parseInput(input) {
   //Return parsed input.
   return [subject, action];
 }
+function parseAndExecuteInput(input) {
+  //Parses and executes input, with a few additional effects depending on
+  //advanceTurn and displayInput.
+
+  //Parse the input.
+  var parsedInput = parseInput(input);
+  var subject = parsedInput[0];
+  var action = parsedInput[1];
+  //Unless the subject's displayInput is false
+  if (subject.displayInput != false) {
+    //Output the player's input
+    outputUserText(input);
+  }
+  //Unless the subject's advanceTurn is false
+  if (subject.advanceTurn != false) {
+    advanceTurn();
+  }
+  //Execute the input.
+  subject.methods[action]();
+}
 //Setup-------------------------------------------------------------------------
 function nameSetup() {
   var nameDisplay = document.getElementById("roomNameDisplay");
@@ -251,6 +266,7 @@ function imageSetup() {
   //Finds the imageDisplay and configures it according to useImages
   var imageDisplay = document.getElementById("imageDisplay");
   //If useImages is true
+
   if (Configuration.useImages) {
     //Update it.
     var room = findByName(getPlayer().location, getRooms());
@@ -259,6 +275,9 @@ function imageSetup() {
     //If not make the imageDisplay disappear.
     imageDisplay.style.display = "none";
   }
+  //Initialize imageDisplay.calls. This is used to ensure that
+  //updateImageDisplay is only called once per call of enterHandler.
+  imageDisplay.calls = 0;
 }
 function audioSetup() {
   //Sets up the audio buttons.
@@ -351,8 +370,18 @@ function playSound(sound) {
 }
 //Display-----------------------------------------------------------------------
 function updateImageDisplay(image) {
+  //Updates the image display. Because of imageDisplay.calls, it can only be
+  //used effectively once per call of enterHandler, excepting the call in
+  //imageSetup before imageDisplay.calls is initialized.
+
   var imageDisplay = document.getElementById("imageDisplay");
-  imageDisplay.src = image;
+  if (typeof image == "undefined" || image == "") {
+    image = imageDisplay.src;
+  }
+  if (imageDisplay.calls == 0 || typeof imageDisplay.calls == "undefined") {
+    imageDisplay.src = image;
+  }
+  imageDisplay.calls += 1;
 }
 function updateNameDisplay(str) {
   var nameDisplay = document.getElementById("roomNameDisplay");
@@ -367,7 +396,6 @@ function updateRoomDisplay(roomName) {
   var room = findByName(roomName, getRooms());
   //Update the roomDisplay field
   updateNameDisplay(room.givenName);
-  updateImageDisplay(room.image);
   changeMusic(room.music);
   //Build and output a description of the room.
   var description = buildCompleteDescription(room);
@@ -865,4 +893,12 @@ function addLoseConversation() {
   lose.displayInput = false;
   lose.advanceTurn = false;
   world.conversations.push(lose);
+}
+//Unsorted----------------------------------------------------------------------
+function safelyGetProperty(object, property) {
+  if (typeof object == "undefined") {
+    return object;
+  } else {
+    return object[property];
+  }
 }
