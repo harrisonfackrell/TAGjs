@@ -167,7 +167,7 @@ var World = {
       "Okay. This is North Pole, Alaska. Probably not where Santa lives, but it \
       might be worth exploring.",
       {
-        "in": ["northpole.fishingstore","in to a nearby store"],
+        "in": ["northpole.fishingstore","go in to a nearby store"],
         "back": ["northpole.workshopout","go back in the direction of your tree"]
       },
       "North Pole, Alaska"
@@ -755,6 +755,8 @@ var World = {
             eyes and a carrot nose--pretty standard fare, if you ask me.");
         },
         talk: function() {
+          output("You start a conversation. <em>You can type \
+          <strong>goodbye</strong> to end it.");
           startConversation("truenorth.snowman");
         },
         attack: function() {
@@ -1090,6 +1092,8 @@ var World = {
           }
         },
         talk: function() {
+          output("You start a conversation. <em>You can type \
+          <strong>goodbye</strong> to end it.");
           startConversation("truenorth.polarbear");
         }
       },
