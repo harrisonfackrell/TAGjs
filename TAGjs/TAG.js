@@ -666,6 +666,10 @@ function Conversation(name, topics, methods) {
   Object.assign(this.methods, methods);
   this.methods.goodbye = function() {
     endConversation(name);
+    var player = getPlayer();
+    warp(player, player.prevLocation);
+    output("**********");
+    updateRoomDisplay(player.location);
   }
   this.givenName = "";
   this.advanceTurn = false;
@@ -683,6 +687,10 @@ function Monolog(name, sequence, displayInput, advanceTurn) {
       if (sequence.i - 1 == sequence.length) {
         //End the conversation.
         endConversation(name);
+        var player = getPlayer();
+        warp(player, player.prevLocation);
+        output("**********");
+        updateRoomDisplay(player.location);
       //Otherwise
       } else {
         //display the next statement.
@@ -707,8 +715,11 @@ function getConversations() {
   return getWorld().conversations;
 }
 function startConversation(conversationName) {
-  //Starts a conversation
+  //Starts a conversation. It also clears out any conversations that were
+  //already there, allowing you to start a conversation from within a
+  //conversation.
 
+  clearConversations();
   //get the player and conversation
   var player = getPlayer();
   var conversation = findByName(conversationName, getConversations());
@@ -722,16 +733,22 @@ function startConversation(conversationName) {
   conversation.methods[key]();
 }
 function endConversation(conversationName) {
-  var player = getPlayer();
+  //Ends a conversation. This is done silently, and does not move the player.
+
   var conversation = findByName(conversationName, getConversations());
   if (conversation.location == "Conversing") {
     if (conversation.sequence) {
       conversation.sequence.i = 0;
     }
-    warp(player, player.prevLocation);
     warp(conversation, "Nowhere");
-    output("**********");
-    updateRoomDisplay(player.location);
+  }
+}
+function clearConversations() {
+  //Clears all conversations. Normally, there should only ever be one.
+
+  var activeConvs = narrowEntitiesByLocation(getConversations(), "Conversing");
+  for (var i = 0; i < activeConvs.length; i++) {
+    endConversation(activeConvs[i].name);
   }
 }
 function addTopic(conversation, key, paragraph) {
