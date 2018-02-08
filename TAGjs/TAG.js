@@ -97,7 +97,7 @@ function output(str) {
   //Get the output box
   var outputBox = document.getElementById("outputBox");
   //Append the string onto the output box's content and scroll to the bottom.
-  outputBox.innerHTML += "<p>>" + str + "</p>";
+  outputBox.innerHTML += "<p>> " + str + "</p>";
   outputBox.scrollTop = outputBox.scrollHeight;
 }
 function outputUserText(str) {
@@ -667,7 +667,6 @@ function Conversation(name, topics, methods) {
   this.methods.goodbye = function() {
     endConversation(name);
     var player = getPlayer();
-    warp(player, player.prevLocation);
     output("**********");
     updateRoomDisplay(player.location);
   }
@@ -688,7 +687,6 @@ function Monolog(name, sequence, displayInput, advanceTurn) {
         //End the conversation.
         endConversation(name);
         var player = getPlayer();
-        warp(player, player.prevLocation);
         output("**********");
         updateRoomDisplay(player.location);
       //Otherwise
@@ -733,13 +731,15 @@ function startConversation(conversationName) {
   conversation.methods[key]();
 }
 function endConversation(conversationName) {
-  //Ends a conversation. This is done silently, and does not move the player.
+  //Ends a conversation. This is done silently, though it does move the player.
 
   var conversation = findByName(conversationName, getConversations());
   if (conversation.location == "Conversing") {
     if (conversation.sequence) {
       conversation.sequence.i = 0;
     }
+    var player = getPlayer();
+    warp(player, player.prevLocation);
     warp(conversation, "Nowhere");
   }
 }

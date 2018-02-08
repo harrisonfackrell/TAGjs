@@ -1,45 +1,46 @@
 body {
-  background-color: grey;
+  background-color: MediumPurple;
+}
+@keyframes emphasizeName {
+    0%   {color: Gainsboro;}
+    50%  {color: grey;}
+    100% {color: Gainsboro;}
 }
 @font-face {
   font-family: custom;
   src: url("../../Fonts/Reformed Ellar.ttf");
 }
 #roomDisplay {
-  background-color: Gainsboro;
-  border-color: dimgrey;
+  background-color: Indigo;
+  border-color: black;
 }
 #roomNameDisplay {
   font-family: custom;
-  color: black;
+  color: Gainsboro;
 }
 #imageDisplay {
 
 }
 #audio p {
   font: 3em custom;
-  color: black;
+  color: Gainsboro;
 }
 #outputBox {
   background-color: lightgrey;
-  border-color: dimgrey;
-  color: black;
+  border-color: black;
   font-family: custom;
 }
 #outputBox .userText {
   color: dimgrey;
 }
 #inputBackground {
-  background-color: lightgrey;
-  border-color: dimgrey;
+  background-color: Indigo;
+  border-color: black;
 }
 #inputBox {
-  background-color: ghostwhite;
-  border-color: dimgrey;
-  color: black;
+  border-color: black;
   font-family: custom;
 }
 footer {
-  color: black;
   font-family: custom;
 }
