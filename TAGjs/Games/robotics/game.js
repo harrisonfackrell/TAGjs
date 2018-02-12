@@ -119,7 +119,7 @@ var World = {
       "D2 Sidewalk"
     ),
     new Room("D3.outside",
-      "This is D3, which houses the NUAMES office",
+      "This is D3, which houses the NUAMES office.",
       {
         "south": ["D2.outside","go south to D2"]
       },
@@ -226,8 +226,8 @@ var World = {
         },
         take: function() {
           output("You take the glasses and put them on.");
-          this.parent.location = "Inventory",
-          this.parent.description = "a pair of safety glasses"
+          this.parent.location = "Inventory";
+          this.parent.description = "a pair of safety glasses";
         }
       },
       "glasses"
@@ -243,6 +243,7 @@ var World = {
         in: function() {
           if (inventoryContains("D3.glasses")) {
             this.parent.location = "Nowhere";
+            alert("You have the glasses");
           }
           movePlayerByInput(getInput());
         }
@@ -251,7 +252,7 @@ var World = {
         "in": ["D13.workshopin","You can't go in to the shop unless you have \
           <strong>safety glasses</strong>"]
       },
-      "nothing"
+      "in"
     ),
     new Obstruction("D2.lock",
       "D2.outside",
