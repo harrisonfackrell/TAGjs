@@ -261,8 +261,7 @@ var World = {
         }
       },
       {
-        "in": ["Nowhere","there is a lock on the door, preventing you from \
-        going in"]
+        "in": ["Nowhere","there is a lock on the door, so you can't go in"]
       },
       "lock"
     ),
@@ -274,8 +273,7 @@ var World = {
         }
       },
       {
-        "in": ["Nowhere","there is a lock on the door, preventing you from \
-        going in"]
+        "in": ["Nowhere","there is a lock on the door, so you can't go in"]
       },
       "lock"
     )
@@ -344,8 +342,8 @@ var World = {
         "And as quickly as he'd come, the perpetrator was gone.",
         "\"HALT, FOUL VILLAIN\", a voice yelled belatedly.",
         "Someone wearing the NUAMES Nighthawk costume turned around the corner. \
-        \"Citizens of NUAMES, I require your assistance! Where did the hooded \
-        figure go?\"",
+        \"Citizens of NUAMES, I require your assistance! Where did The Hooded \
+        Figure go?\"",
         "Dumbfounded, everyone pointed out the door, and the mascot dashed \
         away."
       ]
