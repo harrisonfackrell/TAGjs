@@ -1,9 +1,10 @@
 //Data Containers---------------------------------------------------------------
 var Configuration = {
   synonyms: {
-    look: ["look","examine"],
-    attack: ["attack","kick","punch","fight","destroy","crush","break","smash"],
-    move: ["move","go","walk","run"],
+    look: ["look","examine","read"],
+    attack: ["attack","kick","punch","fight","destroy","crush","break","smash",
+      "tear","rip","burn"],
+    move: ["move","go","walk","run","drive"],
     throw: ["throw","toss"],
     use: ["use","activate"],
     open: ["open"],
@@ -12,7 +13,11 @@ var Configuration = {
     take: ["take","pick up","steal","get"],
     unequip: ["unequip","take off"],
     equip: ["equip","put on","wear"],
-    inventory: ["inventory","item"]
+    inventory: ["inventory","item"],
+    deactivate: ["deactivate","on"],
+    activate: ["activate","off"],
+    "duct tape": ["tape"],
+    "computer chip": ["chip"]
   },
   useImages: false,
   useMusicControls: false,
@@ -135,12 +140,20 @@ var World = {
       "Basketball Court"
     ),
     new Room("nuames.seminary",
-      "You're standing outside of the seminary building, which may or may not be \
-      an official part of campus.",
+      "You're standing outside of the seminary building. Lots of students come \
+      here every day.",
       {
         "south": ["nuames.basketball","south to the basketball court"]
       },
       "Seminary Building"
+    ),
+    new Room("robot.driving",
+      "You're driving the robot. Conveniently, it's equipped with mecanum \
+      wheels for omni-directional movement",
+      {
+        "NUAMES": ["D13.foyer","go back to NUAMES"]
+      },
+      "Driving the Robot"
       )
   ],
   entities: [
@@ -174,6 +187,64 @@ var World = {
       },
       "Reid"
     ),
+    new Entity("D13.brokenbot","D13.foyer",
+      "the fried robot",
+      {
+        take: function() {
+          output("Yeah... good luck carrying that.");
+        },
+        attack: function() {
+          lose("You attack the robot, breaking it even more. Despite \
+          everyone's best efforts, nobody is able to fix the robot in time. \
+          You lose.");
+        },
+        look: function() {
+          output("The robot is pretty fried--you're going to need \
+          <strong>wires</strong>, <strong>duct tape</strong> and a \
+          <strong>computer chip</strong> to fix it.");
+          outputCommentary("Darrel has pointed out to me that his microwave \
+          gun wouldn't actually harm the robot all that much. Oh well; I guess \
+          the plot is invalidated.");
+        },
+        "duct tape": function() {
+          if (inventoryContains("D13.ducttape")) {
+            output("You apply duct tape to the robot. Now it shouldn't fall \
+            apart--emphasis on \"shouldn't\"");
+            this.parent.ducttape = true;
+          } else {
+            output("You don't have any duct tape.");
+          }
+        },
+        wires: function() {
+          if (inventoryContains("D13.wires")) {
+            output("You replace the robot's wires. It should be able to \
+            communicate with its motors again.");
+            this.parent.wires = true;
+          } else {
+            output("You don't have any wires.");
+          }
+        },
+        "computer chip": function() {
+          if (inventoryContains("D13.wires")) {
+            output("You replace the robot's computer chip. It should be able \
+            to run code now.");
+            this.parent.computerchip = true;
+          } else {
+            output("You don't have a computer chip.");
+          }
+        }
+      },
+      "robot",
+      function() {
+        if (this.ducttape && this.wires && this.computerchip) {
+          output("The robot is working again. Everybody gives a cheer. <em>The \
+          environment has changed; you should <strong>look</strong> around.");
+          warp(this, "Nowhere");
+          var workingRobot = findByName("D13.workingrobot", getInterceptors());
+          warp(workingRobot, "D13.foyer");
+        }
+      }
+    ),
     new Entity("D13.note","D13.foyer",
       "a small, handwritten note",
       {
@@ -191,6 +262,18 @@ var World = {
         }
       },
       "note"
+    ),
+    new Entity("D13.glassessign","D13.workshop",
+      "a piece of paper taped to the wall. It says, \"Ha! I took your safety \
+      glasses! Good luck getting into the worshop now!\" It's signed with \
+      \"The Hooded Figure\".",
+      {
+        attack: function() {
+          output("You tear down the paper.");
+          warp(this.parent, "Nowhere");
+        }
+      },
+      "paper"
     ),
     new Entity("D13.memecomputer","D13.workshopin",
       "a computer, playing meme songs on loop",
@@ -210,12 +293,27 @@ var World = {
           the robotics team is in here, meme songs are going. They once \
           finished an entire 10-hour video; I think they have a meme problem.");
         },
-        "turn off": function() {
+        off: function() {
           output("You turn off the computer. A dedicated robotic arm reaches \
           over and turns it on again.");
         }
       },
       "computer"
+    ),
+    new Entity("D13.ducttape","D13.workshopin",
+      "a roll of duct tape",
+      {
+        take: function() {
+          output("You are now carrying the duct tape. This was one of the \
+          items The Hooded Figure talked about in his note.");
+          warp(this.parent, "Inventory");
+        },
+        look: function() {
+          output("It's a roll of duct tape--it can fix anything! (Except, of \
+          course, your hair. Don't try it; it will go poorly.)");
+        }
+      },
+      "duct tape"
     ),
     new Entity("D3.glasses","D3.outside",
       "a pair of safety glasses. How convenient",
@@ -234,8 +332,7 @@ var World = {
       )
   ],
   obstructions: [
-    new Obstruction("D13.noglasses",
-      "D13.workshop",
+    new Obstruction("D13.noglasses","D13.workshop",
       {
         nothing: function() {
           getPlayer().methods.nothing();
@@ -254,8 +351,7 @@ var World = {
       },
       "in"
     ),
-    new Obstruction("D2.lock",
-      "D2.outside",
+    new Obstruction("D2.lock","D2.outside",
       {
         attack: function() {
           output("You do your best, but the lock won't budge.");
@@ -266,8 +362,7 @@ var World = {
       },
       "lock"
     ),
-    new Obstruction("D3.lock",
-      "D3.outside",
+    new Obstruction("D3.lock","D3.outside",
       {
         attack: function() {
           output("You do your best, but the lock won't budge.");
@@ -279,7 +374,27 @@ var World = {
       "lock"
     )
   ],
-  interceptors: [],
+  interceptors: [
+    new Obstruction("D13.workingRobot","Nowhere",
+      {
+        take: function() {
+          output("Yeah... good luck carrying that.");
+        },
+        attack: function() {
+          lose("You attack the robot, breaking it even more. Despite \
+          everyone's best efforts, nobody is able to fix the robot in time. \
+          You lose.");
+        },
+        look: function() {
+          output("Thanks to your efforts, the robot is now fixed.");
+        }
+      },
+      {
+        "drive": ["robot.driving","drive the robot somewhere"]
+      },
+      "robot"
+      )
+  ],
   conversations: [
     new Monolog("Setup",
       [
@@ -299,6 +414,12 @@ var World = {
         function() {
           var player = getPlayer();
           player.name = getInput();
+          var blacklist = "darrel reid braden grijalva"
+          if (testForWord(blacklist, player.name)) {
+            output("<em>That name will be confusing. It has been replaced with \
+            a different one.</em>")
+            player.name = "Generick Persson";
+          }
           output("Your name is " + player.name + ". Is this okay? (Y/N)");
         },
         function() {
@@ -358,7 +479,7 @@ var World = {
         <strong>computer chip</strong>--in time! You will flounder on the \
         field! You will be laughed at as your robot fails to work! Feel my \
         wrath!",
-        "Sincerely, The Hooded Figure.\""
+        "\"Sincerely, The Hooded Figure. :)\""
       ]
     )
   ]

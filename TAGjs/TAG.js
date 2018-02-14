@@ -238,12 +238,12 @@ function parseAndExecuteInput(input) {
     //Output the player's input
     outputUserText(input);
   }
+  subject.methods[action]();
   //Unless the subject's advanceTurn is false
   if (subject.advanceTurn != false) {
     advanceTurn();
   }
   //Execute the input.
-  subject.methods[action]();
 }
 //Setup-------------------------------------------------------------------------
 function nameSetup() {
