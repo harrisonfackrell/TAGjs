@@ -57,6 +57,7 @@ function PlayerEntity(location, methods, turn) {
       advanceTurn();
     }
   }
+  this.methods.parent = this;
   Object.assign(this.methods, methods);
   this.prevLocation = this.location;
   this.givenName = "player";
@@ -324,7 +325,6 @@ function setup() {
   inputSetup();
   imageSetup();
   audioSetup();
-  addMethodParents();
   preloadImages(getRoomImages());
   addLoseConversation();
   //init() is defined in game.js
@@ -512,11 +512,10 @@ function addTag(tagtext, string, substr) {
     substr = string;
   }
   //Test for substring within string.
+
   if (string.includes(substr)) {
-    //Convert string into a RegExp
-    var re = new RegExp(substr, "i");
-    //Use string.replace to add strong tags around the substring.
-    var description = string.replace(re, function(str) {
+    //Use string.replace to add tags around the substring.
+    var description = string.replace(substr, function(str) {
       return "<" + tagtext + ">" + str + "</" + tagtext + ">";
     });
     return description;
@@ -594,8 +593,11 @@ function moveEntity(entity, direction) {
   var obstructedExit = testForObstructions(direction, entity.location);
   //Make sure there's not an obstruction
   if (obstructedExit) {
-    var description = obstructedExit[1] + ".";
-    output(description);
+    //Only announce the obstruction if the entity is the player.
+    if (entity == getPlayer()) {
+      var description = obstructedExit[1] + ".";
+      output(description);
+    }
   //If there isn't an obstruction, move them.
   } else {
     warp(entity, exits[direction][0]);
@@ -663,13 +665,14 @@ function Conversation(name, topics, methods) {
     var paragraph = topics[key];
     addTopic(this, key, paragraph);
   }
-  Object.assign(this.methods, methods);
   this.methods.goodbye = function() {
     endConversation(name);
     var player = getPlayer();
     output("**********");
     updateRoomDisplay(player.location);
   }
+  Object.assign(this.methods, methods);
+  this.methods.parent = this;
   this.givenName = "";
   this.advanceTurn = false;
 }
@@ -695,8 +698,10 @@ function Monolog(name, sequence, displayInput, advanceTurn) {
         sequence[sequence.i - 1]();
       }
     }
-  };
+  }
+  this.methods.parent = this;
   this.sequence = makeSequence(sequence);
+  this.sequence.parent = this;
   this.givenName = "";
   if (displayInput) {
     this.displayInput = true;
@@ -777,11 +782,12 @@ function Entity(name, location, description, methods, givenName, turn) {
       output("I don't think that's wise.");
     }
   }
+  Object.assign(this.methods, methods);
+  this.methods.parent = this;
   this.name = name;
   this.description = description;
   this.location = location;
   this.prevLocation = location;
-  Object.assign(this.methods, methods);
   this.givenName = givenName;
   if (turn) {
     this.turn = turn;
@@ -800,18 +806,6 @@ function narrowEntitiesByLocation(entities, roomName) {
   }
   return narrowedEntities;
 }
-function addMethodParents() {
-  var interactables = getInteractables();
-  for (var i = 0; i < interactables.length; i++) {
-    var interactable = interactables[i];
-    if (interactable.methods) {
-      interactable.methods.parent = interactable;
-    }
-    if (interactable.sequence) {
-      interactable.sequence.parent = interactable;
-    }
-  }
-}
 function isPresent(name) {
   if(roomContains(getPlayer().location, name)) {
     return true;
@@ -825,10 +819,11 @@ function Obstruction(name, location, methods, exits, givenName, turn) {
       output("Do what with the " + givenName + "?");
     }
   }
+  Object.assign(this.methods, methods);
+  this.methods.parent = this;
   this.name = name;
   this.location = location;
   this.prevLocation = location;
-  Object.assign(this.methods, methods);
   this.exits = exits;
   this.givenName = givenName;
   if (turn) {
@@ -908,6 +903,8 @@ function addLoseConversation() {
     {
       "undo": function() {
         endConversation("Lose");
+        output("**********");
+        updateRoomDisplay(getPlayer().location);
       },
       "goodbye": function() {
         this.nothing();

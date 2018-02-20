@@ -17,7 +17,8 @@ var Configuration = {
     deactivate: ["deactivate","on"],
     activate: ["activate","off"],
     "duct tape": ["tape"],
-    "computer chip": ["chip"]
+    "computer chip": ["chip"],
+    hammer: ["hammer","mallet"]
   },
   useImages: false,
   useMusicControls: false,
@@ -161,9 +162,16 @@ var World = {
       "Darrel, who is the programming captain",
       {
         talk: function() {
-          output("You talk to Darrel. He says, \"That microwave gun can fry \
-          anything--a chicken dinner, a computer... anything. That robot's \
-          toast unless we can figure something out fast.");
+          output("You talk to Darrel. He says, \"The perpetrator has made off, \
+          and is still at large!\" You pause for a minute to consider the \
+          obvious nature of his statement.");
+        },
+        attack: function() {
+          output("You try to attack Darrel. He whips out a cardboard lance and \
+          expertly deflects all of your blows.");
+          outputCommentary("Once, the programming team went jousting \
+          with cardboard \"lances\". On that same day, we also had races \
+          on swivel chairs.");
         }
       },
       "Darrel"
@@ -172,8 +180,9 @@ var World = {
       "Mr. Grijalva",
       {
         talk: function() {
-          output("You talk to Mr. G. He says, \"" + getPlayer().name + ", this \
-          has never happened before. I don't know what to do now.");
+          output("You talk to Mr. G. He says, \"Well, better fix the robot.\" \
+          He seems remarkably unconcerned--maybe even *suspiciously* \
+          unconcerned.");
         }
       },
       "Grijalva"
@@ -182,7 +191,11 @@ var World = {
       "Mr. Reid",
       {
         talk: function() {
-          output("You talk to Mr. Reid. He says, \"What just happened?\"");
+          output("You talk to Mr. Reid. He says, \"Were you guys jousting \
+          again? Is that what this is all about?\"");
+          outputCommentary("Once, the programming team went jousting \
+          with cardboard \"lances\". On that same day, we also had races \
+          on swivel chairs.");
         }
       },
       "Reid"
@@ -209,7 +222,7 @@ var World = {
         "duct tape": function() {
           if (inventoryContains("D13.ducttape")) {
             output("You apply duct tape to the robot. Now it shouldn't fall \
-            apart--emphasis on \"shouldn't\"");
+            apart--emphasis on \"shouldn't\".");
             this.parent.ducttape = true;
           } else {
             output("You don't have any duct tape.");
@@ -240,8 +253,8 @@ var World = {
           output("The robot is working again. Everybody gives a cheer. <em>The \
           environment has changed; you should <strong>look</strong> around.");
           warp(this, "Nowhere");
-          var workingRobot = findByName("D13.workingrobot", getInterceptors());
-          warp(workingRobot, "D13.foyer");
+          var workingrobot = findByName("D13.workingrobot", getInterceptors());
+          warp(workingrobot, "D13.foyer");
         }
       }
     ),
@@ -266,7 +279,7 @@ var World = {
     new Entity("D13.glassessign","D13.workshop",
       "a piece of paper taped to the wall. It says, \"Ha! I took your safety \
       glasses! Good luck getting into the worshop now!\" It's signed with \
-      \"The Hooded Figure\".",
+      \"The Hooded Figure\"",
       {
         attack: function() {
           output("You tear down the paper.");
@@ -276,7 +289,7 @@ var World = {
       "paper"
     ),
     new Entity("D13.memecomputer","D13.workshopin",
-      "a computer, playing meme songs on loop",
+      "a computer playing meme songs on loop",
       {
         look: function() {
           output("It's a computer, playing meme songs on loop");
@@ -293,6 +306,9 @@ var World = {
           the robotics team is in here, meme songs are going. They once \
           finished an entire 10-hour video; I think they have a meme problem.");
         },
+        hammer: function() {
+          this.attack();
+        },
         off: function() {
           output("You turn off the computer. A dedicated robotic arm reaches \
           over and turns it on again.");
@@ -300,7 +316,29 @@ var World = {
       },
       "computer"
     ),
-    new Entity("D13.ducttape","D13.workshopin",
+    new Entity("D13.ducttapecase","D13.grijalvaroom",
+      "A glass case that says \"IN CASE OF ROBOT EMERGENCY, BREAK \
+      GLASS\"",
+      {
+        attack: function() {
+          output("You do your best, but the glass doesn't break. It appears to \
+          be remarkably durable for something that's intended to be broken.");
+        },
+        hammer: function() {
+          if (inventoryContains("D13.hammer")) {
+            output("You swing the hammer and shatter the glass, revealing a \
+            roll of <strong>duct tape</strong>");
+            output("You take the duct tape with you; you should be able to use \
+            it on the robot.");
+            var tape = findByName("D13.ducttape", getEntities());
+          } else {
+            getPlayer().nothing();
+          }
+        }
+      },
+      "case"
+    ),
+    new Entity("D13.ducttape","Nowhere",
       "a roll of duct tape",
       {
         take: function() {
@@ -314,6 +352,22 @@ var World = {
         }
       },
       "duct tape"
+    ),
+    new Entity("D13.hammer","D13.workshopin",
+      "a hammer",
+      {
+        look: function() {
+          output("It's a hammer. Were you expecting a porker?");
+        },
+        take: function() {
+          output("You take the hammer. This will come in handy if you need to \
+          make ham.");
+          outputCommentary("Harrison, one of the programmers, *really* likes \
+          to tell lame jokes like this. Coincidentally, he also wrote this \
+          adventure game.");
+        }
+      },
+      "hammer"
     ),
     new Entity("D3.glasses","D3.outside",
       "a pair of safety glasses. How convenient",
@@ -340,9 +394,9 @@ var World = {
         in: function() {
           if (inventoryContains("D3.glasses")) {
             this.parent.location = "Nowhere";
-            alert("You have the glasses");
           }
-          movePlayerByInput(getInput());
+          moveEntity(getPlayer(), "in");
+          getPlayer().methods.look();
         }
       },
       {
@@ -375,7 +429,7 @@ var World = {
     )
   ],
   interceptors: [
-    new Obstruction("D13.workingRobot","Nowhere",
+    new Obstruction("D13.workingrobot","Nowhere",
       {
         take: function() {
           output("Yeah... good luck carrying that.");
@@ -491,7 +545,8 @@ function init() {
 }
 function outputCommentary(string) {
   if (Configuration.useCommentary) {
-    output(addTag("em", string));
+    string = addTag("em", string)
+    output(string);
   }
 }
 //Execution---------------------------------------------------------------------
