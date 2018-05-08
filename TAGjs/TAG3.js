@@ -1,15 +1,30 @@
 //Classes
 const Interactable = function(name, location, description, methods, givenName, turn) {
-  this.methods = this.methods ? Object.assign(this.methods, methods) : methods;
+  this.methods = methods;
   this.methods.parent = this;
+
   this.name = name;
   this.description = description;
   this.locations = [location, "", "", "", ""];
   Object.seal(this.locations);
   this.givenName = givenName;
-  this.turn = turn ? turn : () => {};
+
+  this.turn = turn ? turn : function() {};
+
   this.advanceTurn = true;
   this.displayInput = true;
+
+  this.warp = function(roomName) {
+    if (roomName == this.locations[0]) {
+      return;
+    } else {
+      for (i = this.locations.length - 1; i > 0; i--) {
+        this.locations[i] = this.locations[i - 1];
+      }
+      this.locations[0] = roomName;
+    }
+  }
+
   return this;
 }
 const Entity = function(name, location, description, methods, givenName, turn) {
@@ -24,15 +39,15 @@ const Entity = function(name, location, description, methods, givenName, turn) {
       output("I don't think that's wise.");
     }
   }, methods);
-  return new Interactable(name, location, description, this.methods, givenName, turn);
+  return new Interactable(name, location, description, methods, givenName, turn);
 }
 const PlayerEntity = function(location, methods, turn) {
   methods = Object.assign({
     nothing: function() {
-      var room = findByName(this.parent.location, getRooms());
+      var room = findByName(this.parent.locations[0], getRooms());
       var exits = Object.keys(room.exits);
       exits = exits.concat(
-        Object.keys(getInterceptorExits(this.parent.location)));
+        Object.keys(getInterceptorExits(this.parent.locations[0])));
       for (var i = 0; i < exits.length; i++) {
         var input = getInput().toLowerCase();
         var exit = exits[i].toLowerCase();
@@ -56,11 +71,11 @@ const PlayerEntity = function(location, methods, turn) {
     move: function() {
       var input = getInput();
       movePlayerByInput(input);
-      advanceTurn();
+      nextTurn();
     },
     look: function() {
       var player = getPlayer();
-      updateRoomDisplay(player.location);
+      updateRoomDisplay(player.locations[0]);
     },
     help: function() {
       var player = getPlayer();
@@ -79,42 +94,175 @@ const PlayerEntity = function(location, methods, turn) {
     },
     wait: function() {
       output("You wait around for a moment");
-      advanceTurn();
+      nextTurn();
     }
   }, methods);
+
   this.advanceTurn = false;
   this.displayInput = true;
+
   this.inventoryContains = function() {
     //Tests for an entity with a given name in the "Inventory" location. This is
     //Really just a specialized shorthand for roomContains.
-    var contains = roomContains("Inventory", name);
-    return contains;
+    return roomContains("Inventory", name);;
   }
+
   return Object.assign(new Entity("player", location, "the player", methods, "player", turn), this);
+}
+const Obstruction = function(name, location, methods, exits, givenName, turn) {
+  methods = Object.assign({
+    nothing: function() {
+      output("Do what with the " + givenName + "?");
+    }
+  }, methods);
+
+  this.exits = exits;
+
+  return Object.assign(new Interactable(name, location, "", methods, givenName, turn), this);
 }
 const Conversation = function(name, topics, methods) {
   //A conversation is a special entity. The "topics" parameter is an object
   //with string/string pairs, which gets converted into methods that output the
   //value. The "methods" parameter is optional, and works as expected.
-  var keys = Object.keys(topics);
-  this.methods = {};
-  for (var i = 0; i < keys.length; i++) {
-    var key = keys[i];
-    var paragraph = topics[key];
-    addTopic(this, key, paragraph);
+  this.addTopic = function(key, paragraph) {
+    this.methods[key] = function() {
+      output(paragraph);
+    }
   }
-  this.methods.goodbye = function() {
-    endConversation(name);
-    var player = getPlayer();
+  this.wrap = function(obj) {
+    switch(typeof obj) {
+      case "string":
+        return this.wrapString(obj);
+        break;
+      default:
+        return obj;
+    }
+  }
+  this.wrapString = function(string) {
+    return function() {
+      output(string);
+    }
+  }
+  this.start = function() {
+    //Starts a conversation. It also clears out any conversations that were
+    //already there, allowing you to start a conversation from within a
+    //conversation.
+    clearConversations();
+
+    //warp them both to "Conversing". This room doesn't actually have to be
+    //defined, as none of its properties will be displayed.
+    output("HEY YOU");
+    getPlayer().warp("Conversing");
+    this.warp("Conversing");
     output("**********");
-    updateRoomDisplay(player.location);
+    //Display the first topic or statement.
+    var key = Object.keys(this.methods)[0];
+    this.methods[key]();
   }
-  Object.assign(this.methods, methods);
+  this.end = function() {
+    if (this.locations[0] == "Conversing") {
+      var player = getPlayer();
+      player.warp(player.locations[1]);
+      this.warp("Nowhere");
+    }
+  }
+
+  this.methods = {};
+
+  var keys = Object.keys(topics);
+  for (var i = 0; i < keys.length; i++) {
+    this.methods[keys[i]] = this.wrap(topics[keys[i]]);
+  }
+
+  this.methods = Object.assign(this.methods, {
+    goodbye: function() {
+      this.parent.end();
+      var player = getPlayer();
+      output("**********");
+      updateRoomDisplay(player.locations[0]);
+    }
+  }, methods);
+
   this.advanceTurn = false;
-  return Object.assign(new Entity(name, "Nowhere", "conversation", methods, "", () => {}), this);
+  Object.assign(this, new Interactable(name, "Nowhere", "conversation", this.methods, "", function() {}));
+  this.methods.parent = this;
+  return this;
+}
+const Sequence = function(array) {
+  this.functions = [];
+  this.wrap = Conversation.prototype.wrap;
+  this.advance = function() {
+    if (this.functions[position]) {
+      this.functions[position]();
+      position += 1;
+    } else {
+
+    }
+  }
+  this.setPosition = function(position) {
+    this.position = position;
+  }
+  for (var i = 0; i < array.length; i++) {
+    if (typeof array[i] == "string") {
+      this.functions[i] = this.wrapString(array[i]);
+    }
+  }
+  this.position = 0;
+  this.parent = null;
+  return this;
+}
+const Monolog = function(name, sequence, displayInput, advanceTurn) {
+  //A Monolog is a special conversation that moves along regardless of input.
+  //Instead of a dialog tree, it's a dialog railroad.
+
+  var methods = {
+    nothing: function() {
+      this.parent.sequence.advance();
+    },
+    goodbye: function() {
+      this.nothing();
+    }
+  }
+
+  this.sequence = new Sequence(sequence);
+  this.sequence.parent = this;
+
+  this.displayInput = displayInput;
+  this.advanceTurn = advanceTurn;
+  Object.assign(this, new Conversation(name, {}, methods));
+  this.methods.parent = this;
+  return this;
+}
+const Movie = function(name, sequence, imgSuffix, sndSuffix) {
+  //A movie is a special kind of monolog that draws images and sound effects
+  //from a dedicated folder
+
+  this.imgSuffix = imgSuffix ? imgSuffix : "jpg"
+  this.sndSuffix = sndSuffix ? sndSufix : "wav";
+
+  var methods = {
+    nothing: function() {
+      var sequence = this.parent.sequence;
+      var folder = "movies/" + this.parent.name;
+      var imgPath = folder + "/images/" + (sequence.position) + "." + imgSuffix;
+      var sndPath = folder + "/audio/" + (sequence.position) + "." + sndSuffix;
+      updateImageDisplay(imgPath);
+      playSound(sndPath);
+      sequence.advance();
+    }
+  }
+
+  return Object.assign(new Monolog(name, sequence), this);
+}
+const Room = function(name, description, exits, givenName, image, music) {
+  this.name = name;
+  this.image = image ? image : "";
+  this.music = music ? music : "";
+  this.description = description;
+  this.exits = exits;
+  this.givenName = givenName;
 }
 //Player------------------------------------------------------------------------
-
 function getPlayer() {
   //Returns the global Player object.
     return getWorld().player;
@@ -125,8 +273,8 @@ function enterHandler() {
 
   //Parse and execute input
   parseAndExecuteInput(getInput());
-  //Update the image display to that of the player's location
-  var room = findByName(getPlayer().location, getRooms());
+  //Update the image display to that of the player's locations[0]
+  var room = findByName(getPlayer().locations[0], getRooms());
   updateImageDisplay(safelyGetProperty(room, "image"));
   //Reset imageDisplay.calls
   var imageDisplay = document.getElementById("imageDisplay");
@@ -252,7 +400,7 @@ function parseInput(input) {
   //entity.
 
   //Get the interactable entities here.
-  var location = getPlayer().location;
+  var location = getPlayer().locations[0];
   var entities = getInteractables();
   entities = narrowEntitiesByLocation(entities, location);
   //Find the subject.
@@ -284,7 +432,7 @@ function parseAndExecuteInput(input) {
   subject.methods[action]();
   //Unless the subject's advanceTurn is false
   if (subject.advanceTurn != false) {
-    advanceTurn();
+    nextTurn();
   }
   //Execute the input.
 }
@@ -312,7 +460,7 @@ function imageSetup() {
 
   if (Configuration.useImages) {
     //Update it.
-    var room = findByName(getPlayer().location, getRooms());
+    var room = findByName(getPlayer().locations[0], getRooms());
     updateImageDisplay(room.image);
   } else {
     //If not make the imageDisplay disappear.
@@ -344,7 +492,7 @@ function audioSetup() {
 function init() {
   //This function exists to support game.js files with no init function.
 
-  updateRoomDisplay(getPlayer().location);
+  updateRoomDisplay(getPlayer().locations[0]);
 }
 function preloadImages(images) {
   //Preloads images.
@@ -566,20 +714,6 @@ function addTag(tagtext, string, substr) {
   }
 }
 //Rooms-------------------------------------------------------------------------
-function Room(name, description, exits, givenName, image, music) {
-  if (typeof image == "undefined") {
-    var image = "";
-  }
-  if (typeof music == "undefined") {
-    var music = "";
-  }
-  this.name = name;
-  this.image = image;
-  this.music = music;
-  this.description = description;
-  this.exits = exits;
-  this.givenName = givenName;
-}
 function getRoomImages() {
   var rooms = getRooms();
   var images = [];
@@ -610,7 +744,7 @@ function findByName(name, arr) {
 }
 function getCurrentExits() {
   var rooms = getRooms();
-  var location = getPlayer().location;
+  var location = getPlayer().locations[0];
   var room = findByName(location, rooms);
   return room.exits;
 }
@@ -618,21 +752,15 @@ function getRooms() {
   return getWorld().rooms;
 }
 //Movement----------------------------------------------------------------------
-function warp(entity, roomName) {
-  if (roomName != entity.prevLocation) {
-    entity.prevLocation = entity.location;
-  }
-  entity.location = roomName;
-}
 function moveEntity(entity, direction) {
   //Moves an entity in the given direction. If there is no such direction, it
   //will fail loudly.
 
-  var currentRoom = findByName(entity.location, getRooms());
-  var exits = Object.assign(getInterceptorExits(entity.location),
+  var currentRoom = findByName(entity.locations[0], getRooms());
+  var exits = Object.assign(getInterceptorExits(entity.locations[0]),
     currentRoom.exits);
-  var interceptors = narrowEntitiesByLocation(getInterceptors, entity.location);
-  var obstructedExit = testForObstructions(direction, entity.location);
+  var interceptors = narrowEntitiesByLocation(getInterceptors, entity.locations[0]);
+  var obstructedExit = testForObstructions(direction, entity.locations[0]);
   //Make sure there's not an obstruction
   if (obstructedExit) {
     //Only announce the obstruction if the entity is the player.
@@ -642,7 +770,7 @@ function moveEntity(entity, direction) {
     }
   //If there isn't an obstruction, move them.
   } else {
-    warp(entity, exits[direction][0]);
+    entity.warp(exits[direction][0]);
   }
 }
 function movePlayerByInput(input) {
@@ -650,11 +778,11 @@ function movePlayerByInput(input) {
 
   //Gather information on the player's movement.
   var player = getPlayer();
-  var direction = testForExits(getInput(), player.location);
+  var direction = testForExits(getInput(), player.locations[0]);
   //See if they entered a valid direction
   if (direction) {
     moveEntity(player, direction);
-    updateRoomDisplay(player.location);
+    updateRoomDisplay(player.locations[0]);
   //If they didn't enter a valid direction, tell them.
   } else {
     output("You can't go that way.");
@@ -690,78 +818,16 @@ function testForExits(input, roomName) {
   return false;
 }
 //Conversations-----------------------------------------------------------------
-
-function Monolog(name, sequence, displayInput, advanceTurn) {
-  //A sequence is a special conversation that moves along regardless of input.
-  //Instead of a dialog tree, it's a dialog railroad.
-  this.name = name;
-  this.location = "Nowhere";
-  this.methods = {
-    nothing: function() {
-      var sequence = this.parent.sequence;
-      sequence.i += 1;
-      //If all of the sequence has been exhausted
-      if (sequence.i - 1 == sequence.length) {
-        //End the conversation.
-        endConversation(name);
-        var player = getPlayer();
-        output("**********");
-        updateRoomDisplay(player.location);
-      //Otherwise
-      } else {
-        //display the next statement.
-        sequence[sequence.i - 1]();
-      }
-    }
-  }
-  this.methods.parent = this;
-  this.sequence = makeSequence(sequence);
-  this.sequence.parent = this;
-  this.givenName = "";
-  if (displayInput) {
-    this.displayInput = true;
-  } else {
-    this.displayInput = false;
-  }
-  if (advanceTurn) {
-    this.advanceTurn = true;
-  } else {
-    this.advanceTurn = false;
-  }
-}
 function getConversations() {
   return getWorld().conversations;
 }
 function startConversation(conversationName) {
-  //Starts a conversation. It also clears out any conversations that were
-  //already there, allowing you to start a conversation from within a
-  //conversation.
 
-  clearConversations();
-  //get the player and conversation
-  var player = getPlayer();
-  var conversation = findByName(conversationName, getConversations());
-  //warp them both to "Conversing". This room doesn't actually have to be
-  //defined, as none of its properties will be displayed.
-  warp(player, "Conversing");
-  warp(conversation, "Conversing");
-  output("**********");
-  //Display the first topic or statement.
-  var key = Object.keys(conversation.methods)[0];
-  conversation.methods[key]();
 }
 function endConversation(conversationName) {
   //Ends a conversation. This is done silently, though it does move the player.
 
-  var conversation = findByName(conversationName, getConversations());
-  if (conversation.location == "Conversing") {
-    if (conversation.sequence) {
-      conversation.sequence.i = 0;
-    }
-    var player = getPlayer();
-    warp(player, player.prevLocation);
-    warp(conversation, "Nowhere");
-  }
+
 }
 function clearConversations() {
   //Clears all conversations. Normally, there should only ever be one.
@@ -772,9 +838,7 @@ function clearConversations() {
   }
 }
 function addTopic(conversation, key, paragraph) {
-  conversation.methods[key] = function() {
-    output(paragraph);
-  }
+
 }
 //World-------------------------------------------------------------------------
 function getWorld() {
@@ -785,7 +849,6 @@ function getInteractables() {
    getConversations(), getPlayer());
 }
 //Entities----------------------------------------------------------------------
-
 function getEntities() {
   return getWorld().entities;
 }
@@ -793,36 +856,19 @@ function narrowEntitiesByLocation(entities, roomName) {
   var narrowedEntities = [];
   for (var i = 0; i < entities.length; i++) {
     var entity = entities[i];
-    if (entity.location == roomName) {
+    if (entity.locations[0] == roomName) {
       narrowedEntities.push(entity);
     }
   }
   return narrowedEntities;
 }
 function isPresent(name) {
-  if(roomContains(getPlayer().location, name)) {
+  if(roomContains(getPlayer().locations[0], name)) {
     return true;
   }
   return false;
 }
 //Obstructions------------------------------------------------------------------
-function Obstruction(name, location, methods, exits, givenName, turn) {
-  this.methods = {
-    nothing: function() {
-      output("Do what with the " + givenName + "?");
-    }
-  }
-  Object.assign(this.methods, methods);
-  this.methods.parent = this;
-  this.name = name;
-  this.location = location;
-  this.prevLocation = location;
-  this.exits = exits;
-  this.givenName = givenName;
-  if (turn) {
-    this.turn = turn;
-  }
-}
 function getObstructions() {
   return getWorld().obstructions;
 }
@@ -844,10 +890,10 @@ function getInterceptorExits(roomName) {
   return exitArray;
 }
 //Time--------------------------------------------------------------------------
-function advanceTurn() {
+function nextTurn() {
   var interactables = getInteractables();
-  interactables = interactables.filter(function(element){
-    return element.location != "Nowhere"
+  interactables = interactables.filter(function(element) {
+    return element.locations[0] != "Nowhere";
   });
   for (i in interactables) {
     if (interactables[i].turn) {
@@ -858,13 +904,7 @@ function advanceTurn() {
 //Sequences---------------------------------------------------------------------
 function makeSequence(array) {
   //Takes an array and makes everything in that array a function.
-  for (var i = 0; i < array.length; i++) {
-    if (typeof array[i] == "string") {
-      array[i] = wrapSequenceString(array[i]);
-    }
-  }
-  array.i = 0;
-  return array;
+
 }
 function wrapSequenceString(string) {
   //Wraps a string from a sequence.
@@ -897,7 +937,7 @@ function addLoseConversation() {
       "undo": function() {
         endConversation("Lose");
         output("**********");
-        updateRoomDisplay(getPlayer().location);
+        updateRoomDisplay(getPlayer().locations[0]);
       },
       "goodbye": function() {
         this.nothing();
@@ -909,40 +949,6 @@ function addLoseConversation() {
   world.conversations.push(lose);
 }
 //Movies------------------------------------------------------------------------
-function Movie(name, sequence, imgSuffix, sndSuffix) {
-  //A movie is a special kind of monolog that draws images and sound effects
-  //from a dedicated folder
-
-  if (typeof imgSuffix == "undefined") {
-    var imgSuffix = "jpg";
-  }
-  if (typeof sndSuffix == "undefined") {
-    sndSuffix = "wav";
-  }
-  var monolog = new Monolog(name, sequence);
-  monolog.methods.nothing = function() {
-    var sequence = this.parent.sequence;
-    sequence.i += 1;
-    //If all of the sequence has been exhausted
-    if (sequence.i - 1 == sequence.length) {
-      //End the conversation.
-      endConversation(name);
-    //Otherwise
-    } else {
-      //display the next statement, display the next image, and play the next
-      //sound file.
-      var folder = "movies/" + this.parent.name;
-      var imgPath = folder + "/images/" + (sequence.i - 1) + "." + imgSuffix;
-      var sndPath = folder + "/audio/" + (sequence.i - 1) + "." + sndSuffix;
-      updateImageDisplay(imgPath);
-      playSound(sndPath);
-      sequence[sequence.i - 1]();
-    }
-  }
-  monolog.imgSuffix = imgSuffix;
-  monolog.sndSuffix = sndSuffix;
-  return monolog;
-}
 function preloadMovie(movieName) {
   //Preloads a movie.
 

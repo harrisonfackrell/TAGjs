@@ -39,7 +39,7 @@ var Configuration = {
   useSoundControls: false
 }
 var World = {
-  player: new PlayerEntity("home.livingroom",
+  player: PlayerEntity("truenorth.bearroom",
     {
       hint: function() {
         output("Hint: Typing 'HINT' will give you a helpful hint.");
@@ -276,7 +276,7 @@ var World = {
           this.equip();
         },
         equip: function() {
-          if (!inventoryContains("inventory.coat")) {
+          if (!getPlayer().inventoryContains("inventory.coat")) {
             this.take();
           }
           if (this.parent.isOn) {
@@ -290,7 +290,7 @@ var World = {
           output("It's a warm winter coat. It's blue, your favorite color.");
         },
         take: function() {
-          if (inventoryContains("inventory.coat")) {
+          if (getPlayer().inventoryContains("inventory.coat")) {
             output("I'm afraid I don't understand");
           } else {
             output("You pick up your coat. You can view your inventory items \
@@ -322,7 +322,7 @@ var World = {
         },
         hang: function() {
           var input = getInput();
-          if (inventoryContains("home.redornament")) {
+          if (getPlayer().inventoryContains("home.redornament")) {
             if (testForWord(input, "red ornament")) {
               var red = findByName("home.redornament", getInteractables());
               red.location = "Nowhere";
@@ -332,7 +332,7 @@ var World = {
               output("Hang what on the tree?");
             }
           } else if (testForWord(input, "blue ornament")) {
-            if (inventoryContains("home.blueornament")) {
+            if (getPlayer().inventoryContains("home.blueornament")) {
               var blue = findByName("home.blueornament", getInteractables());
               blue.location = "Nowhere";
               this.parent.blue = true;
@@ -394,7 +394,7 @@ var World = {
           }
         },
         light: function() {
-          if (inventoryContains("home.lighter")) {
+          if (getPlayer().inventoryContains("home.lighter")) {
             if (this.parent.letter && this.parent.book) {
               output("You get just enough of a spark going to light the fire. As \
               the flames take hold, you hear a little jingle, kind of like a \
@@ -412,7 +412,7 @@ var World = {
         },
         put: function() {
           var input = getInput();
-          if (inventoryContains("home.catalog")) {
+          if (getPlayer().inventoryContains("home.catalog")) {
             if (testForWord(input, "catalog")) {
               output("You toss the catalog into the fireplace.");
               var catalog = findByName("home.catalog", getEntities());
@@ -421,7 +421,7 @@ var World = {
               return;
             }
           }
-          if (inventoryContains("home.book")) {
+          if (getPlayer().inventoryContains("home.book")) {
             if (testForWord(input, "book")) {
               output("You toss <em>Celsius 233</em> into the fireplace.");
               var book = findByName("home.book", getEntities());
@@ -459,7 +459,7 @@ var World = {
             him about it.");
         },
         "sugar plum": function() {
-          if (inventoryContains("home.sugarplum")) {
+          if (getPlayer().inventoryContains("home.sugarplum")) {
             output("He laughs, tosses you a <strong>red ornament</strong>, and \
               scampers off.");
             var ornament = findByName("home.redornament", getEntities());
@@ -542,7 +542,7 @@ var World = {
           this.open();
         },
         open: function() {
-          if (inventoryContains("home.lighter")) {
+          if (getPlayer().inventoryContains("home.lighter")) {
             output("You find nothing else worthy of note in the toolbox.")
           } else {
             output("You rifle through the toolbox and find a <strong>lighter</strong>.");
@@ -593,7 +593,7 @@ var World = {
             is getting snow inside your hood.");
         },
         shovel: function() {
-          if (inventoryContains("home.shovel")) {
+          if (getPlayer().inventoryContains("home.shovel")) {
             output("You clear away the snow, revealing the <strong>mailbox</strong>");
             output("<em>If you want to see what's changed, you can \
               <strong>look</strong> around.</em>");
@@ -710,7 +710,7 @@ var World = {
             \"Do you have a coupon?\"");
         },
         coupon: function() {
-          if (inventoryContains("space.coupon")) {
+          if (getPlayer().inventoryContains("space.coupon")) {
             output("He looks at your coupon and nods his head. \"I see you've \
             been to the ISS. Here's your complimentary fishing pole. \
             If you need any <strong>bait</strong>, just ask one \
@@ -757,7 +757,7 @@ var World = {
         talk: function() {
           output("You start a conversation. <em>You can type \
           <strong>goodbye</strong> to end it.");
-          startConversation("truenorth.snowman");
+          findByName("truenorth.snowman", getConversations()).start();
         },
         attack: function() {
           output("The snowman tells you to chill out.");
@@ -776,7 +776,7 @@ var World = {
           output("Do what with the lake?");
         },
         fish: function() {
-          if (inventoryContains("northpole.fishingpole") && inventoryContains("space.spacecrawdad")) {
+          if (getPlayer().inventoryContains("northpole.fishingpole") && getPlayer().inventoryContains("space.spacecrawdad")) {
             if (roomContains("Nowhere", "truenorth.fish")) {
               output("You stick your fishing pole in the water and wait. Before \
               too long, you get a nibble, and you expertly catch it.");
@@ -831,7 +831,7 @@ var World = {
             practical, but who are you to judge?");
         },
         take: function() {
-          if (inventoryContains("truenorth.fish")) {
+          if (getPlayer().inventoryContains("truenorth.fish")) {
             output("I'm afraid I don't understand");
           } else {
             output("You take the space fish along with you.");
@@ -891,7 +891,7 @@ var World = {
           output("\"You don't have any presents?\" he asks. \"Well that's a concern! I'll \
           go talk to my elves and get this all sorted out. In the meantime, \
           you can go home. Your presents should be there in the morning.\"");
-          warp(getPlayer(), "endroom");
+          getPlayer().warp("endroom");
           updateRoomDisplay("endroom");
         },
         look: function() {
@@ -933,7 +933,7 @@ var World = {
           output("Do what with the space crawdad?");
         },
         put: function() {
-          if (inventoryContains("northpole.fishingpole")) {
+          if (getPlayer().inventoryContains("northpole.fishingpole")) {
             output("You attach the space crawdad to your fishing pole.");
           } else {
             this.nothing();
@@ -1040,7 +1040,7 @@ var World = {
         nothing: function() {
           var coat = findByName("inventory.coat", getEntities());
           if (coat.isOn) {
-            this.parent.location = "Nowhere";
+            this.parent.warp("Nowhere");
             movePlayerByInput(getInput());
           } else {
             output("You can't go <strong>out</strong> unless you're wearing \
@@ -1059,7 +1059,7 @@ var World = {
         nothing: function() {
           var coat = findByName("inventory.coat", getEntities());
           if (coat.isOn) {
-            this.parent.location = "Nowhere";
+            this.parent.warp("Nowhere");
             movePlayerByInput(getInput());
           } else {
             output("You can't go <strong>out</strong> unless you're wearing \
@@ -1083,7 +1083,7 @@ var World = {
           output("I'm not sure attacking a *polar bear* is a good idea.");
         },
         fish: function() {
-          if (inventoryContains("truenorth.fish")) {
+          if (getPlayer().inventoryContains("truenorth.fish")) {
             output("You throw the space fish at the bear, and it lumbers away.");
             var bearroom = findByName("truenorth.bearroom", getRooms());
             this.parent.location = "Nowhere";
@@ -1094,7 +1094,7 @@ var World = {
         talk: function() {
           output("You start a conversation. <em>You can type \
           <strong>goodbye</strong> to end it.");
-          startConversation("truenorth.polarbear");
+          findByName("truenorth.polarbear", getConversations()).start();
         }
       },
       {
@@ -1170,7 +1170,7 @@ var World = {
     ),
     new Conversation("truenorth.polarbear",
       {
-        "hello": "ROARROARRRRGROWLROAR. (Hello traveler; I am glad to meet your  \
+        "hello": "ROARROARRRRGROWLROAR. (Hello, traveler; I am glad to meet your  \
           acquaintence. Unfortunately, however, I find my mood to be dampened, \
           as I am quite <strong>hungry</strong>.)",
         "hungry": "GROOOOWWLGROWWWLGROWWLLL. (I am hungry enough that the \
@@ -1201,7 +1201,7 @@ function init() {
     horror that none of them are labeled with your name. Pragmatic \
     10-year-old that you are, you decide that this will require a visit to \
     Santa.");
-  updateRoomDisplay(getPlayer().location);
+  updateRoomDisplay(getPlayer().locations[0]);
 }
 //Execution---------------------------------------------------------------------
 setup();
