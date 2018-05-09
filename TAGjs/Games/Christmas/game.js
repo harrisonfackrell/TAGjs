@@ -39,7 +39,7 @@ var Configuration = {
   useSoundControls: false
 }
 var World = {
-  player: PlayerEntity("truenorth.bearroom",
+  player: new PlayerEntity("truenorth.bearroom",
     {
       hint: function() {
         output("Hint: Typing 'HINT' will give you a helpful hint.");
@@ -1094,7 +1094,7 @@ var World = {
         talk: function() {
           output("You start a conversation. <em>You can type \
           <strong>goodbye</strong> to end it.");
-          findByName("truenorth.polarbear", getConversations()).start();
+          findByName("truenorth.polarbear", getConversations()).gracefullyStart();
         }
       },
       {
