@@ -48,42 +48,48 @@ var World = {
     }
   ),
   rooms: [
+    //System
+    new Room("Inventory",
+      "This is an inventory.",
+      [],
+      "Inventory"
+    ),
     //Home
     new Room("home.livingroom",
       "You're in the living room, which is set up for Christmas.",
-      {
-        "kitchen": ["home.kitchen","go down the hall to the kitchen"],
-        "reading room": ["home.readingroom","down the hall to the reading room"],
-        "out": ["home.outside","out through the door"]
-      },
+      [
+        new Exit("kitchen","home.kitchen","go down the hall to the kitchen"),
+        new Exit("reading room","home.readingroom","down the hall to the reading room"),
+        new Exit("out","home.outside","out through the door")
+      ],
       "Living Room"
     ),
     new Room("home.readingroom",
       "The reading room is rather large. Sometimes, you wonder why anyone \
       would ever dedicate that much space to something as boring as books.",
-      {
-        "out": ["home.livingroom","go out the door to the living room"]
-      },
+      [
+        new Exit("out","home.livingroom","go out the door to the living room")
+      ],
       "Reading Room"
     ),
     new Room("home.kitchen",
 
 
       "The kitchen is nicely decorated.",
-      {
-        "living room": ["home.livingroom","go down the hall to the living room"],
-        "garage": ["home.garage","through the door to the garage"]
-      },
+      [
+        new Exit("living room","home.livingroom","go down the hall to the living room"),
+        new Exit("garage","home.garage","through the door to the garage")
+      ],
       "Kitchen"
     ),
     new Room("home.garage",
 
 
       "The garage is a little more drab than the rest of the house.",
-      {
-        "kitchen": ["home.kitchen","go in to the kitchen"],
-        "out": ["home.outside","out through the garage door"]
-      },
+      [
+        new Exit("kitchen","home.kitchen","go in to the kitchen"),
+        new Exit("out","home.outside","out through the garage door")
+      ],
       "Garage"
     ),
     new Room("home.outside",
@@ -92,10 +98,10 @@ var World = {
       "You are outside. Your exterior decorations are humble, but they're not the worst you've \
       ever seen--that honor goes to the inflatable pumpkin your family once \
       put up for Halloween and then forgot to take down by December.",
-      {
-        "inside": ["home.livingroom","go inside to the living room"],
-        "garage": ["home.garage","step into the garage"]
-      },
+      [
+        new Exit("inside","home.livingroom","go inside to the living room"),
+        new Exit("garage","home.garage","step into the garage")
+      ],
       "Outside"
     ),
     //Space
@@ -104,20 +110,20 @@ var World = {
 
       "You're flying high in sky on a Christmas tree rocket. Who needs cheap \
       thrills like skiing?",
-      {
-        "home": ["home.livingroom","fly home"],
-        "north pole": ["northpole.landing","head to the north pole"]
-      },
+      [
+        new Exit("home","home.livingroom","fly home"),
+        new Exit("north pole","northpole.landing","head to the north pole")
+      ],
       "Flying on a Rocket Tree"
     ),
     new Room("space.station",
 
 
       "You've made it to the International Space Station. Nifty.",
-      {
-        "in": ["space.stationin","head in to the station"],
-        "down": ["space.junction","fly back down to earth"]
-      },
+      [
+        new Exit("in","space.stationin","head in to the station"),
+        new Exit("down","space.junction","fly back down to earth")
+      ],
       "International Space Station"
     ),
     new Room("space.stationin",
@@ -125,19 +131,19 @@ var World = {
 
       "The inside of the space station is just as robotic and filled-with-computers \
       as you imagined it.",
-      {
-        "back": ["space.stationback","journey to the back of the station"],
-        "out": ["space.station","go out the hatch"]
-      },
+      [
+        new Exit("back","space.stationback","journey to the back of the station"),
+        new Exit("out","space.station","go out the hatch")
+      ],
       "Inside the ISS"
     ),
     new Room("space.stationback",
 
 
       "The back of the station is also robotic and filled-with-computers.",
-      {
-        "front": ["space.stationin","go to the front of the station"]
-      },
+      [
+        new Exit("front","space.stationin","go to the front of the station")
+      ],
       "Back of the ISS"
     ),
     //northpole
@@ -145,20 +151,20 @@ var World = {
 
 
       "This is where you've landed your rocket-tree.",
-      {
-        "fly": ["space.junction","fly up on your rocket-tree"],
-        "through": ["northpole.workshopout","you can head through the trees"]
-      },
+      [
+        new Exit("fly","space.junction","fly up on your rocket-tree"),
+        new Exit("through","northpole.workshopout","you can head through the trees")
+      ],
       "North Pole Landing"
     ),
     new Room("northpole.workshopout",
 
 
       "You seem to be standing near a village.",
-      {
-        "towards": ["northpole.alaskasign","head towards the village"],
-        "back": ["northpole.landing","go back to your rocket-tree"]
-      },
+      [
+        new Exit("towards","northpole.alaskasign","head towards the village"),
+        new Exit("back","northpole.landing","go back to your rocket-tree")
+      ],
       "Village"
     ),
     new Room("northpole.alaskasign",
@@ -166,10 +172,10 @@ var World = {
 
       "Okay. This is North Pole, Alaska. Probably not where Santa lives, but it \
       might be worth exploring.",
-      {
-        "in": ["northpole.fishingstore","go in to a nearby store"],
-        "back": ["northpole.workshopout","go back in the direction of your tree"]
-      },
+      [
+        new Exit("in","northpole.fishingstore","go in to a nearby store"),
+        new Exit("back","northpole.workshopout","go back in the direction of your tree")
+      ],
       "North Pole, Alaska"
     ),
     new Room("northpole.fishingstore",
@@ -177,9 +183,9 @@ var World = {
 
       "Welcome to <em>Star Fish</em>, the greatest fishing utility shop in North \
       Pole, Alaska. It's oddly space themed.",
-      {
-        "out": ["northpole.alaskasign","head out the door"]
-      },
+      [
+        new Exit("out","northpole.alaskasign","head out the door")
+      ],
       "Star Fish Fishing Utility Shop"
     ),
     //truenorth
@@ -190,10 +196,10 @@ var World = {
       poor last time, so there's a very real and unfortunate possibility that it's not. \
       In any case, it doesn't look like Santa's Workshop is right here, so \
       you'll have to do some searching.",
-      {
-        "fly": ["space.junction","fly up on your rocket-tree"],
-        "south": ["truenorth.bearroom","go south. It is mathematically impossible to go in any other direction"]
-      },
+      [
+        new Exit("fly","space.junction","fly up on your rocket-tree"),
+        new Exit("south","truenorth.bearroom","go south. It is mathematically impossible to go in any other direction")
+      ],
       "True North Pole Landing"
     ),
     new Room("truenorth.bearroom",
@@ -201,49 +207,49 @@ var World = {
 
       "As you walk out into the frozen tundra, you start to feel grateful for \
       your coat.",
-      {
-        "north": ["truenorth.landing","go north to the landing site"],
-        "east": ["truenorth.oasis","east to a lake"],
-        "west": ["truenorth.igloo","west to an igloo"],
-        "south": ["truenorth.workshopout","south to what looks like Santa's Workshop"]
-      },
+      [
+        new Exit("north","truenorth.landing","go north to the landing site"),
+        new Exit("east","truenorth.oasis","east to a lake"),
+        new Exit("west","truenorth.igloo","west to an igloo"),
+        new Exit("south","truenorth.workshopout","south to what looks like Santa's Workshop")
+      ],
       "Frozen Tundra"
     ),
     new Room("truenorth.igloo",
 
 
       "The inside of the igloo is surprisingly warm.",
-      {
-        "out": ["truenorth.bearroom","step out of the igloo"]
-      },
+      [
+        new Exit("out","truenorth.bearroom","step out of the igloo")
+      ],
       "Igloo"
     ),
     new Room("truenorth.oasis",
 
 
       "As it turns out, the north pole *isn't* just a big sheet of ice.",
-      {
-        "back": ["truenorth.bearroom","go back where you came from"]
-      },
+      [
+        new Exit("back","truenorth.bearroom","go back where you came from")
+      ],
       "Lake"
     ),
     new Room("truenorth.workshopout",
 
 
       "This is it. Santa's workshop is right here.",
-      {
-        "in": ["truenorth.workshop","go in"],
-        "back": ["truenorth.bearroom","head back"]
-      },
+      [
+        new Exit("in","truenorth.workshop","go in"),
+        new Exit("back","truenorth.bearroom","head back")
+      ],
       "Santa's Workshop"
     ),
     new Room("truenorth.workshop",
 
 
       "After all that work, you've made it.",
-      {
-        "out": ["truenorth.workshopout","go out if you want, but I don't see why you would"]
-      },
+      [
+        new Exit("out","truenorth.workshopout","go out if you want, but I don't see why you would")
+      ],
       "Santa Claus"
     ),
     new Room("endroom",
@@ -251,8 +257,8 @@ var World = {
 
       "Sure enough, there are presents there for you in the morning--not the \
       least of which is a text adventure game for your computer. Neat!",
-      {
-      },
+      [
+      ],
       "THE END"
     ),
   ],
@@ -892,7 +898,7 @@ var World = {
           go talk to my elves and get this all sorted out. In the meantime, \
           you can go home. Your presents should be there in the morning.\"");
           getPlayer().warp("endroom");
-          updateRoomDisplay("endroom");
+          findByName("endroom", getRooms()).updateDisplay();
         },
         look: function() {
           output("It's Santa Claus, with a full white beard and a jolly red cap.");
@@ -1201,7 +1207,7 @@ function init() {
     horror that none of them are labeled with your name. Pragmatic \
     10-year-old that you are, you decide that this will require a visit to \
     Santa.");
-  updateRoomDisplay(getPlayer().locations[0]);
+  findByName(getPlayer().locations[0], getRooms()).updateDisplay();
 }
 //Execution---------------------------------------------------------------------
 setup();

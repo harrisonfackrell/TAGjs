@@ -47,12 +47,10 @@ const PlayerEntity = function(location, methods, turn) {
   this.methods = Object.assign(this.methods, {
     nothing: function() {
       var room = findByName(this.parent.locations[0], getRooms());
-      var exits = Object.keys(room.exits);
-      exits = exits.concat(
-        Object.keys(getInterceptorExits(this.parent.locations[0])));
+      var exits = room.getExits();
       for (var i = 0; i < exits.length; i++) {
         var input = getInput().toLowerCase();
-        var exit = exits[i].toLowerCase();
+        var exit = exits[i].key.toLowerCase();
         if(input == exit) {
           var player = getPlayer();
           this.move();
@@ -62,7 +60,7 @@ const PlayerEntity = function(location, methods, turn) {
       output("I'm afraid I don't understand.");
     },
     inventory: function() {
-      var entities = narrowEntitiesByLocation(getEntities(), "Inventory");
+      var entities = findByName("Inventory", getRooms()).localize(getEntities());
       if (entities.length > 0) {
         var description = describeEntities("Inventory");
         output("You have " + describeEntities("Inventory"));
@@ -216,6 +214,100 @@ const Room = function(name, description, exits, givenName, image, music) {
   this.description = description;
   this.exits = exits;
   this.givenName = givenName;
+  this.updateDisplay = function() {
+    //Updates the name window, the image, the output box and the music to
+    //reflect the given location.
+
+    //Update the roomDisplay field
+    updateNameDisplay(this.givenName);
+    changeMusic(this.music);
+    //Build and output a description of the room.
+    output(this.buildCompleteDescription());
+  }
+  this.buildCompleteDescription = function() {
+    //Builds a complete description of a room.
+
+    //Initialize all of the necessary variables.
+    var entities = this.localize(getEntities());
+    var exits = this.exits;
+    var interceptors = this.localize(getInterceptors());
+    var obstructions = this.localize(getObstructions());
+    //Set a blank description and add each element if it applies.
+    var description = "";
+    description += this.description;
+    if (entities.length > 0) {
+      description += " You see " + this.describeEntities();
+    }
+    if (exits.length > 0) {
+      description += " You can " + this.describeExits();
+    }
+    if (obstructions.length > 0) {
+      description += " However, " + this.describeObstructions();
+    }
+    //Return the description.
+    return description;
+  }
+  this.localize = function(interactables) {
+    return interactables.filter(function(element) {
+      return element.locations[0] == this.name;
+    });
+  }
+  this.describeEntities = function() {
+    var descriptionArray = [];
+    var entities = this.localize(getEntities());
+    for (var i = 0; i < narrowedEntities.length; i++) {
+      var entity = narrowedEntities[i];
+      var entityDescription = embolden(entity.description, entity.givenName);
+      descriptionArray.push(entityDescription);
+    }
+    return manageListGrammar(descriptionArray, "and") + ".";
+  }
+  this.describeExits = function() {
+    var descriptionArray = []
+    var exits = this.getExits();
+    for (var i = 0; i < exits.length; i++) {
+      descriptionArray.push(embolden(exits[i].description, exits[i].key));
+    }
+    return manageListGrammar(descriptionArray, "or") + ".";
+  }
+  this.describeObstructions = function() {
+    var descriptionArray = [];
+    var obstructions = this.localize(getObstructions());
+    for (var i = 0; i < obstructions.length; i++) {
+      descriptionArray.push(describeSingularObstruction(obstructions[i]));
+    }
+    return manageListGrammar(descriptionArray, "and") + ".";
+  }
+  this.describeSingularObstruction = function(obstruction) {
+    var exits = obstruction.exits;
+    for (var i = 0; i < exits.length; i++) {
+      var description = embolden(exits[i].description, entity.givenName);
+      if (testForWord(description, exits[i].key)) {
+        var description = embolden(description, exits[i].key);
+      }
+      return description
+    }
+  }
+  this.getInterceptorExits = function() {
+    var interceptors = this.localize(getInterceptors());
+    var exitArray = [];
+    for (var i = 0; i < interceptors.length; i++) {
+      var exits = interceptors[i].exits;
+      for (var j = 0; j < exits.length; j++) {
+        exitArray.push(exits[i]);
+      }
+    }
+    return exitArray;
+  }
+  this.getExits = function() {
+    return this.exits.concat(this.getInterceptorExits());
+  }
+}
+const Exit = function(key, location, description) {
+  this.key = key;
+  this.location = location;
+  this.description = description;
+  return this;
 }
 const Wrapping = function() {
   this.wrap = (obj) => {
@@ -416,14 +508,13 @@ function parseInput(input) {
 
   //Get the interactable entities here.
   var location = getPlayer().locations[0];
-  var entities = getInteractables();
-  entities = narrowEntitiesByLocation(entities, location);
+  var entities = findByName(location, getRooms()).localize(getInteractables());
   //Find the subject.
   var subject = detectEntity(input, entities);
   //If it's the player (default for finding none)
   if (subject == getPlayer()) {
     //Try again with inventory items.
-    entities = narrowEntitiesByLocation(getEntities(), "Inventory");
+    entities = findByName("Inventory", getRooms()).localize(getInteractables());
     subject = detectEntity(input, entities);
   }
   //Find an action
@@ -600,88 +691,6 @@ function updateNameDisplay(str) {
   nameDisplay.innerHTML = str;
   nameDisplay.className = "emphasizeName";
 }
-function updateRoomDisplay(roomName) {
-  //Updates the name window, the image, the output box and the music to
-  //reflect the given location.
-
-  //Get the room
-  var room = findByName(roomName, getRooms());
-  //Update the roomDisplay field
-  updateNameDisplay(room.givenName);
-  changeMusic(room.music);
-  //Build and output a description of the room.
-  var description = buildCompleteDescription(room);
-  output(description);
-}
-function describe(room) {
-  return room.description;
-}
-function describeEntities(roomName) {
-  var descriptionArray = [];
-  var entities = getEntities();
-  var narrowedEntities = narrowEntitiesByLocation(entities, roomName);
-  for (var i = 0; i < narrowedEntities.length; i++) {
-    var entity = narrowedEntities[i];
-    var entityDescription = embolden(entity.description, entity.givenName);
-    descriptionArray.push(entityDescription);
-  }
-  description = manageListGrammar(descriptionArray, "and") + ".";
-  return description;
-}
-function describeExits(keys, exits) {
-  var descriptionArray = []
-  for (var i = 0; i < keys.length; i++) {
-    var key = keys[i];
-    var exitDescription = embolden(exits[key][1], key);
-    descriptionArray.push(exitDescription);
-  }
-  description = manageListGrammar(descriptionArray, "or") + ".";
-  return description;
-}
-function describeObstructions(obstructions, delimiter) {
-  var descriptionArray = [];
-  for (var i = 0; i < obstructions.length; i++) {
-    var entity = obstructions[i];
-    var exitKeys = Object.keys(entity.exits);
-    for (var j = 0; j < exitKeys.length; j++) {
-      var exit = entity.exits[exitKeys[j]];
-      var entityDescription = embolden(exit[1], entity.givenName);
-      if (testForWord(entityDescription, exitKeys[j])) {
-        var entityDescription = embolden(entityDescription, exitKeys[j]);
-      }
-      descriptionArray.push(entityDescription);
-    }
-  }
-  description = manageListGrammar(descriptionArray, delimiter) + ".";
-  return description;
-}
-function buildCompleteDescription(room) {
-  //Builds a complete description of a room.
-
-  //Initialize all of the necessary variables.
-  var entities = narrowEntitiesByLocation(getEntities(), room.name);
-  var exits = room.exits;
-  var exitKeys = Object.keys(exits);
-  var interceptors = narrowEntitiesByLocation(getInterceptors(), room.name);
-  var obstructions = narrowEntitiesByLocation(getObstructions(), room.name);
-  //Set a blank description and add each element if it applies.
-  var description = "";
-  description += describe(room);
-  if (entities.length > 0) {
-    description += " You see " + describeEntities(room.name);
-  }
-  if (exitKeys.length > 0) {
-    description += " You can " + describeExits(exitKeys, exits);
-  }
-  if (obstructions.length > 0) {
-    description += " However, " + describeObstructions(obstructions, "and");
-  }
-  if (interceptors.length > 0) {
-    description += " You can also " + describeObstructions(interceptors, "or");
-  }
-  //Return the description.
-  return description;
-}
 function manageListGrammar(elements, delimiter) {
   var description = "";
   for (var i = 0; i < elements.length; i++) {
@@ -741,7 +750,7 @@ function roomContains(roomName, name) {
   //Checks the room with the given roomName for the entity with the given name.
 
   //Get all the entities in the room
-  var entities = narrowEntitiesByLocation(getEntities(), roomName);
+  var entities = findByName(roomName, getRooms()).localize(getEntities());
   //Find the entity you're looking for
   var item = findByName(name, entities);
   //If it exists
@@ -772,9 +781,8 @@ function moveEntity(entity, direction) {
   //will fail loudly.
 
   var currentRoom = findByName(entity.locations[0], getRooms());
-  var exits = Object.assign(getInterceptorExits(entity.locations[0]),
-    currentRoom.exits);
-  var interceptors = narrowEntitiesByLocation(getInterceptors, entity.locations[0]);
+  var exits = currentRoom.exits.concat(currentRoom);
+  var interceptors = currentRoom.localize(getInterceptors());
   var obstructedExit = testForObstructions(direction, entity.locations[0]);
   //Make sure there's not an obstruction
   if (obstructedExit) {
@@ -806,8 +814,7 @@ function movePlayerByInput(input) {
 function testForObstructions(input, roomName) {
   //Returns the exit that prevented movement.
   var player = getPlayer();
-  var obstructions = getObstructions();
-  obstructions = narrowEntitiesByLocation(obstructions, roomName);
+  obstructions = findByName(roomName, getRooms()).localize(getObstructions());
   for (var i = 0; i < obstructions.length; i++) {
     var exits = Object.keys(obstructions[i].exits);
     for (var j = 0; j < exits.length; j++) {
@@ -822,11 +829,10 @@ function testForObstructions(input, roomName) {
 function testForExits(input, roomName) {
   var player = getPlayer();
   var room = findByName(roomName, getRooms());
-  var exits = Object.keys(room.exits);
-  exits = exits.concat(Object.keys(getInterceptorExits(room.name)));
+  var exits = room.getExits();
   for (var i = 0; i < exits.length; i++) {
     var exit = exits[i]
-    if (testForWord(input, exit)) {
+    if (testForWord(input, exit.key)) {
       return exit;
     }
   }
@@ -836,9 +842,6 @@ function testForExits(input, roomName) {
 function getConversations() {
   return getWorld().conversations;
 }
-function startConversation(conversationName) {
-
-}
 function endConversation(conversationName) {
   //Ends a conversation. This is done silently, though it does move the player.
 
@@ -847,7 +850,7 @@ function endConversation(conversationName) {
 function clearConversations() {
   //Clears all conversations. Normally, there should only ever be one.
 
-  var activeConvs = narrowEntitiesByLocation(getConversations(), "Conversing");
+  var activeConvs = findByName("Conversing", getRooms()).localize(getConversations());
   for (var i = 0; i < activeConvs.length; i++) {
     endConversation(activeConvs[i].name);
   }
@@ -864,11 +867,6 @@ function getInteractables() {
 function getEntities() {
   return getWorld().entities;
 }
-function narrowEntitiesByLocation(entities, roomName) {
-  return entities.filter(function(element) {
-    return element.locations[0] == roomName;
-  });
-}
 function isPresent(name) {
   if(roomContains(getPlayer().locations[0], name)) {
     return true;
@@ -882,19 +880,6 @@ function getObstructions() {
 //Interceptors------------------------------------------------------------------
 function getInterceptors() {
   return getWorld().interceptors;
-}
-function getInterceptorExits(roomName) {
-  var interceptors = narrowEntitiesByLocation(getInterceptors(), roomName);
-  var exitArray = {};
-  for (var i = 0; i < interceptors.length; i++) {
-    var interceptor = interceptors[i];
-    var exitKeys = Object.keys(interceptor.exits);
-    for (var j = 0; j < exitKeys.length; j++) {
-      var exitKey = exitKeys[j];
-      exitArray[exitKey] = interceptor.exits[exitKey];
-    }
-  }
-  return exitArray;
 }
 //Time--------------------------------------------------------------------------
 function nextTurn() {
