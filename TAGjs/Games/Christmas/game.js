@@ -38,8 +38,8 @@ var Configuration = {
   useMusicControls: false,
   useSoundControls: false
 }
-var World = {
-  player: new PlayerEntity("truenorth.bearroom",
+var World = new GameWorld(
+  new PlayerEntity("truenorth.bearroom",
     {
       hint: function() {
         output("Hint: Typing 'HINT' will give you a helpful hint.");
@@ -47,13 +47,7 @@ var World = {
       }
     }
   ),
-  rooms: [
-    //System
-    new Room("Inventory",
-      "This is an inventory.",
-      [],
-      "Inventory"
-    ),
+  [
     //Home
     new Room("home.livingroom",
       "You're in the living room, which is set up for Christmas.",
@@ -262,7 +256,7 @@ var World = {
       "THE END"
     ),
   ],
-  entities: [
+  [
     //inventory
     new Entity("inventory.coat",
       "home.livingroom",
@@ -763,7 +757,7 @@ var World = {
         talk: function() {
           output("You start a conversation. <em>You can type \
           <strong>goodbye</strong> to end it.");
-          findByName("truenorth.snowman", getConversations()).start();
+          findByName("truenorth.snowman", getConversations()).gracefullyStart();
         },
         attack: function() {
           output("The snowman tells you to chill out.");
@@ -1038,7 +1032,7 @@ var World = {
       "keypad"
     ),
   ],
-  obstructions: [
+  [
     //home
     new Obstruction("home.livingroom.nocoat",
       "home.livingroom",
@@ -1054,9 +1048,9 @@ var World = {
           }
         }
       },
-      {
-        "out": ["home.outside","You can't go out unless you're wearing your coat"]
-      },
+      [
+        new Exit("out","home.outside","You can't go out unless you're wearing your coat")
+      ],
       "out"
     ),
     new Obstruction("home.garage.nocoat",
@@ -1073,9 +1067,9 @@ var World = {
           }
         }
       },
-      {
-        "out": ["home.outside","You can't go out unless you're wearing your coat"]
-      },
+      [
+        new Exit("out","home.outside","You can't go out unless you're wearing your coat")
+      ],
       "out"
     ),
     //truenorth
@@ -1086,7 +1080,8 @@ var World = {
           output("Do what with the bear?");
         },
         attack: function() {
-          output("I'm not sure attacking a *polar bear* is a good idea.");
+          lose("As you attack the polar bear, it shifts its head slightly. \
+          You accidentally hit its teeth, injuring yourself.");
         },
         fish: function() {
           if (getPlayer().inventoryContains("truenorth.fish")) {
@@ -1103,13 +1098,13 @@ var World = {
           findByName("truenorth.polarbear", getConversations()).gracefullyStart();
         }
       },
-      {
-        "south": ["truenorth.workshopout","you cannot go south because a polar bear is blocking your path"]
-      },
+      [
+        new Exit("south","truenorth.workshopout","you cannot go south because a polar bear is blocking your path")
+      ],
       "polar bear"
     )
   ],
-  interceptors: [
+  [
     //home
     new Obstruction("home.button",
       "Nowhere",
@@ -1159,7 +1154,7 @@ var World = {
       "space"
       )
   ],
-  conversations: [
+  [
     new Conversation("truenorth.snowman",
       {
         "hello": "Hi! It's *ice* to meet you! Do you want to be my \
@@ -1195,7 +1190,7 @@ var World = {
       }
     )
   ]
-}
+);
 //Functions---------------------------------------------------------------------
 function init() {
   output("It's Christmas day, and you're feeling very excited to get \
