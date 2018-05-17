@@ -17,11 +17,18 @@ const Interactable = function(name, location, methods, givenName, turn) {
     if (roomName == this.locations[0]) {
       return;
     } else {
+      this.locations[0] = roomName;
       for (i = this.locations.length - 1; i > 0; i--) {
         this.locations[i] = this.locations[i - 1];
       }
-      this.locations[0] = roomName;
     }
+  }
+  this.inverseWarp = function() {
+    var presentLocation = this.locations[0];
+    for (i = 0; i < this.locations.length - 1; i++) {
+      this.locations[i] = this.locations[i + 1];
+    }
+    this.locations[this.locations.length - 1] = presentLocation;
   }
 
   return this;
@@ -135,31 +142,6 @@ const Conversation = function(name, topics, methods) {
 
   this.advanceTurn = false;
   this.methods.parent = this;
-  return this;
-}
-const LosingConversation = function(message, undoMessage) {
-  Object.assign(this, new Conversation("Lose",
-    {
-      message: message,
-      nothing: undoMessage
-    },
-    {
-      "undo": () => {
-        this.gracefullyEnd();
-      },
-      "goodbye": () => {
-        this.methods.nothing();
-      }
-    }
-  ));
-  this.displayInput = false;
-  this.end = function() {
-    getPlayer().warp(getPlayer().locations[1]);
-    var conversations = getConversations();
-    var index = conversations.indexOf(this);
-    alert(index);
-    conversations.splice(index, 1);
-  }
   return this;
 }
 const Sequence = function(array) {
@@ -347,7 +329,26 @@ const GameWorld = function(player, rooms, entities, obstructions, interceptors,
   this.entities = entities;
   this.obstructions = obstructions;
   this.interceptors = interceptors;
-  this.conversations = conversations;
+  this.conversations = conversations.concat([
+    (function() {
+      Object.assign(this, new Conversation("Lose",
+        {
+          message: "",
+          nothing: ""
+        },
+        {
+          "undo": () => {
+            this.gracefullyEnd();
+          },
+          "goodbye": () => {
+            this.methods.nothing();
+          }
+        }
+      ));
+      this.displayInput = false;
+      return this;
+    })()
+  ]);
 }
 const Wrapping = function() {
   this.wrap = (obj) => {
@@ -382,7 +383,7 @@ const Conversational = function() {
   this.end = function() {
     if (this.locations[0] == "Conversing") {
       var player = getPlayer();
-      player.warp(player.locations[1]);
+      player.inverseWarp();
       this.warp("Nowhere");
     }
   }
@@ -849,7 +850,6 @@ function movePlayerByInput(input) {
   }
 }
 function testForObstructions(input, roomName) {
-  var player = getPlayer();
   obstructions = findByName(roomName, getRooms()).localize(getObstructions());
   for (var i = 0; i < obstructions.length; i++) {
     var exits = obstructions[i].exits;
@@ -875,11 +875,6 @@ function testForExits(input, roomName) {
 //Conversations-----------------------------------------------------------------
 function getConversations() {
   return getWorld().conversations;
-}
-function endConversation(conversationName) {
-  //Ends a conversation. This is done silently, though it does move the player.
-
-
 }
 function clearConversations() {
   //Clears all conversations. Normally, there should only ever be one.
@@ -943,8 +938,9 @@ function lose(message, undoMessage) {
   message = message ? message : "You have lost.";
   undoMessage = undoMessage ? embolden(undoMessage, "undo") : "You can type\
    <strong>undo</strong> to try again.";
-  var loseConversation = new LosingConversation(message, undoMessage);
-  getConversations().push(loseConversation);
+  var loseConversation = findByName("Lose", getConversations());
+  loseConversation.addTopic("message", message);
+  loseConversation.addTopic("nothing", undoMessage);
   loseConversation.gracefullyStart();
   updateNameDisplay("You Lose");
   output(embolden(undoMessage, "undo"));

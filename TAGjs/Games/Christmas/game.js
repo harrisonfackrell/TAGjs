@@ -35,7 +35,7 @@ var Configuration = {
     "inventory": ["inventory","item"]
   },
   useImages: false,
-  useMusicControls: false,
+  useMusicControls: true,
   useSoundControls: false
 }
 var World = new GameWorld(
@@ -1193,16 +1193,17 @@ var World = new GameWorld(
 );
 //Functions---------------------------------------------------------------------
 function init() {
-  output("It's Christmas day, and you're feeling very excited to get \
-    on with it. Unfortunately, you've been told that \"opening presents at \
-    3 in the morning is ridiculous\". Well, fine, but that's not going to stop \
-    you from waking up early to get a sneak peek. After some fumbling, you \
-    manage to find the lightswitch.");
-  output("As you look through the presents, you realize with rising \
-    horror that none of them are labeled with your name. Pragmatic \
-    10-year-old that you are, you decide that this will require a visit to \
-    Santa.");
-  findByName(getPlayer().locations[0], getRooms()).updateDisplay();
+  lose();
+  // output("It's Christmas day, and you're feeling very excited to get \
+  //   on with it. Unfortunately, you've been told that \"opening presents at \
+  //   3 in the morning is ridiculous\". Well, fine, but that's not going to stop \
+  //   you from waking up early to get a sneak peek. After some fumbling, you \
+  //   manage to find the lightswitch.");
+  // output("As you look through the presents, you realize with rising \
+  //   horror that none of them are labeled with your name. Pragmatic \
+  //   10-year-old that you are, you decide that this will require a visit to \
+  //   Santa.");
+  // findByName(getPlayer().locations[0], getRooms()).updateDisplay();
 }
 //Execution---------------------------------------------------------------------
 setup();
