@@ -45,6 +45,9 @@ var World = new GameWorld(
         output("Hint: Typing 'HINT' will give you a helpful hint.");
         output("Helpful, huh?");
       }
+    },
+    function() {
+      alert(this.age);
     }
   ),
   [
@@ -1193,7 +1196,6 @@ var World = new GameWorld(
 );
 //Functions---------------------------------------------------------------------
 function init() {
-  lose();
   // output("It's Christmas day, and you're feeling very excited to get \
   //   on with it. Unfortunately, you've been told that \"opening presents at \
   //   3 in the morning is ridiculous\". Well, fine, but that's not going to stop \

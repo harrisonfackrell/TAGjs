@@ -10,6 +10,8 @@ const Interactable = function(name, location, methods, givenName, turn) {
 
   this.turn = turn ? turn : function() {};
 
+  this.age = 0;
+
   this.advanceTurn = true;
   this.displayInput = true;
 
@@ -17,10 +19,10 @@ const Interactable = function(name, location, methods, givenName, turn) {
     if (roomName == this.locations[0]) {
       return;
     } else {
-      this.locations[0] = roomName;
       for (i = this.locations.length - 1; i > 0; i--) {
         this.locations[i] = this.locations[i - 1];
       }
+      this.locations[0] = roomName;
     }
   }
   this.inverseWarp = function() {
@@ -382,8 +384,7 @@ const Conversational = function() {
   }
   this.end = function() {
     if (this.locations[0] == "Conversing") {
-      var player = getPlayer();
-      player.inverseWarp();
+      getPlayer().inverseWarp();
       this.warp("Nowhere");
     }
   }
@@ -418,7 +419,6 @@ function getPlayer() {
 //IO----------------------------------------------------------------
 function enterHandler() {
   //Enter handler for the input box that sets instruction execution into motion.
-
   //Parse and execute input
   parseAndExecuteInput(getInput());
   //Update the image display to that of the player's locations[0]
@@ -890,7 +890,7 @@ function getWorld() {
 }
 function getInteractables() {
   return getEntities().concat(getObstructions(), getInterceptors(),
-   getConversations());
+   getConversations(), getPlayer());
 }
 //Entities----------------------------------------------------------------------
 function getEntities() {
@@ -917,6 +917,7 @@ function nextTurn() {
     return element.locations[0] != "Nowhere";
   });
   for (i in interactables) {
+    interactables[i].age += 1;
     if (interactables[i].turn) {
       interactables[i].turn();
     }
