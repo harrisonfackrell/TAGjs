@@ -47,7 +47,7 @@ var World = new GameWorld(
       }
     },
     function() {
-      alert(this.age);
+
     }
   ),
   [
