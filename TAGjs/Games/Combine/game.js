@@ -8,8 +8,8 @@ var Configuration = {
   useMusicControls: false,
   useSoundControls: false
 }
-var World = {
-  player: new PlayerEntity("Expanse",
+var World = new GameWorld(
+  new PlayerEntity("Expanse",
     {
       nothing: function() {
         combine();
@@ -22,14 +22,14 @@ var World = {
       },
     },
   ),
-  rooms: [
+  [
     new Room("Expanse",
       "",
-      {},
+      [],
       "Combine"
     )
   ],
-  entities: [
+  [
     new Entity("Water","Expanse",
       "Water",
       {
@@ -76,10 +76,41 @@ var World = {
       "Wisdom"
     ),
   ],
-  obstructions: [],
-  interceptors: [],
-  conversations: [],
-  combinations: [
+  [],
+  [],
+  []
+);
+//Functions---------------------------------------------------------------------
+function init() {
+  updateNameDisplay("Combine");
+  output("Welcome to Combine! You can combine two elements by typing their \
+  names, try again by typing <strong>restart</strong>, or see which elements \
+  you have by typing <strong>list</strong>. There are 97 elements to create - \
+  good luck!");
+  output("You have " + findByName(getPlayer().locations[0], getRooms()).describeEntities());
+  var elements = ["Ocean","Stone","Explosion","Wind","Genius","Clay","Steam",
+                  "Mist","Lava","Sky","Volcano","Wave","Brick","Pottery",
+                  "Cloud","Rain","Plant","Crop","Fog","Snow","House",
+                  "Civilization","Philosophy","Logic","Math","Einstein",
+                  "Physics","Quantum Theory","Tree","Tectonics","Mountain",
+                  "Tool","Wood","Mining","Metal","Smithing","Plank",
+                  "Raft","Boat","Cooking","Artistry",
+                  "Astronomy","Oil","Gasoline","Lantern","Wire","Lightning",
+                  "Electronics","Motor","Rocket","Plane","Computer",
+                  "Programmer","Text Adventure Game","Eruption","Engraving",
+                  "Vehicle","Diplomacy","Hypercomputing","Autopilot",
+                  "Sand","Glass","Lightbulb","Smoke","Irrigation","Charcoal",
+                  "Grill","Papyrus","Writing","Literature","Email","Telegraph",
+                  "Postal Service","Pencil","Satellite","GPS","Internet",
+                  "Cave Painting","Cavern","Flower","Boquet","Masonry",
+                  "Railroad","Carpentry","Cuisine","Music","Synthetic Instrument",
+                  "Printer","Wheel","Sound","Telephone","Cell Phone",
+                  "Neighborhood","Paper","Audio Book","Ebook","Trade"
+                  ];
+  for (var i = 0; i < elements.length; i++) {
+    getEntities().push(new Element(elements[i]));
+  }
+  World.combinations = [
     ["Water","Water","Ocean"],
     ["Earth","Earth","Stone"],
     ["Fire","Fire","Explosion"],
@@ -226,44 +257,11 @@ var World = {
     ["Sky","Steam","Cloud"]
   ]
 }
-//Functions---------------------------------------------------------------------
-function init() {
-  updateNameDisplay("Combine");
-  output("Welcome to Combine! You can combine two elements by typing their \
-  names, try again by typing <strong>restart</strong>, or see which elements \
-  you have by typing <strong>list</strong>. There are 97 elements to create - \
-  good luck!");
-  output("You have " + describeEntities(getPlayer().location));
-  var elements = ["Ocean","Stone","Explosion","Wind","Genius","Clay","Steam",
-                  "Mist","Lava","Sky","Volcano","Wave","Brick","Pottery",
-                  "Cloud","Rain","Plant","Crop","Fog","Snow","House",
-                  "Civilization","Philosophy","Logic","Math","Einstein",
-                  "Physics","Quantum Theory","Tree","Tectonics","Mountain",
-                  "Tool","Wood","Mining","Metal","Smithing","Plank",
-                  "Raft","Boat","Cooking","Artistry",
-                  "Astronomy","Oil","Gasoline","Lantern","Wire","Lightning",
-                  "Electronics","Motor","Rocket","Plane","Computer",
-                  "Programmer","Text Adventure Game","Eruption","Engraving",
-                  "Vehicle","Diplomacy","Hypercomputing","Autopilot",
-                  "Sand","Glass","Lightbulb","Smoke","Irrigation","Charcoal",
-                  "Grill","Papyrus","Writing","Literature","Email","Telegraph",
-                  "Postal Service","Pencil","Satellite","GPS","Internet",
-                  "Cave Painting","Cavern","Flower","Boquet","Masonry",
-                  "Railroad","Carpentry","Cuisine","Music","Synthetic Instrument",
-                  "Printer","Wheel","Sound","Telephone","Cell Phone",
-                  "Neighborhood","Paper","Audio Book","Ebook","Trade"
-                  ];
-  for (var i = 0; i < elements.length; i++) {
-    getEntities().push(new Element(elements[i]));
-  }
-}
-function Element(name, description) {
-  this.name = name;
-  this.description = name;
-  this.location = "Nowhere";
+function Element(name) {
+  Object.assign(this, new Entity(name, "Nowhere", name, {}, name));
   this.methods = {};
   this.methods.nothing = function() {combine();};
-  this.givenName = name;
+  return this;
 }
 function getCombos() {
   return World.combinations;
@@ -285,21 +283,19 @@ function combine() {
   output("That's not a valid combination.");
 }
 function create(combo) {
-  if (isPresent(combo[0]) && isPresent(combo[1])) {
+  if (findByName(combo[0], getEntities()).locations[0] == "Expanse" && findByName(combo[0], getEntities()).locations[0] == "Expanse") {
     output("<strong>" + combo[0] + "</strong> and <strong>" + combo[1] +
     "</strong> makes <strong>" + combo[2] + "</strong>!");
     var element = findByName(combo[2], getEntities());
-    element.location = "Expanse";
+    element.warp("Expanse");
   } else {
     output("You don't have both of those elements.")
   }
 }
 function listElements() {
-  var player = getPlayer();
-  var currentRoom = findByName(player.location, getRooms());
-  var entities = getEntities();
-  var undiscovered = narrowEntitiesByLocation(entities, "Nowhere");
-  output(describeEntities(currentRoom) + " Elements Remaining: " + undiscovered.length);
+  var currentRoom = findByName(getPlayer().locations[0], getRooms());
+  var undiscovered = findByName("Nowhere", getRooms()).localize(getEntities());
+  output(currentRoom.describeEntities() + " Elements Remaining: " + undiscovered.length);
 }
 //Execution---------------------------------------------------------------------
 setup();

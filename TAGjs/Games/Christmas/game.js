@@ -39,7 +39,7 @@ var Configuration = {
   useSoundControls: false
 }
 var World = new GameWorld(
-  new PlayerEntity("truenorth.bearroom",
+  new PlayerEntity("home.livingroom",
     {
       hint: function() {
         output("Hint: Typing 'HINT' will give you a helpful hint.");
@@ -279,26 +279,19 @@ var World = new GameWorld(
           this.equip();
         },
         equip: function() {
-          if (!getPlayer().inventoryContains("inventory.coat")) {
-            this.take();
-          }
-          if (this.parent.isOn) {
-            output("You're already wearing your coat!");
-          } else {
-            output("You put on your coat. You can probably go outside now.");
-            this.parent.isOn = true;
-          }
+          this.take();
         },
         look: function() {
           output("It's a warm winter coat. It's blue, your favorite color.");
         },
         take: function() {
-          if (getPlayer().inventoryContains("inventory.coat")) {
+          if (this.parent.locations[0] == "Inventory") {
             output("I'm afraid I don't understand");
           } else {
             output("You pick up your coat. You can view your inventory items \
               with the <strong>inventory</strong> command.");
-            this.parent.location = "Inventory";
+            output("You put on your coat. You can probably go outside now.");
+            this.parent.warp("Inventory");
           }
         }
       },
@@ -325,19 +318,19 @@ var World = new GameWorld(
         },
         hang: function() {
           var input = getInput();
-          if (getPlayer().inventoryContains("home.redornament")) {
+          var red = findByName("home.redornament", getInteractables());
+          var blue = findByName("home.blueornament", getInteractables());
+          if (red.locations[0] == "Inventory") {
             if (testForWord(input, "red ornament")) {
-              var red = findByName("home.redornament", getInteractables());
-              red.location = "Nowhere";
+              red.warp("Nowhere");
               this.parent.red = true;
               output("You hang the <strong>red ornament</strong> on the tree.");
             } else {
               output("Hang what on the tree?");
             }
           } else if (testForWord(input, "blue ornament")) {
-            if (getPlayer().inventoryContains("home.blueornament")) {
-              var blue = findByName("home.blueornament", getInteractables());
-              blue.location = "Nowhere";
+            if (blue.locations[0] == "Inventory") {
+              blue.warp("Nowhere");
               this.parent.blue = true;
               output("You hang the <strong>blue ornament</strong> on the tree.");
             } else {
@@ -353,7 +346,7 @@ var World = new GameWorld(
             output("<em>If you want to see what's changed, you can \
               <strong>look</strong> around.</em>");
             var button = findByName("home.button", getInterceptors());
-            button.location = "home.livingroom";
+            button.warp("home.livingroom");
           }
         }
       },
@@ -397,7 +390,7 @@ var World = new GameWorld(
           }
         },
         light: function() {
-          if (getPlayer().inventoryContains("home.lighter")) {
+          if (findByName("home.lighter", getEntities()).locations[0] == "Inventory") {
             if (this.parent.letter && this.parent.book) {
               output("You get just enough of a spark going to light the fire. As \
               the flames take hold, you hear a little jingle, kind of like a \
@@ -415,20 +408,20 @@ var World = new GameWorld(
         },
         put: function() {
           var input = getInput();
-          if (getPlayer().inventoryContains("home.catalog")) {
+          if (findByName("home.catalog", getEntities()).locations[0] == "Inventory") {
             if (testForWord(input, "catalog")) {
               output("You toss the catalog into the fireplace.");
               var catalog = findByName("home.catalog", getEntities());
-              catalog.location = "nowhere";
+              catalog.warp("Nowhere");
               this.parent.letter = true;
               return;
             }
           }
-          if (getPlayer().inventoryContains("home.book")) {
+          if (findByName("home.book", getEntities()).locations[0] == "Inventory") {
             if (testForWord(input, "book")) {
               output("You toss <em>Celsius 233</em> into the fireplace.");
               var book = findByName("home.book", getEntities());
-              book.location = "nowhere";
+              book.warp("Nowhere");
               this.parent.book = true;
               return;
             }
@@ -462,14 +455,14 @@ var World = new GameWorld(
             him about it.");
         },
         "sugar plum": function() {
-          if (getPlayer().inventoryContains("home.sugarplum")) {
+          var sugarplum = findByName("home.sugarplum", getEntities());
+          if (sugarplum.locations[0] == "Inventory") {
             output("He laughs, tosses you a <strong>red ornament</strong>, and \
               scampers off.");
             var ornament = findByName("home.redornament", getEntities());
-            var sugarplum = findByName("home.sugarplum", getEntities());
-            ornament.location = "Inventory";
-            sugarplum.location = "Nowhere";
-            this.parent.location = "Nowhere";
+            ornament.warp("Inventory");
+            sugarplum.warp("Nowhere");
+            this.parent.warp("Nowhere");
           } else {
             output("You don't have a sugar plum!");
           }
@@ -486,7 +479,7 @@ var World = new GameWorld(
         },
         take: function() {
           output("You take the sugar plum.");
-          this.parent.location = "Inventory";
+          this.parent.warp("Inventory");
         },
         eat: function() {
           output("You already brushed your teeth, though. It would taste gross!");
@@ -519,11 +512,11 @@ var World = new GameWorld(
           output("Do what with the ornament?");
         },
         take: function() {
-          if (this.parent.location == "Inventory") {
+          if (this.parent.locations[0] == "Inventory") {
             this.nothing();
           } else {
             output("You take the blue ornament");
-            this.parent.location = "Inventory";
+            this.parent.warp("Inventory");
           }
         },
         hang: function() {
@@ -545,13 +538,13 @@ var World = new GameWorld(
           this.open();
         },
         open: function() {
-          if (getPlayer().inventoryContains("home.lighter")) {
+          if (findByName("home.lighter", getEntities()).locations[0] == "Inventory") {
             output("You find nothing else worthy of note in the toolbox.")
           } else {
             output("You rifle through the toolbox and find a <strong>lighter</strong>.");
             output("You take the lighter. It might come in handy for the fireplace.");
             var lighter = findByName("home.lighter", getEntities());
-            lighter.location = "Inventory";
+            lighter.warp("Inventory");
           }
         },
         look: function() {
@@ -596,13 +589,13 @@ var World = new GameWorld(
             is getting snow inside your hood.");
         },
         shovel: function() {
-          if (getPlayer().inventoryContains("home.shovel")) {
+          if (findByName("home.shovel", getEntities()).locations[0] == "Inventory") {
             output("You clear away the snow, revealing the <strong>mailbox</strong>");
             output("<em>If you want to see what's changed, you can \
               <strong>look</strong> around.</em>");
             var mailbox = findByName("home.mailbox", getEntities());
-            mailbox.location = "home.outside";
-            this.parent.location = "Nowhere";
+            mailbox.warp("home.outside");
+            this.parent.warp("Nowhere");
           } else {
             output("But you don't have a snowshovel!");
           }
@@ -622,7 +615,7 @@ var World = new GameWorld(
         },
         take: function() {
           output("You take the snowshovel with you.");
-          this.parent.location = "Inventory";
+          this.parent.warp("Inventory");
         },
         look: function() {
           output("It's a snowshovel. The right edge is slightly chipped.");
@@ -645,7 +638,7 @@ var World = new GameWorld(
               Looks flammable.");
             output("You take the catalog with you.");
             var catalog = findByName("home.catalog", getEntities());
-            catalog.location = "Inventory";
+            catalog.warp("Inventory");
             this.parent.empty = true;
           }
         },
@@ -671,7 +664,7 @@ var World = new GameWorld(
         take: function() {
           output("You pick up <em>Celsius 233</em>. You would say it's a cool  \
             book, but the cover depicts flames.");
-          this.parent.location = "Inventory";
+          this.parent.warp("Inventory");
         }
       },
       "book"
@@ -689,14 +682,14 @@ var World = new GameWorld(
           output("Knowing this, you should be able to fly to the real north \
             pole now.")
           var interceptor = findByName("space.truenorth", getInterceptors());
-          interceptor.location = "space.junction";
+          interceptor.warp("space.junction");
         },
         take: function() {
           output("You take the coordinates. You should be able to fly to the \
             real north pole now.");
           var interceptor = findByName("space.truenorth", getInterceptors());
-          this.parent.location = "Inventory";
-          interceptor.location = "space.junction";
+          this.parent.warp("Inventory");
+          interceptor.warp("space.junction");
         }
       },
       "coordinates"
@@ -713,15 +706,15 @@ var World = new GameWorld(
             \"Do you have a coupon?\"");
         },
         coupon: function() {
-          if (getPlayer().inventoryContains("space.coupon")) {
+          if (findByName("space.coupon", getEntities()).locations[0] == "Inventory") {
             output("He looks at your coupon and nods his head. \"I see you've \
             been to the ISS. Here's your complimentary fishing pole. \
             If you need any <strong>bait</strong>, just ask one \
             of the cosmonauts. They always have a stock of space crawdad.\"");
             var fishingpole = findByName("northpole.fishingpole", getEntities());
             var coupon = findByName("space.coupon", getEntities());
-            fishingpole.location = "Inventory";
-            coupon.location = "Nowhere";
+            fishingpole.warp("Inventory");
+            coupon.warp("Nowhere");
           } else {
             output("You don't have a coupon!");
           }
@@ -779,16 +772,16 @@ var World = new GameWorld(
           output("Do what with the lake?");
         },
         fish: function() {
-          if (getPlayer().inventoryContains("northpole.fishingpole") && getPlayer().inventoryContains("space.spacecrawdad")) {
-            if (roomContains("Nowhere", "truenorth.fish")) {
+          if (findByName("northpole.fishingpole", getEntities()).locations[0] == "Inventory" && findByName("space.spacecrawdad", getEntities()).locations[0] == "Inventory") {
+            if (findByName("truenorth.hints", getEntities()).locations[0] != "Inventory") {
               output("You stick your fishing pole in the water and wait. Before \
               too long, you get a nibble, and you expertly catch it.");
               output("You caught a... piece of paper. And it somehow ate your space crawdad. It's \
               labeled \"ISS SECRET CODE <strong>CLUES</strong>\".");
               var hints = findByName("truenorth.hints", getEntities());
               var crawdad = findByName("space.spacecrawdad", getEntities());
-              hints.location = "Inventory";
-              crawdad.location = "Nowhere";
+              hints.warp("Inventory");
+              crawdad.warp("Nowhere");
             } else {
               output("Despite your best efforts, you can't seem to catch \
                 anything else.");
@@ -834,11 +827,11 @@ var World = new GameWorld(
             practical, but who are you to judge?");
         },
         take: function() {
-          if (getPlayer().inventoryContains("truenorth.fish")) {
+          if (findByName("truenorth.fish", getEntities()).locations[0] == "Inventory") {
             output("I'm afraid I don't understand");
           } else {
             output("You take the space fish along with you.");
-            this.parent.location = "Inventory";
+            this.parent.warp("Inventory");
           }
         },
         eat: function() {
@@ -865,10 +858,10 @@ var World = new GameWorld(
         },
         equip: function() {
           output("You put the space helmet on. You can probably go to space now.");
-          this.parent.location = "Inventory";
+          this.parent.warp("Inventory");
           this.parent.on = true;
           var hashelmet = findByName("space.hashelmet", getInterceptors());
-          hashelmet.location = "space.junction";
+          hashelmet.warp("space.junction");
         },
         look: function() {
           output("It's a black-and-white space helmet, straight out of 1969");
@@ -916,7 +909,7 @@ var World = new GameWorld(
             gives you a <strong>space crawdad</strong> and mimes a fish swimming \
             with his hand.");
           var crawdad = findByName("space.spacecrawdad", getEntities());
-          crawdad.location = "Inventory";
+          crawdad.warp("Inventory");
         },
         look: function() {
           output("It's a Russian cosmonaut. You can tell he's Russian because \
@@ -936,7 +929,7 @@ var World = new GameWorld(
           output("Do what with the space crawdad?");
         },
         put: function() {
-          if (getPlayer().inventoryContains("northpole.fishingpole")) {
+          if (findByName("northpole.fishingpole", getEntities()).locations[0] == "Inventory") {
             output("You attach the space crawdad to your fishing pole.");
           } else {
             this.nothing();
@@ -963,7 +956,7 @@ var World = new GameWorld(
         take: function() {
           output("You take the coupon. It says it's for a place called \
           \"Star Fish\".");
-          this.parent.location = "Inventory";
+          this.parent.warp("Inventory");
         },
         use: function() {
           output("Give the coupon to who?");
@@ -1022,7 +1015,7 @@ var World = new GameWorld(
             output("A small hatch opens, and a <strong>space fish</strong>, somehow \
             still fresh, floats out into the room. You take it with you.");
             var fish = findByName("truenorth.fish", getEntities());
-            fish.location = "Inventory";
+            fish.warp("Inventory");
           } else {
             output("The keypad's display says, \"That's not the code! Try again!\"");
           }
@@ -1042,9 +1035,9 @@ var World = new GameWorld(
       {
         nothing: function() {
           var coat = findByName("inventory.coat", getEntities());
-          if (coat.isOn) {
+          if (coat.locations[0] == "Inventory") {
             this.parent.warp("Nowhere");
-            movePlayerByInput(getInput());
+            getPlayer().methods.move();
           } else {
             output("You can't go <strong>out</strong> unless you're wearing \
               your coat.");
@@ -1061,9 +1054,9 @@ var World = new GameWorld(
       {
         nothing: function() {
           var coat = findByName("inventory.coat", getEntities());
-          if (coat.isOn) {
+          if (coat.locations[0] == "Inventory") {
             this.parent.warp("Nowhere");
-            movePlayerByInput(getInput());
+            getPlayer().methods.move();
           } else {
             output("You can't go <strong>out</strong> unless you're wearing \
               your coat.");
@@ -1087,10 +1080,10 @@ var World = new GameWorld(
           You accidentally hit its teeth, injuring yourself.");
         },
         fish: function() {
-          if (getPlayer().inventoryContains("truenorth.fish")) {
+          if (findByName("truenorth.fish", getEntities()).locations[0] == "Inventory") {
             output("You throw the space fish at the bear, and it lumbers away.");
             var bearroom = findByName("truenorth.bearroom", getRooms());
-            this.parent.location = "Nowhere";
+            this.parent.warp("Nowhere");
           } else {
             output("You don't have a fish!");
           }
@@ -1126,9 +1119,9 @@ var World = new GameWorld(
           output("It's a large red button, clearly labled \"LAUNCH ROCKET\".")
         }
       },
-      {
-        "button": ["space.junction", "press the <strong>rocket button</strong>"]
-      },
+      [
+        new Exit("button","space.junction", "press the <strong>rocket button</strong>")
+      ],
       "button"
     ),
     //space
@@ -1139,9 +1132,9 @@ var World = new GameWorld(
           movePlayerByInput(getInput());
         }
       },
-      {
-        "true north": ["truenorth.landing","fly to true north"]
-      },
+      [
+        new Exit("true north","truenorth.landing","fly to true north")
+      ],
       "true north"
     ),
     new Obstruction("space.hashelmet",
@@ -1151,9 +1144,9 @@ var World = new GameWorld(
           movePlayerByInput(getInput());
         }
       },
-      {
-        "space": ["space.station","go to space"]
-      },
+      [
+        new Exit("space","space.station","go to space")
+      ],
       "space"
       )
   ],
@@ -1196,16 +1189,16 @@ var World = new GameWorld(
 );
 //Functions---------------------------------------------------------------------
 function init() {
-  // output("It's Christmas day, and you're feeling very excited to get \
-  //   on with it. Unfortunately, you've been told that \"opening presents at \
-  //   3 in the morning is ridiculous\". Well, fine, but that's not going to stop \
-  //   you from waking up early to get a sneak peek. After some fumbling, you \
-  //   manage to find the lightswitch.");
-  // output("As you look through the presents, you realize with rising \
-  //   horror that none of them are labeled with your name. Pragmatic \
-  //   10-year-old that you are, you decide that this will require a visit to \
-  //   Santa.");
-  // findByName(getPlayer().locations[0], getRooms()).updateDisplay();
+  output("It's Christmas day, and you're feeling very excited to get \
+    on with it. Unfortunately, you've been told that \"opening presents at \
+    3 in the morning is ridiculous\". Well, fine, but that's not going to stop \
+    you from waking up early to get a sneak peek. After some fumbling, you \
+    manage to find the lightswitch.");
+  output("As you look through the presents, you realize with rising \
+    horror that none of them are labeled with your name. Pragmatic \
+    10-year-old that you are, you decide that this will require a visit to \
+    Santa.");
+  findByName(getPlayer().locations[0], getRooms()).updateDisplay();
 }
 //Execution---------------------------------------------------------------------
 setup();

@@ -37,7 +37,7 @@ const Interactable = function(name, location, methods, givenName, turn) {
 }
 const Entity = function(name, location, description, methods, givenName, turn) {
   Object.assign(this, new Interactable(name, location, methods, givenName, turn));
-  methods = Object.assign( {
+  this.methods = Object.assign( {
     nothing: function() {
       output("Do what with the " + givenName + "?");
     },
@@ -47,13 +47,14 @@ const Entity = function(name, location, description, methods, givenName, turn) {
     attack: function() {
       output("I don't think that's wise.");
     }
-  }, methods);
+  }, this.methods);
   this.description = description;
+  this.methods.parent = this;
   return this;
 }
 const PlayerEntity = function(location, methods, turn) {
   Object.assign(this, new Interactable("player", location, methods, "player", turn));
-  this.methods = Object.assign(this.methods, {
+  this.methods = Object.assign({
     nothing: function() {
       var exits = findByName(this.parent.locations[0], getRooms()).getExits();
       for (var i = 0; i < exits.length; i++) {
@@ -65,10 +66,10 @@ const PlayerEntity = function(location, methods, turn) {
       output("I'm afraid I don't understand.");
     },
     inventory: function() {
-      var entities = findByName("Inventory", getRooms()).localize(getEntities());
+      var inventory = findByName("Inventory", getRooms());
+      var entities = inventory.localize(getEntities());
       if (entities.length > 0) {
-        var description = describeEntities("Inventory");
-        output("You have " + describeEntities("Inventory"));
+        output("You have " + inventory.describeEntities("Inventory"));
       } else {
         output("You have nothing.");
       }
@@ -99,7 +100,7 @@ const PlayerEntity = function(location, methods, turn) {
       output("You wait around for a moment");
       nextTurn();
     }
-  }, methods);
+  }, this.methods);
 
   this.advanceTurn = false;
   this.displayInput = true;
@@ -290,16 +291,13 @@ const Room = function(name, description, exits, givenName, image, music) {
     }
     return manageListGrammar(descriptionArray, "and") + ".";
   }
-  this.describeSingularObstruction = function(obstruction) {
-
-  }
   this.getInterceptorExits = function() {
     var interceptors = this.localize(getInterceptors());
     var exitArray = [];
     for (var i = 0; i < interceptors.length; i++) {
       var exits = interceptors[i].exits;
       for (var j = 0; j < exits.length; j++) {
-        exitArray.push(exits[i]);
+        exitArray.push(exits[j]);
       }
     }
     return exitArray;
@@ -318,10 +316,15 @@ const GameWorld = function(player, rooms, entities, obstructions, interceptors,
  conversations) {
   this.player = player;
   this.rooms = rooms.concat([
-    new Room("Inventory",
-      "This is an inventory.",
+    new Room("Nowhere",
+      "",
       [],
-      "Inventory"
+      ""
+    ),
+    new Room("Inventory",
+      "",
+      [],
+      ""
     ),
     new Room("Conversing",
       "",
