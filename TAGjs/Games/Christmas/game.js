@@ -3,7 +3,7 @@ var Configuration = {
   synonyms: {
     look: ["look","examine"],
     attack: ["attack","kick","punch","fight","destroy","crush","break","smash","kill","bite"],
-    move: ["move","go","walk","run","step","fly","head"],
+    move: ["move","go","walk","run","step","fly","head","press"],
     throw: ["throw","toss"],
     use: ["use"],
     open: ["open","search","check"],
@@ -32,14 +32,15 @@ var Configuration = {
     "space fish": ["fish"],
     "insult": ["stupid","dumb","idiot","hate","awful"],
     "praise": ["cool","awesome","nerd"],
-    "inventory": ["inventory","item"]
+    "inventory": ["inventory","item"],
+    "rocket button": ["button"]
   },
   useImages: false,
   useMusicControls: false,
   useSoundControls: false
 }
 var World = new GameWorld(
-  new PlayerEntity("home.livingroom",
+  new PlayerEntity("space.junction",
     {
       hint: function() {
         IO.output("Hint: Typing 'HINT' will give you a helpful hint.");
@@ -55,7 +56,14 @@ var World = new GameWorld(
       [
         new Exit("kitchen","home.kitchen","go down the hall to the kitchen"),
         new Exit("reading room","home.readingroom","down the hall to the reading room"),
-        new Exit("out","home.outside","out through the door")
+        new Exit("out", function(entity) {
+          if (getPlayer().inventoryContains("inventory.coat")) {
+            entity.warp("home.outside");
+          } else {
+            IO.output("You step outside briefly, but it's too cold without \
+            your <strong>coat</strong>.");
+          }
+        },"out through the door")
       ],
       "Living Room"
     ),
@@ -206,7 +214,13 @@ var World = new GameWorld(
         new Exit("north","truenorth.landing","go north to the landing site"),
         new Exit("east","truenorth.oasis","east to a lake"),
         new Exit("west","truenorth.igloo","west to an igloo"),
-        new Exit("south","truenorth.workshopout","south to what looks like Santa's Workshop")
+        new Exit("south",function() {
+          if (getRooms().findByName("truenorth.bearroom").contains("truenorth.polarbear")) {
+            IO.output("The polar bear is blocking your way to the south.");
+          } else {
+            getPlayer().warp("truenorth.workshopout");
+          }
+        },"south to what looks like Santa's Workshop")
       ],
       "Frozen Tundra"
     ),
@@ -350,7 +364,7 @@ var World = new GameWorld(
               the trunk of the tree.");
             IO.output("<em>If you want to see what's changed, you can \
               <strong>look</strong> around.</em>");
-            var button = getInterceptors().findByName("home.button");
+            var button = getObstructions().findByName("home.button");
             button.warp("home.livingroom");
           }
         }
@@ -686,13 +700,13 @@ var World = new GameWorld(
           IO.output("Longitude: 0, Latitude: 90");
           IO.output("Knowing this, you should be able to fly to the real north \
             pole now.")
-          var interceptor = getInterceptors().findByName("space.truenorth");
+          var interceptor = getObstructions().findByName("space.truenorth");
           interceptor.warp("space.junction");
         },
         take: function() {
           IO.output("You take the coordinates. You should be able to fly to the \
             real north pole now.");
-          var interceptor = getInterceptors().findByName("space.truenorth");
+          var interceptor = getObstructions().findByName("space.truenorth");
           this.parent.warp("Inventory");
           interceptor.warp("space.junction");
         }
@@ -778,7 +792,7 @@ var World = new GameWorld(
         },
         fish: function() {
           if (getPlayer().inventoryContains("northpole.fishingpole") && getPlayer().inventoryContains("space.spacecrawdad")) {
-            if (roomContains("Nowhere", "truenorth.fish")) {
+            if (getRooms().findByName("Nowhere").contains("truenorth.hints")) {
               IO.output("You stick your fishing pole in the water and wait. Before \
               too long, you get a nibble, and you expertly catch it.");
               IO.output("You caught a... piece of paper. And it somehow ate your space crawdad. It's \
@@ -865,7 +879,7 @@ var World = new GameWorld(
           IO.output("You put the space helmet on. You can probably go to space now.");
           this.parent.warp("Inventory");
           this.parent.on = true;
-          var hashelmet = getInterceptors().findByName("space.hashelmet");
+          var hashelmet = getObstructions().findByName("space.hashelmet");
           hashelmet.warp("space.junction");
         },
         look: function() {
@@ -1032,44 +1046,9 @@ var World = new GameWorld(
       },
       "keypad"
     ),
-  ]),
-  new NamedArray([
-    //home
-    new Obstruction("home.livingroom.nocoat",
-      "home.livingroom",
-      {
-        nothing: function() {
-          var inventory = getRooms().findByName("Inventory");
-          if (inventory.contains("inventory.coat")) {
-            this.parent.warp("Nowhere");
-          }
-          getPlayer().moveByInput(getInput());
-        }
-      },
-      [
-        new Exit("out","home.outside","You can't go out unless you're wearing your coat")
-      ],
-      "out"
-    ),
-    new Obstruction("home.garage.nocoat",
-      "home.garage",
-      {
-        nothing: function() {
-          var inventory = getRooms().findByName("Inventory");
-          if (inventory.contains("inventory.coat")) {
-            this.parent.warp("Nowhere");
-          }
-          getPlayer().moveByInput(getInput());
-        }
-      },
-      [
-        new Exit("out","home.outside","You can't go out unless you're wearing your coat")
-      ],
-      "out"
-    ),
-    //truenorth
-    new Obstruction("truenorth.polarbear",
+    new Entity("truenorth.polarbear",
       "truenorth.bearroom",
+      "a polar bear in your path",
       {
         nothing: function() {
           IO.output("Do what with the bear?");
@@ -1093,9 +1072,6 @@ var World = new GameWorld(
           getConversations().findByName("truenorth.polarbear").gracefullyStart();
         }
       },
-      [
-        new Exit("south","truenorth.workshopout","you cannot go south because a polar bear is blocking your path")
-      ],
       "polar bear"
     )
   ]),
@@ -1103,51 +1079,26 @@ var World = new GameWorld(
     //home
     new Obstruction("home.button",
       "Nowhere",
-      {
-        nothing: function() {
-          var fireplace = getEntities().findByName("home.fireplace");
-          IO.output("You press the button.");
-          if (fireplace.lit) {
-            IO.output("The tree turns into a rocket.");
-            movePlayerByInput(getInput());
-          } else {
-            IO.output("Another banner pops up. It says, \"LIGHT FIRE TO CONTINUE\".");
-          }
-        },
-        look: function() {
-          IO.output("It's a large red button, clearly labled \"LAUNCH ROCKET\".")
-        }
-      },
-      {
-        "button": ["space.junction", "press the <strong>rocket button</strong>"]
-      },
-      "button"
+      [
+        new Exit("button","space.junction","press the <strong>rocket button</strong>")
+      ],
+      true
     ),
     //space
     new Obstruction("space.truenorth",
-      "Nowhere",
-      {
-        nothing: function() {
-          movePlayerByInput(getInput());
-        }
-      },
-      {
-        "true north": ["truenorth.landing","fly to true north"]
-      },
-      "true north"
+      "space.junction",
+      [
+        new Exit("true north","truenorth.landing","fly to true north")
+      ],
+      true
     ),
     new Obstruction("space.hashelmet",
-      "Nowhere",
-      {
-        nothing: function() {
-          movePlayerByInput(getInput());
-        }
-      },
-      {
-        "space": ["space.station","go to space"]
-      },
-      "space"
-      )
+      "space.junction",
+      [
+        new Exit("space","space.station","go to space")
+      ],
+      true
+    )
   ]),
   new NamedArray([
     new Conversation("truenorth.snowman",

@@ -114,21 +114,22 @@ const IO = (function() {
     inputBox.value = "";
   }
   this.output = function(str) {
-    //IO.outputs a string to the IO.output box.
+    //outputs a string to the output box.
 
-    //Get the IO.output box
+    str = str ? "<p>> " + str + "</p>" : "";
     var outputBox = document.getElementById("outputBox");
-    //Append the string onto the IO.output box's content and scroll to the bottom.
-    outputBox.innerHTML += "<p>> " + str + "</p>";
+    outputBox.innerHTML += str;
     outputBox.scrollTop = outputBox.scrollHeight;
   }
   this.outputUserText = function(str) {
     //Sanitizes text and applies a span with the class "userText" before
-    //IO.outputting its string.
+    //outputting its string.
 
     var re = /<|>/g;
     sanitizedStr = str.replace(re, "");
-    IO.output("<span class=\"userText\">" + sanitizedStr + "</span>");
+    sanitizedStr = sanitizedStr ?
+     "<span class=\"userText\">" + sanitizedStr + "</span>" : "";
+    IO.output(sanitizedStr);
   }
   this.listenForKey = function(e, key, callback) {
     //Listens for a key. "e" is an event. This function is intended to be used as
@@ -144,7 +145,6 @@ const Parser = (function() {
   this.testForWord = function(input, word) {
     //Returns true if the given input contains the given word or one of its
     //synonyms, defined in game.js. Case insensitive.
-
     //Convert both the input and the word to lowercase
     input = input.toLowerCase();
     word = word.toLowerCase();
@@ -195,9 +195,8 @@ const Parser = (function() {
     //Iterate through the entites
     for (var i = 0; i < entities.length; i++) {
       var entity = entities[i];
-      var entityName = entity.givenName;
       //If the input contains the entity's name (or a synonym)
-      if (Parser.testForWord(input, entityName)) {
+      if (Parser.testForWord(input, entity.givenName)) {
         //Return it.
         return entity;
       }
@@ -217,7 +216,7 @@ const Parser = (function() {
       if(Parser.testForWord(input, key)) {
         //Make sure the key is not "parent" - the parent property of the
         //subject.methods object is not a function.
-        if (Parser.testForWord("parent", key)) {
+        if (key == "parent") {
           return "nothing";
         } else {
           //As long as it's not "parent", return the key.
@@ -250,17 +249,13 @@ const Parser = (function() {
   }
   this.parseAndExecuteInput = function(input) {
     //Parses and executes input, with a few additional effects depending on
-    //advanceTurn and displayInput.
+    //advanceTurn.
 
     //Parse the input.
     var parsedInput = this.parseInput(input);
     var subject = parsedInput[0];
     var action = parsedInput[1];
-    //Unless the subject's displayInput is false
-    if (subject.displayInput != false) {
-      //IO.output the player's input
-      IO.outputUserText(input);
-    }
+    IO.outputUserText(input);
     subject.methods[action]();
     //Unless the subject's advanceTurn is false
     if (subject.advanceTurn != false) {
@@ -283,19 +278,20 @@ const Display = (function() {
   }
   this.updateNameDisplay = function(str) {
     var nameDisplay = document.getElementById("roomNameDisplay");
+    str = str ? str : nameDisplay.innerHTML
     nameDisplay.innerHTML = str;
     nameDisplay.className = "emphasizeName";
   }
   this.manageListGrammar = function(elements, delimiter) {
     var description = "";
     for (var i = 0; i < elements.length; i++) {
-      if (i == 0) {
-        description += elements[i];
-      } else if (i < elements.length - 1) {
-        description += ", " + elements[i];
-      } else if (i >= elements.length - 1) {
-        description += " " + delimiter + " " + elements[i];
+      if (i > 0 && elements.length > 2) {
+        description += ", ";
       }
+      if (i >= elements.length - 1 && elements.length > 1) {
+        description += " " + delimiter + " ";
+      }
+      description += elements[i];
     }
     return description;
   }
@@ -377,14 +373,11 @@ const Sound = (function() {
 })();
 //Classes
 const Interactable = function(name, location, methods, givenName, turn) {
-  Object.assign(this, new Moving());
+  Object.assign(this, new Moving(name, location));
 
   this.methods = methods;
   this.methods.parent = this;
 
-  this.name = name;
-  this.locations = [location, "", "", "", ""];
-  Object.seal(this.locations);
   this.givenName = givenName;
 
   this.turn = turn ? turn : function() {};
@@ -392,14 +385,13 @@ const Interactable = function(name, location, methods, givenName, turn) {
   this.age = 0;
 
   this.advanceTurn = true;
-  this.displayInput = true;
 
   return this;
 }
 const Entity = function(name, location, description, methods, givenName, turn) {
   Object.assign(this, new Interactable(name, location, methods, givenName,
      turn));
-  methods = Object.assign( {
+  this.methods = Object.assign( {
     nothing: function() {
       IO.output("Do what with the " + givenName + "?");
     },
@@ -409,7 +401,7 @@ const Entity = function(name, location, description, methods, givenName, turn) {
     attack: function() {
       IO.output("I don't think that's wise.");
     }
-  }, methods);
+  }, this.methods);
   this.description = description;
   return this;
 }
@@ -466,24 +458,24 @@ const PlayerEntity = function(location, methods, turn) {
   }, methods);
 
   this.advanceTurn = false;
-  this.displayInput = true;
   this.methods.parent = this;
-  this.inventoryContains = function() {
+  this.inventoryContains = function(name) {
     //Tests for an entity with a given name in the "Inventory" location. This is
     return getRooms().findByName("Inventory").contains(name);
   }
   this.moveByInput = function(input) {
     //Moves the player according to their input.
+    var oldLocation = this.locations[0];
 
-    //Gather information on the player's movement.
     var direction = getRooms().findByName(this.locations[0]).testForExits(input);
-    //See if they entered a valid direction
     if (direction) {
       getPlayer().move(direction);
-
-    //If they didn't enter a valid direction, tell them.
     } else {
       IO.output("You can't go that way.");
+    }
+
+    if (oldLocation != this.locations[0]) {
+      getRooms().findByName(this.locations[0]).updateDisplay();
     }
   }
   this.lose = function(message, undoMessage) {
@@ -495,14 +487,13 @@ const PlayerEntity = function(location, methods, turn) {
     loseConversation.addTopic("nothing", undoMessage);
     loseConversation.gracefullyStart();
     Display.updateNameDisplay("You Lose");
-    IO.output(Display.embolden(undoMessage, "undo"));
+    IO.output(undoMessage);
   }
   this.turn = turn;
   return this;
 }
-const Obstruction = function(name, location, methods, exits, givenName, turn) {
-  Object.assign(this, new Interactable(name, location, methods, givenName,
-     turn));
+const Obstruction = function(name, location, exits, additive) {
+  Object.assign(this, new Moving(name, location));
   this.describe = function() {
     var description = "";
     for (var i = 0; i < this.exits.length; i++) {
@@ -514,9 +505,10 @@ const Obstruction = function(name, location, methods, exits, givenName, turn) {
     return description
   }
   this.exits = exits;
+  this.additive = additive ? true : false;
   return this;
 }
-const Conversation = function(name, topics, methods) {
+const Conversation = function(name, topics) {
   //A conversation is a special entity. The "topics" parameter is an object
   //with string/string pairs, which gets converted into methods that IO.output the
   //value. The "methods" parameter is optional, and works as expected.
@@ -527,39 +519,38 @@ const Conversation = function(name, topics, methods) {
     goodbye: function() {
       this.parent.gracefullyEnd();
     }
-  }, methods);
+  }, this.methods);
 
   this.advanceTurn = false;
   this.methods.parent = this;
   return this;
 }
 const Sequence = function(array) {
-  Object.assign(this, new Wrapping());
+  Object.assign(array, new Wrapping());
 
-  this.advance = function() {
-    if (this.functions[this.position]) {
-      this.functions[this.position]();
-      this.position += 1;
+  array.advance = function() {
+    array.position += 1;
+    if (array[array.position]) {
+      array[array.position]();
     } else {
-      this.parent.gracefullyEnd();
-      this.position = 0;
+      array.parent.gracefullyEnd();
+      array.position = -1;
     }
   }
 
-  this.setPosition = function(position) {
-    this.position = position;
+  array.setPosition = function(position) {
+    array.position = position - 1;
   }
 
-  this.functions = [];
   for (var i = 0; i < array.length; i++) {
-    this.functions[i] = this.wrap(array[i]);
+    array[i] = array.wrap(array[i]);
   }
 
-  this.position = 0;
-  this.parent = null;
-  return this;
+  array.position = -1;
+  array.parent = null;
+  return array;
 }
-const Monolog = function(name, sequence, displayInput, advanceTurn) {
+const Monolog = function(name, sequence, advanceTurn) {
   //A Monolog is a special conversation that moves along regardless of input.
   //Instead of a dialog tree, it's a dialog railroad.
 
@@ -575,10 +566,16 @@ const Monolog = function(name, sequence, displayInput, advanceTurn) {
     }
   }
 
-  this.sequence = new Sequence(sequence);
-  this.sequence.parent = this;
+  this.end = function() {
+    this.warp("Nowhere");
+    if (getPlayer().locations[0] == "Conversing") {
+      getPlayer().inverseWarp();
+    }
+    this.sequence.setPosition(0);
+  }
+  this.sequence = sequence.length >= 0 ? new Sequence(sequence) : sequence;
 
-  this.displayInput = displayInput === true ? true : false;
+  this.sequence.parent = this;
   this.advanceTurn = advanceTurn === true ? true : false;
   this.methods.parent = this;
   return this;
@@ -647,8 +644,6 @@ const Room = function(name, description, exits, givenName, image, music) {
     //Initialize all of the necessary variables.
     var entities = this.localize(getEntities());
     var exits = this.exits;
-    var interceptors = this.localize(getInterceptors());
-    var obstructions = this.localize(getObstructions());
     //Set a blank description and add each element if it applies.
     var description = "";
     description += this.description;
@@ -657,9 +652,6 @@ const Room = function(name, description, exits, givenName, image, music) {
     }
     if (exits.length > 0) {
       description += " You can " + this.describeExits();
-    }
-    if (obstructions.length > 0) {
-      description += " However, " + this.describeObstructions();
     }
     //Return the description.
     return description;
@@ -687,33 +679,25 @@ const Room = function(name, description, exits, givenName, image, music) {
     }
     return Display.manageListGrammar(descriptionArray, "or") + ".";
   }
-  this.describeObstructions = function() {
-    var descriptionArray = [];
-    var obstructions = this.localize(getObstructions());
-    for (var i = 0; i < obstructions.length; i++) {
-      descriptionArray.push(obstructions[i].describe());
-    }
-    return Display.manageListGrammar(descriptionArray, "and") + ".";
-  }
-  this.describeSingularObstruction = function(obstruction) {
-
-  }
   this.getObstructionExits = function(obstructions) {
     obstructions = this.localize(obstructions);
     var exitArray = [];
     for (var i = 0; i < obstructions.length; i++) {
       var exits = obstructions[i].exits;
       for (var j = 0; j < exits.length; j++) {
-        exitArray.push(exits[i]);
+        exitArray.push(exits[j]);
       }
     }
     return exitArray;
   }
   this.getExits = function() {
-    var obstructed = this.getObstructionExits(this.localize(getObstructions()));
-    var intercepted = this.getObstructionExits(this.localize(getInterceptors()));
-    var exits = intercepted.concat(this.exits);
-    return new NamedArray(exits.filter(function(exit) {
+    var obstructed = this.getObstructionExits(getObstructions());
+    var intercepted = this.getObstructionExits(getObstructions().filter(
+      function(obstruction) {
+        return obstruction.additive;
+    }));
+    //remove exits colliding with *any* obstructions
+    var exits = new NamedArray(this.exits.filter(function(exit) {
       var collisions = 0;
       for (var i = 0; i < obstructed.length; i++) {
         if (obstructed[i].name == exit.name) {
@@ -722,6 +706,8 @@ const Room = function(name, description, exits, givenName, image, music) {
       }
       return collisions < 1;
     }));
+    //add exits belonging to additive obstructions ("interceptors")
+    return exits.concat(intercepted);
   }
   this.testForExits = function(input) {
     var exits = this.getExits();
@@ -733,21 +719,8 @@ const Room = function(name, description, exits, givenName, image, music) {
     }
     return false;
   }
-  this.testForObstructions = function(input) {
-    obstructions = this.localize(getObstructions());
-    for (var i = 0; i < obstructions.length; i++) {
-      var exits = obstructions[i].exits;
-      for (var j = 0; j < exits.length; j++) {
-        if (Parser.testForWord(input, exits[j].name)) {
-          return obstructions[i];
-        }
-      }
-    }
-    return false;
-  }
   this.contains = function(name) {
     //Checks the room with the given roomName for the entity with the given name.
-
     //Get all the entities in the room
     var entities = this.localize(getInteractables());
     //Find the entity you're looking for
@@ -761,9 +734,11 @@ const Room = function(name, description, exits, givenName, image, music) {
   }
   return this;
 }
-const Exit = function(name, location, description) {
+const Exit = function(name, take, description) {
   this.name = name;
-  this.location = location;
+  this.take = typeof take == "string" ? function(entity) {
+    entity.warp(take);
+  } : take;
   this.description = description;
   return this;
 }
@@ -793,7 +768,10 @@ const NamedArray = function(array) {
   }
   return array;
 }
-const Moving = function() {
+const Moving = function(name, location) {
+  this.name = name;
+  this.locations = [location, "", "", "", ""];
+  Object.seal(this.locations);
   this.warp = function(roomName) {
     if (roomName == this.locations[0]) {
       return;
@@ -814,14 +792,13 @@ const Moving = function() {
   this.move = function(direction) {
     //Moves an entity in the given direction. If there is no such direction, it
     //will fail loudly.
-    var currentRoom = getRooms().findByName(this.locations[0]);
-    var exits = currentRoom.getExits();
-    this.warp(exits.findByName(direction).location);
-    getRooms().findByName(getPlayer().locations[0]).updateDisplay();
+    var exits = getRooms().findByName(this.locations[0]).getExits();
+    exits.findByName(direction).take(this);
   }
+  return this;
 }
-const GameWorld = function(player, rooms, entities, obstructions, interceptors,
- conversations, init) {
+const GameWorld = function(player, rooms, entities, obstructions, conversations,
+ init) {
   this.player = player;
   this.rooms = rooms.concat([
     new Room("Inventory",
@@ -833,27 +810,28 @@ const GameWorld = function(player, rooms, entities, obstructions, interceptors,
       "",
       [],
       ""
+    ),
+    new Room("Nowhere",
+      "",
+      [],
+      ""
     )]);
   this.entities = entities;
   this.obstructions = obstructions;
-  this.interceptors = interceptors;
   this.conversations = conversations.concat([
     (function() {
       Object.assign(this, new Conversation("Lose",
         {
           message: "",
-          nothing: ""
-        },
-        {
+          nothing: "",
           "undo": () => {
-            this.gracefullyEnd();
+            this.parent.gracefullyEnd();
           },
           "goodbye": () => {
-            this.methods.nothing();
+            this.nothing();
           }
         }
       ));
-      this.displayInput = false;
       return this;
     })()
   ]);
@@ -906,9 +884,7 @@ const Conversational = function() {
     this.methods[key]();
   }
   this.end = function() {
-    if (this.locations[0] == "Conversing") {
-      this.warp("Nowhere");
-    }
+    this.warp("Nowhere");
     if (getPlayer().locations[0] == "Conversing") {
       getPlayer().inverseWarp();
     }
@@ -924,7 +900,10 @@ const Topical = function(topics) {
   Object.assign(this, new Wrapping());
 
   this.addTopic = function(key, paragraph) {
-    this.methods[key] = this.wrap(paragraph);
+    if (typeof paragraph == "string") {
+      paragraph = this.wrap(paragraph);
+    }
+    this.methods[key] = paragraph;
   }
 
   this.methods = {};
@@ -951,15 +930,11 @@ function getWorld() {
   return World;
 }
 function getInteractables() {
-  return getEntities().concat(getObstructions(), getInterceptors(),
-   getConversations(), getPlayer());
+  return getEntities().concat(getConversations(), getPlayer());
 }
 function getEntities() {
   return getWorld().entities;
 }
 function getObstructions() {
   return getWorld().obstructions;
-}
-function getInterceptors() {
-  return getWorld().interceptors;
 }
