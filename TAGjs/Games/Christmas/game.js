@@ -40,7 +40,7 @@ var Configuration = {
   useSoundControls: false
 }
 var World = new GameWorld(
-  new PlayerEntity("space.junction",
+  new PlayerEntity("home.livingroom",
     {
       hint: function() {
         IO.output("Hint: Typing 'HINT' will give you a helpful hint.");
@@ -1086,14 +1086,14 @@ var World = new GameWorld(
     ),
     //space
     new Obstruction("space.truenorth",
-      "space.junction",
+      "Nowhere",
       [
         new Exit("true north","truenorth.landing","fly to true north")
       ],
       true
     ),
     new Obstruction("space.hashelmet",
-      "space.junction",
+      "Nowhere",
       [
         new Exit("space","space.station","go to space")
       ],
