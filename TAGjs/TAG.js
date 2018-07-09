@@ -40,11 +40,11 @@ const Setup = (function() {
     musicButton.onclick = function() {Sound.toggleElement("music");};
     soundButton.onclick = function() {Sound.toggleElement("sound");};
     //If USE_SOUND is true
-    if (Configuration.useMusicControls == false) {
+    if (getConfiguration().globals.useMusicControls == false) {
       var musicControls = document.getElementById("musicControls");
       musicControls.style.display = "none";
     }
-    if (Configuration.useSoundControls == false) {
+    if (getConfiguration().globals.useSoundControls == false) {
       var soundControls = document.getElementById("soundControls");
       soundControls.style.display = "none";
     }
@@ -797,9 +797,10 @@ const Moving = function(name, location) {
   }
   return this;
 }
-const GameWorld = function(player, rooms, entities, obstructions, conversations,
- init) {
-  this.player = player;
+const GameWorld = function(players, rooms, entities, obstructions,
+ conversations, init) {
+  this.players = players.length > 0 ? players : [players];
+  this.activePlayer = 0;
   this.rooms = rooms.concat([
     new Room("Inventory",
       "This is an inventory.",
@@ -848,6 +849,54 @@ const GameWorld = function(player, rooms, entities, obstructions, conversations,
         interactables[i].turn();
       }
     }
+  }
+  this.setActivePlayer = function(index) {
+    this.activePlayer = index;
+  }
+  this.start = function() {
+    if (typeof getConfiguration() != "undefined") {
+      getConfiguration().worldstack.push(this);
+    } else {
+      throw "Cannot start world when Configuration has not been initialized."
+    }
+  }
+  this.end = function() {
+    if (getConfiguration().getWorld() == this) {
+      getConfiguration().worldstack.pop();
+    } else {
+      throw "Cannot end inactive world.";
+    }
+  }
+  this.getPlayer = function() {
+    //Returns the global Player object.
+      return this.players[this.activePlayer];
+  }
+  this.getRooms = function() {
+    return this.rooms;
+  }
+  this.getConversations = function() {
+    return this.conversations;
+  }
+  this.getInteractables = function() {
+    return this.getEntities().concat(this.getConversations(), this.getPlayer());
+  }
+  this.getEntities = function() {
+    return this.entities;
+  }
+  this.getObstructions = function() {
+    return this.obstructions;
+  }
+}
+const GameConfiguration = function(globals, synonyms, worldstack) {
+  this.globals = Object.assign({
+    useImages: false,
+    useMusicControls: false,
+    useSoundControls: false
+  }, globals);
+  this.synonyms = synonyms;
+  this.worldstack = worldstack.length > 0 ? worldstack : [worldstack];
+  this.getWorld = function() {
+    return this.worldstack[this.worldstack.length - 1];
   }
 }
 const Wrapping = function() {
@@ -916,25 +965,28 @@ const Topical = function(topics) {
   return this;
 }
 //Context Accessors
+function getConfiguration() {
+  return Configuration;
+}
 function getPlayer() {
-  //Returns the global Player object.
-    return getWorld().player;
+  return getWorld().getPlayer();
 }
 function getRooms() {
-  return getWorld().rooms;
+  return getWorld().getRooms();
 }
 function getConversations() {
-  return getWorld().conversations;
+  return getWorld().getConversations();
 }
 function getWorld() {
-  return World;
+  var worldstack = getConfiguration().worldstack;
+  return worldstack[worldstack.length - 1];
 }
 function getInteractables() {
-  return getEntities().concat(getConversations(), getPlayer());
+  return getWorld().getInteractables();
 }
 function getEntities() {
-  return getWorld().entities;
+  return getWorld().getEntities();
 }
 function getObstructions() {
-  return getWorld().obstructions;
+  return getWorld().getObstructions();
 }
