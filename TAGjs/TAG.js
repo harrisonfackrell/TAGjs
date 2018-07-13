@@ -64,22 +64,7 @@ const Setup = (function() {
       }
     }
   }
-  this.getRoomImages = function() {
-    var rooms = getRooms();
-    var images = [];
-    for (var i = 0; i < rooms.length; i++) {
-      images.push(rooms[i].image);
-    }
-    return images;
-  }
-  this.getRoomAudio = function() {
-    var rooms = getRooms();
-    var audio = [];
-    for (var i = 0; i < rooms.length; i++) {
-      audio.push(rooms[i].music);
-    }
-    return audio;
-  }
+
   this.setup = function() {
     //Runs necessary setup functions.
     this.nameSetup();
@@ -87,18 +72,17 @@ const Setup = (function() {
     this.imageSetup();
     this.audioSetup();
 
-    this.preloadImages(this.getRoomImages());
-    this.preloadAudio(this.getRoomAudio());
-
-    var movies = getConversations();
+    var movies = getCutscenes();
     for (var i = 0; i < movies.length; i++) {
       if (typeof movies[i].preload != "undefined") {
         movies[i].preload();
       }
     }
-
-    //init() is defined in game.js
-    getWorld().init();
+    var worlds = getConfiguration().worlds;
+    Object.keys(worlds).forEach(function(key) {
+      worlds[key].preload();
+    })
+    worlds["main"].start();
   }
   return this;
 })();
@@ -482,7 +466,7 @@ const PlayerEntity = function(location, methods, turn) {
     message = message ? message : "You have lost.";
     undoMessage = undoMessage ? Display.embolden(undoMessage, "undo") : "You can type\
      <strong>undo</strong> to try again.";
-    var loseConversation = getConversations().findByName("Lose");
+    var loseConversation = getCutscenes().findByName("Lose");
     loseConversation.addTopic("message", message);
     loseConversation.addTopic("nothing", undoMessage);
     loseConversation.gracefullyStart();
@@ -509,20 +493,15 @@ const Obstruction = function(name, location, exits, additive) {
   return this;
 }
 const Conversation = function(name, topics) {
-  //A conversation is a special entity. The "topics" parameter is an object
-  //with string/string pairs, which gets converted into methods that IO.output the
-  //value. The "methods" parameter is optional, and works as expected.
 
   Object.assign(this, new Interactable(name, "Nowhere", {}, "", function() {}),
     new Wrapping(), new Conversational(), new Topical(topics));
   this.methods = Object.assign(this.methods, {
     goodbye: function() {
-      this.parent.gracefullyEnd();
+      getConfiguration().getWorld().end();
     }
   }, this.methods);
 
-  this.advanceTurn = false;
-  this.methods.parent = this;
   return this;
 }
 const Sequence = function(array) {
@@ -533,7 +512,7 @@ const Sequence = function(array) {
     if (array[array.position]) {
       array[array.position]();
     } else {
-      array.parent.gracefullyEnd();
+      getWorld().end();
       array.position = -1;
     }
   }
@@ -565,19 +544,9 @@ const Monolog = function(name, sequence, advanceTurn) {
       this.nothing();
     }
   }
-
-  this.end = function() {
-    this.warp("Nowhere");
-    if (getPlayer().locations[0] == "Conversing") {
-      getPlayer().inverseWarp();
-    }
-    this.sequence.setPosition(0);
-  }
+  this.methods.parent = this;
   this.sequence = sequence.length >= 0 ? new Sequence(sequence) : sequence;
 
-  this.sequence.parent = this;
-  this.advanceTurn = advanceTurn === true ? true : false;
-  this.methods.parent = this;
   return this;
 }
 const Movie = function(name, sequence, imgSuffix, sndSuffix) {
@@ -600,7 +569,7 @@ const Movie = function(name, sequence, imgSuffix, sndSuffix) {
       sequence.advance();
     }
   }
-
+  this.methods.parent = this;
   this.preload = function() {
     //Preloads a movie.
 
@@ -798,7 +767,7 @@ const Moving = function(name, location) {
   return this;
 }
 const GameWorld = function(players, rooms, entities, obstructions,
- conversations, init) {
+ init, endLogic) {
   this.players = players.length > 0 ? players : [players];
   this.activePlayer = 0;
   this.rooms = rooms.concat([
@@ -819,24 +788,8 @@ const GameWorld = function(players, rooms, entities, obstructions,
     )]);
   this.entities = entities;
   this.obstructions = obstructions;
-  this.conversations = conversations.concat([
-    (function() {
-      Object.assign(this, new Conversation("Lose",
-        {
-          message: "",
-          nothing: "",
-          "undo": () => {
-            this.parent.gracefullyEnd();
-          },
-          "goodbye": () => {
-            this.nothing();
-          }
-        }
-      ));
-      return this;
-    })()
-  ]);
   this.init = init ? init : function() {};
+  this.endLogic = endLogic ? endLogic : function() {};
 
   this.nextTurn = function() {
     var interactables = getInteractables();
@@ -853,9 +806,14 @@ const GameWorld = function(players, rooms, entities, obstructions,
   this.setActivePlayer = function(index) {
     this.activePlayer = index;
   }
+  this.preload = function() {
+    Setup.preloadImages(this.getRoomImages());
+    Setup.preloadAudio(this.getRoomAudio());
+  }
   this.start = function() {
     if (typeof getConfiguration() != "undefined") {
       getConfiguration().worldstack.push(this);
+      this.init();
     } else {
       throw "Cannot start world when Configuration has not been initialized."
     }
@@ -863,9 +821,26 @@ const GameWorld = function(players, rooms, entities, obstructions,
   this.end = function() {
     if (getConfiguration().getWorld() == this) {
       getConfiguration().worldstack.pop();
+      this.endLogic();
     } else {
       throw "Cannot end inactive world.";
     }
+  }
+  this.getRoomImages = function() {
+    var rooms = this.getRooms();
+    var images = [];
+    for (var i = 0; i < rooms.length; i++) {
+      images.push(rooms[i].image);
+    }
+    return images;
+  }
+  this.getRoomAudio = function() {
+    var rooms = this.getRooms();
+    var audio = [];
+    for (var i = 0; i < rooms.length; i++) {
+      audio.push(rooms[i].music);
+    }
+    return audio;
   }
   this.getPlayer = function() {
     //Returns the global Player object.
@@ -874,11 +849,11 @@ const GameWorld = function(players, rooms, entities, obstructions,
   this.getRooms = function() {
     return this.rooms;
   }
-  this.getConversations = function() {
+  this.getCutscenes = function() {
     return this.conversations;
   }
   this.getInteractables = function() {
-    return this.getEntities().concat(this.getConversations(), this.getPlayer());
+    return this.getEntities().concat(this.getPlayer());
   }
   this.getEntities = function() {
     return this.entities;
@@ -887,16 +862,37 @@ const GameWorld = function(players, rooms, entities, obstructions,
     return this.obstructions;
   }
 }
-const GameConfiguration = function(globals, synonyms, worldstack) {
+const GameConfiguration = function(globals, synonyms, worlds, cutscenes) {
   this.globals = Object.assign({
     useImages: false,
     useMusicControls: false,
     useSoundControls: false
   }, globals);
   this.synonyms = synonyms;
-  this.worldstack = worldstack.length > 0 ? worldstack : [worldstack];
+  this.worlds = Object.keys(worlds).length > 0 ? worlds : {main: worlds};
+  this.worldstack = [];
+  this.cutscenes = cutscenes.concat([
+    (function() {
+      Object.assign(this, new Conversation("Lose",
+        {
+          message: "",
+          nothing: "",
+          "undo": () => {
+            getWorld().end();
+          },
+          "goodbye": () => {
+            this.nothing();
+          }
+        }
+      ));
+      return this;
+    })()
+  ]);
   this.getWorld = function() {
     return this.worldstack[this.worldstack.length - 1];
+  }
+  this.getCutscenes = function() {
+    return this.cutscenes;
   }
 }
 const Wrapping = function() {
@@ -917,31 +913,27 @@ const Wrapping = function() {
   return this;
 }
 const Conversational = function() {
+  Object.assign(this, new Wrapping());
   this.start = function() {
-    var activeConvs = getRooms().findByName("Conversing").localize(getConversations());
-    for (var i = 0; i < activeConvs.length; i++) {
-      getConversations().findByName(activeConvs[i].name).end();
-    }
-    getPlayer().warp("Conversing");
-    this.warp("Conversing");
+    var conversationWorld = new GameWorld(
+      new PlayerEntity("Nowhere", {}, () => {}),
+      new NamedArray([]),
+      new NamedArray([this]),
+      new NamedArray([]),
+      () => {
+        IO.output("**********");
+        var key = Object.keys(this.methods)[0];
+        this.methods[key]();
+      },
+      () => {
+        IO.output("**********");
+        getRooms().findByName(getPlayer().locations[0]).updateDisplay();
+      }
+    );
+    conversationWorld.start();
   }
   this.gracefullyStart = function() {
     this.start();
-    IO.output("**********");
-    //Display the first topic or statement.
-    var key = Object.keys(this.methods)[0];
-    this.methods[key]();
-  }
-  this.end = function() {
-    this.warp("Nowhere");
-    if (getPlayer().locations[0] == "Conversing") {
-      getPlayer().inverseWarp();
-    }
-  }
-  this.gracefullyEnd = function() {
-    this.end();
-    IO.output("**********");
-    getRooms().findByName(getPlayer().locations[0]).updateDisplay();
   }
   return this;
 }
@@ -974,8 +966,8 @@ function getPlayer() {
 function getRooms() {
   return getWorld().getRooms();
 }
-function getConversations() {
-  return getWorld().getConversations();
+function getCutscenes() {
+  return getConfiguration().getCutscenes();
 }
 function getWorld() {
   var worldstack = getConfiguration().worldstack;
