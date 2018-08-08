@@ -1150,7 +1150,7 @@ var Configuration = new GameConfiguration(
         "nothing": "SNARLROARGROWLLLLROAR (I'm afraid I lack the intellectual \
           capacity to understand your statements.)"
       }
-    ),
+    )
   ])
 )
 //Execution---------------------------------------------------------------------

@@ -1,6 +1,6 @@
 //Modules
 const Setup = (function() {
-  this.nameSetup = function() {
+  var nameSetup = function() {
     var nameDisplay = document.getElementById("roomNameDisplay");
     nameDisplay.addEventListener("webkitAnimationEnd", function(event) {
       nameDisplay.className = "";
@@ -9,14 +9,14 @@ const Setup = (function() {
       nameDisplay.className = "";
     });
   }
-  this.inputSetup = function() {
+  var inputSetup = function() {
     //Finds the inputBox and assigns the necessary handler to it.
     var inputBox = document.getElementById("inputBox");
     inputBox.onkeydown = function(event) {IO.listenForKey(event, "Enter",
     IO.enterHandler);};
     inputBox.focus();
   }
-  this.imageSetup = function() {
+  var imageSetup = function() {
     //Finds the imageDisplay and configures it according to useImages
     var imageDisplay = document.getElementById("imageDisplay");
     //If useImages is true
@@ -30,7 +30,7 @@ const Setup = (function() {
       imageDisplay.style.display = "none";
     }
   }
-  this.audioSetup = function() {
+  var audioSetup = function() {
     //Sets up the audio buttons.
 
     //Find the Buttons
@@ -64,13 +64,12 @@ const Setup = (function() {
       }
     }
   }
-
   this.setup = function() {
     //Runs necessary setup functions.
-    this.nameSetup();
-    this.inputSetup();
-    this.imageSetup();
-    this.audioSetup();
+    nameSetup();
+    inputSetup();
+    imageSetup();
+    audioSetup();
 
     var movies = getCutscenes();
     for (var i = 0; i < movies.length; i++) {
@@ -171,7 +170,7 @@ const Parser = (function() {
     var inputBox = document.getElementById("inputBox");
     return inputBox.value;
   }
-  this.detectEntity = function(input, entities) {
+  var detectEntity = function(input, entities) {
     //Returns the first entity referenced by the input that is contained in
     //"entities". This is according to the order of the entities array, not the
     //input itself. If no entity is found, it returns the player.
@@ -188,7 +187,7 @@ const Parser = (function() {
     //If nothing is referenced, return the player.
     return getPlayer();
   }
-  this.detectAction = function(input, subject) {
+  var detectAction = function(input, subject) {
     //Tests the input for an action attached to the given "subject" entity.
 
     //Get the keys for the subject's methods
@@ -211,7 +210,7 @@ const Parser = (function() {
     //If nothing matches, return "nothing".
     return "nothing";
   }
-  this.parseInput = function(input) {
+  var parseInput = function(input) {
     //Parses input, returning a subject entity and an action attached to that
     //entity.
 
@@ -219,15 +218,15 @@ const Parser = (function() {
     var location = getPlayer().locations[0];
     var entities = getRooms().findByName(location).localize(getInteractables());
     //Find the subject.
-    var subject = this.detectEntity(input, entities);
+    var subject = detectEntity(input, entities);
     //If it's the player (default for finding none)
     if (subject == getPlayer()) {
       //Try again with inventory items.
       entities = getRooms().findByName("Inventory").localize(getInteractables());
-      subject = this.detectEntity(input, entities);
+      subject = detectEntity(input, entities);
     }
     //Find an action
-    var action = this.detectAction(input, subject);
+    var action = detectAction(input, subject);
     //Return parsed input.
     return [subject, action];
   }
@@ -236,7 +235,7 @@ const Parser = (function() {
     //advanceTurn.
 
     //Parse the input.
-    var parsedInput = this.parseInput(input);
+    var parsedInput = parseInput(input);
     var subject = parsedInput[0];
     var action = parsedInput[1];
     IO.outputUserText(input);
@@ -254,9 +253,7 @@ const Display = (function() {
     //Updates the image display.
 
     var imageDisplay = document.getElementById("imageDisplay");
-    if (typeof image == "undefined" || image == "") {
-      image = imageDisplay.src;
-    }
+    image = typeof image == "undefined" || image == "" ? imageDisplay.src : image;
     imageDisplay.src = image;
 
   }
@@ -281,11 +278,9 @@ const Display = (function() {
   }
   this.embolden = function(string, substr) {
     //Bolds a substring within a string. Actually just a special call of addTag.
-    substr = typeof substr == "undefined" || substr == "" ? string : substr;
     return this.addTag("strong", string, substr);
   }
   this.colorize = function(color, string, substr) {
-    substr = typeof substr == "undefined" || substr == "" ? string : substr;
     return this.addTag("span style=\"color: " + color + "\"", string, substr);
   }
   this.addTag = function(tagtext, string, substr) {
@@ -293,17 +288,20 @@ const Display = (function() {
     //copy surrounded by HTML tags with the given tagtext. If no string is
     //provided, it simply surrounds the string with tags.
 
-    substr = typeof substr == "undefined" || substr == "" ? string : substr;
-    //Test for substring within string.
-
-    if (string.includes(substr)) {
+    //If substr is an array of strings, perform this method for each
+    //individually.
+    if (substr[0].length > 1) {
+      for (var i = 0; i < substr.length; i++) {
+        this.addTag(substr[i]);
+      }
+    } else {
+      //Convert the substr to a regex; if it's empty, make a regex out of string.
+      substr = new RegExp(typeof substr == "undefined" || substr == "" ?
+        string : substr, "gi");
       //Use string.replace to add tags around the substring.
-      var description = string.replace(substr, function(str) {
+      return string.replace(substr, function(str) {
         return "<" + tagtext + ">" + str + "</" + tagtext + ">";
       });
-      return description;
-    } else {
-      return string;
     }
   }
   return this;
@@ -369,7 +367,7 @@ const Interactable = function(name, location, methods, givenName, turn) {
   this.age = 0;
 
   this.advanceTurn = true;
-
+  this.type = "Interactable";
   return this;
 }
 const Entity = function(name, location, description, methods, givenName, turn) {
@@ -387,6 +385,7 @@ const Entity = function(name, location, description, methods, givenName, turn) {
     }
   }, this.methods);
   this.description = description;
+  this.type = "Entity";
   return this;
 }
 const PlayerEntity = function(location, methods, turn) {
@@ -414,20 +413,18 @@ const PlayerEntity = function(location, methods, turn) {
       }
     },
     move: function() {
-      getPlayer().moveByInput(Parser.getInput());
+      this.parent.moveByInput(Parser.getInput());
       getWorld().nextTurn();
     },
     look: function() {
       getRooms().findByName(this.parent.locations[0]).updateDisplay();
     },
     help: function() {
-      var player = getPlayer();
-      var description = "Recognized commands include ";
-      var keys = Object.keys(player.methods);
-      keys = keys.filter( function(key) {
+      var keys = Object.keys(this.parent.methods).filter(function(key) {
         return (key !== "nothing" && key !== "parent");
       });
-      description += Display.manageListGrammar(keys, "and");
+      var description = "Recognized commands include " +
+       Display.manageListGrammar(keys, "and");
       for (var i in keys) {
         description = Display.embolden(description, keys[i]);
       }
@@ -436,7 +433,7 @@ const PlayerEntity = function(location, methods, turn) {
       IO.output(description);
     },
     wait: function() {
-      IO.output("You wait around for a moment");
+      IO.output("You wait around for a moment.");
       getWorld().nextTurn();
     }
   }, methods);
@@ -463,17 +460,23 @@ const PlayerEntity = function(location, methods, turn) {
     }
   }
   this.lose = function(message, undoMessage) {
-    message = message ? message : "You have lost.";
-    undoMessage = undoMessage ? Display.embolden(undoMessage, "undo") : "You can type\
-     <strong>undo</strong> to try again.";
-    var loseConversation = getCutscenes().findByName("Lose");
-    loseConversation.addTopic("message", message);
-    loseConversation.addTopic("nothing", undoMessage);
-    loseConversation.gracefullyStart();
-    Display.updateNameDisplay("You Lose");
-    IO.output(undoMessage);
+    new Conversation("Lose",
+      {
+        "message": message ? message : "You have lost.",
+        "nothing": Display.embolden(undoMessage ? undoMessage :
+          "You can type undo to try again.", "undo"),
+        "undo": () => {
+          getWorld().end();
+        }
+      },
+      function() {
+        Display.updateNameDisplay("You Lose");
+        IO.output(undoMessage);
+      }
+    ).start();
   }
   this.turn = turn;
+  this.type = "PlayerEntity";
   return this;
 }
 const Obstruction = function(name, location, exits, additive) {
@@ -490,18 +493,14 @@ const Obstruction = function(name, location, exits, additive) {
   }
   this.exits = exits;
   this.additive = additive ? true : false;
+  this.type = "Obstruction"
   return this;
 }
-const Conversation = function(name, topics) {
+const Conversation = function(name, topics, init, endLogic) {
 
   Object.assign(this, new Interactable(name, "Nowhere", {}, "", function() {}),
-    new Wrapping(), new Conversational(), new Topical(topics));
-  this.methods = Object.assign(this.methods, {
-    goodbye: function() {
-      getConfiguration().getWorld().end();
-    }
-  }, this.methods);
-
+    new Wrapping(), new Conversational(init, endLogic), new Topical(topics));
+  this.type = "Conversation";
   return this;
 }
 const Sequence = function(array) {
@@ -527,13 +526,14 @@ const Sequence = function(array) {
 
   array.position = -1;
   array.parent = null;
+  array.type = "Sequence"
   return array;
 }
-const Monolog = function(name, sequence, advanceTurn) {
+const Monolog = function(name, sequence, init, endLogic) {
   //A Monolog is a special conversation that moves along regardless of input.
   //Instead of a dialog tree, it's a dialog railroad.
 
-  Object.assign(this, new Conversational(),
+  Object.assign(this, new Conversational(init, endLogic),
    new Interactable(name, "Nowhere", {}, "", function() {}));
 
   this.methods = {
@@ -545,15 +545,15 @@ const Monolog = function(name, sequence, advanceTurn) {
     }
   }
   this.methods.parent = this;
-  this.sequence = sequence.length >= 0 ? new Sequence(sequence) : sequence;
-
+  this.sequence = sequence.advance ? new Sequence(sequence) : sequence;
+  this.type = "Monolog"
   return this;
 }
-const Movie = function(name, sequence, imgSuffix, sndSuffix) {
+const Movie = function(name, sequence, init, endLogic, imgSuffix, sndSuffix) {
   //A movie is a special kind of monolog that draws images and sound effects
   //from a dedicated folder
 
-  Object.assign(this, new Monolog(name, sequence));
+  Object.assign(this, new Monolog(name, sequence, init, endLogic));
 
   this.imgSuffix = imgSuffix ? imgSuffix : "jpg";
   this.sndSuffix = sndSuffix ? sndSufix : "wav";
@@ -588,6 +588,7 @@ const Movie = function(name, sequence, imgSuffix, sndSuffix) {
     Setup.preloadImages(images);
     Setup.preloadAudio(audio);
   }
+  this.type = "Movie"
   return this;
 }
 const Room = function(name, description, exits, givenName, image, music) {
@@ -701,6 +702,7 @@ const Room = function(name, description, exits, givenName, image, music) {
       return false;
     }
   }
+  this.type = "Room";
   return this;
 }
 const Exit = function(name, take, description) {
@@ -709,9 +711,15 @@ const Exit = function(name, take, description) {
     entity.warp(take);
   } : take;
   this.description = description;
+  this.type = "Exit";
   return this;
 }
 const NamedArray = function(array) {
+  array = array.length >= 0
+    ? array
+    : typeof array != "undefined"
+    ? [array]
+    : [];
   array.findByName = function(name) {
     for (var i = 0; i < this.length; i++) {
       if (this[i].name == name) {
@@ -721,7 +729,6 @@ const NamedArray = function(array) {
   }
   array.concat = function(...args) {
     var newArray = this.slice();
-
     for (var i = 0; i < args.length; i++) {
       var arg = args[i];
       if (typeof arg.length != "undefined") {
@@ -732,9 +739,9 @@ const NamedArray = function(array) {
         newArray.push(arg);
       }
     }
-
     return new NamedArray(newArray);
   }
+  this.type = "NamedArray";
   return array;
 }
 const Moving = function(name, location) {
@@ -768,9 +775,7 @@ const Moving = function(name, location) {
 }
 const GameWorld = function(players, rooms, entities, obstructions,
  init, endLogic) {
-  this.players = players.length > 0 ? players : [players];
-  this.activePlayer = 0;
-  this.rooms = rooms.concat([
+  rooms = rooms.concat([
     new Room("Inventory",
       "This is an inventory.",
       [],
@@ -786,8 +791,15 @@ const GameWorld = function(players, rooms, entities, obstructions,
       [],
       ""
     )]);
-  this.entities = entities;
-  this.obstructions = obstructions;
+  this.players = players.type == "NamedArray" ? players :
+   new NamedArray(players);
+  this.activePlayer = 0;
+  this.rooms = rooms.type == "NamedArray" ? rooms :
+   new NamedArray(rooms);
+  this.entities = entities.type == "NamedArray" ? entities :
+   new NamedArray(entities);
+  this.obstructions = obstructions.type == "NamedArray" ? obstructions :
+   new NamedArray(obstructions);
   this.init = init ? init : function() {};
   this.endLogic = endLogic ? endLogic : function() {};
 
@@ -810,21 +822,46 @@ const GameWorld = function(players, rooms, entities, obstructions,
     Setup.preloadImages(this.getRoomImages());
     Setup.preloadAudio(this.getRoomAudio());
   }
-  this.start = function() {
+  this.start = function(action) {
+    action = action ? action : () => {};
     if (typeof getConfiguration() != "undefined") {
       getConfiguration().worldstack.push(this);
       this.init();
+      action();
     } else {
       throw "Cannot start world when Configuration has not been initialized."
     }
   }
-  this.end = function() {
+  this.end = function(action) {
+    action = action ? action : () => {};
     if (getConfiguration().getWorld() == this) {
       getConfiguration().worldstack.pop();
       this.endLogic();
+      action();
     } else {
       throw "Cannot end inactive world.";
     }
+  }
+  this.register = function(object) {
+    //Convert object names to corresponding objects
+    object = typeof object == "string" ?
+      (() => {
+        var position = getConfiguration().worldstack.indexOf(this);
+        var oldWorld = getConfiguration().getWorld(position - 1);
+        return oldWorld.getAllObjects().findByName(object);
+      })() : object;
+    //Throw an error if the specified object does not exist
+    if (!object) {
+      throw "Cannot register nonexistent object with a GameWorld."
+    }
+    //Add the object to the appropriate collection
+    var collections = {
+      "PlayerEntity": this.players,
+      "Entity": this.entities,
+      "Obstruction": this.obstructions,
+      "Room": this.rooms
+    }
+    collections[object.type].push(object);
   }
   this.getRoomImages = function() {
     var rooms = this.getRooms();
@@ -861,6 +898,10 @@ const GameWorld = function(players, rooms, entities, obstructions,
   this.getObstructions = function() {
     return this.obstructions;
   }
+  this.getAllObjects = function() {
+    return this.getInteractables().concat(getObstructions(), getRooms());
+  }
+  return this;
 }
 const GameConfiguration = function(globals, synonyms, worlds, cutscenes) {
   this.globals = Object.assign({
@@ -871,29 +912,16 @@ const GameConfiguration = function(globals, synonyms, worlds, cutscenes) {
   this.synonyms = synonyms;
   this.worlds = Object.keys(worlds).length > 0 ? worlds : {main: worlds};
   this.worldstack = [];
-  this.cutscenes = cutscenes.concat([
-    (function() {
-      Object.assign(this, new Conversation("Lose",
-        {
-          message: "",
-          nothing: "",
-          "undo": () => {
-            getWorld().end();
-          },
-          "goodbye": () => {
-            this.nothing();
-          }
-        }
-      ));
-      return this;
-    })()
-  ]);
-  this.getWorld = function() {
-    return this.worldstack[this.worldstack.length - 1];
+  this.cutscenes = cutscenes;
+  this.getWorld = function(index) {
+    index = index > -1 ? index : this.worldstack.length - 1;
+    return this.worldstack[index];
   }
   this.getCutscenes = function() {
     return this.cutscenes;
   }
+  this.type = "GameWorld";
+  return this;
 }
 const Wrapping = function() {
   this.wrap = (obj) => {
@@ -912,25 +940,25 @@ const Wrapping = function() {
   }
   return this;
 }
-const Conversational = function() {
+const Conversational = function(init, endLogic) {
   Object.assign(this, new Wrapping());
   this.start = function() {
-    var conversationWorld = new GameWorld(
+    new GameWorld(
       new PlayerEntity("Nowhere", {}, () => {}),
       new NamedArray([]),
       new NamedArray([this]),
       new NamedArray([]),
-      () => {
-        IO.output("**********");
-        var key = Object.keys(this.methods)[0];
-        this.methods[key]();
-      },
-      () => {
-        IO.output("**********");
-        getRooms().findByName(getPlayer().locations[0]).updateDisplay();
-      }
-    );
-    conversationWorld.start();
+      init ? init :
+        () => {
+          IO.output("**********");
+          this.methods[Object.keys(this.methods)[0]]();
+        },
+      endLogic ? endLogic :
+        () => {
+          IO.output("**********");
+          getRooms().findByName(getPlayer().locations[0]).updateDisplay();
+        }
+    ).start();
   }
   this.gracefullyStart = function() {
     this.start();

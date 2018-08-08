@@ -20,11 +20,27 @@ var Configuration = new GameConfiguration(
   },
   {/*worlds*/
     main: new GameWorld(
-      new NamedArray([/*players*/]),
+      new NamedArray([new PlayerEntity("Nowhere", {}, () => {})]),
+      new NamedArray([/*rooms*/]),
+      new NamedArray([
+        new Entity("garbage","Inventory",
+          "a pile of literal garbage",
+          {},
+          "garbage"
+        )
+      ]),
+      new NamedArray([/*obstructions*/]),
+      function() {getConfiguration().worlds["testWorld"].start();},
+      function() {/*endLogic*/}
+    ),
+    testWorld: new GameWorld(
+      new NamedArray([new PlayerEntity("Nowhere", {}, () => {})]),
       new NamedArray([/*rooms*/]),
       new NamedArray([/*entities*/]),
       new NamedArray([/*obstructions*/]),
-      function() {/*init*/},
+      function() {
+        IO.output("The test world has started"); this.register("garbage");
+      },
       function() {/*endLogic*/}
     )
   },
