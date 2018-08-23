@@ -23,7 +23,7 @@ const Setup = (function() {
 
     if (Configuration.useImages) {
       //Update it.
-      var room = getRooms().findByName(getPlayer().locations[0]);
+      var room = getRooms()[getPlayer().locations[0]];
       Display.updateImageDisplay(room.image);
     } else {
       //If not make the imageDisplay disappear.
@@ -48,6 +48,13 @@ const Setup = (function() {
       var soundControls = document.getElementById("soundControls");
       soundControls.style.display = "none";
     }
+  }
+  this.objectify = function(array) {
+    var object = {};
+    for (var i = 0; i < array.length; i++) {
+      object[array[i].name ? array[i].name : i] = array[i];
+    }
+    return object;
   }
   this.preloadImages = function(images) {
     //Preloads images.
@@ -91,7 +98,7 @@ const IO = (function() {
     //Parse and execute input
     Parser.parseAndExecuteInput(Parser.getInput());
     //Update the image display to that of the player's locations[0]
-    var room = getRooms().findByName(getPlayer().locations[0]);
+    var room = getRooms()[getPlayer().locations[0]];
     Display.updateImageDisplay(room.image);
     //Blank the input box.
     inputBox.value = "";
@@ -174,7 +181,7 @@ const Parser = (function() {
     //Returns the first entity referenced by the input that is contained in
     //"entities". This is according to the order of the entities array, not the
     //input itself. If no entity is found, it returns the player.
-
+    entities = Array.isArray(entities) ? entities : Object.values(entities);
     //Iterate through the entites
     for (var i = 0; i < entities.length; i++) {
       var entity = entities[i];
@@ -216,13 +223,13 @@ const Parser = (function() {
 
     //Get the interactable entities here.
     var location = getPlayer().locations[0];
-    var entities = getRooms().findByName(location).localize(getInteractables());
+    var entities = getRooms()[location].localize(getInteractables());
     //Find the subject.
     var subject = detectEntity(input, entities);
     //If it's the player (default for finding none)
     if (subject == getPlayer()) {
       //Try again with inventory items.
-      entities = getRooms().findByName("Inventory").localize(getInteractables());
+      entities = getRooms()["Inventory"].localize(getInteractables());
       subject = detectEntity(input, entities);
     }
     //Find an action
@@ -297,7 +304,7 @@ const Display = (function() {
     } else {
       //Convert the substr to a regex; if it's empty, make a regex out of string.
       substr = new RegExp(typeof substr == "undefined" || substr == "" ?
-        string : substr, "gi");
+        string : substr, "i");
       //Use string.replace to add tags around the substring.
       return string.replace(substr, function(str) {
         return "<" + tagtext + ">" + str + "</" + tagtext + ">";
@@ -393,7 +400,8 @@ const PlayerEntity = function(location, methods, turn) {
    turn));
   this.methods = Object.assign(this.methods, {
     nothing: function() {
-      var exits = getRooms().findByName(this.parent.locations[0]).getExits();
+      var exits = getRooms()[this.parent.locations[0]].getExits();
+      exits = Object.values(exits);
       for (var i = 0; i < exits.length; i++) {
         if (Parser.getInput().toLowerCase() == exits[i].name.toLowerCase()) {
           this.move();
@@ -403,11 +411,11 @@ const PlayerEntity = function(location, methods, turn) {
       IO.output("I'm afraid I don't understand.");
     },
     inventory: function() {
-      var inventory = getRooms().findByName("Inventory")
+      var inventory = getRooms()["Inventory"];
       var entities = inventory.localize(getEntities());
       if (entities.length > 0) {
-        var description = inventory.describeEntities("Inventory");
-        IO.output("You have " + inventory.describeEntities("Inventory"));
+        var description = inventory.describeEntities();
+        IO.output("You have " + inventory.describeEntities());
       } else {
         IO.output("You have nothing.");
       }
@@ -417,7 +425,7 @@ const PlayerEntity = function(location, methods, turn) {
       getWorld().nextTurn();
     },
     look: function() {
-      getRooms().findByName(this.parent.locations[0]).updateDisplay();
+      getRooms()[this.parent.locations[0]].updateDisplay();
     },
     help: function() {
       var keys = Object.keys(this.parent.methods).filter(function(key) {
@@ -442,13 +450,13 @@ const PlayerEntity = function(location, methods, turn) {
   this.methods.parent = this;
   this.inventoryContains = function(name) {
     //Tests for an entity with a given name in the "Inventory" location. This is
-    return getRooms().findByName("Inventory").contains(name);
+    return getRooms()["Inventory"].contains(name);
   }
   this.moveByInput = function(input) {
     //Moves the player according to their input.
     var oldLocation = this.locations[0];
 
-    var direction = getRooms().findByName(this.locations[0]).testForExits(input);
+    var direction = getRooms()[this.locations[0]].testForExits(input);
     if (direction) {
       getPlayer().move(direction);
     } else {
@@ -456,7 +464,7 @@ const PlayerEntity = function(location, methods, turn) {
     }
 
     if (oldLocation != this.locations[0]) {
-      getRooms().findByName(this.locations[0]).updateDisplay();
+      getRooms()[this.locations[0]].updateDisplay();
     }
   }
   this.lose = function(message, undoMessage) {
@@ -596,7 +604,7 @@ const Room = function(name, description, exits, givenName, image, music) {
   this.image = image ? image : "";
   this.music = music ? music : "";
   this.description = description;
-  this.exits = exits;
+  this.exits = Setup.objectify(exits);
   this.givenName = givenName;
   this.updateDisplay = function() {
     //Updates the name window, the image, the IO.output box and the music to
@@ -612,8 +620,9 @@ const Room = function(name, description, exits, givenName, image, music) {
     //Builds a complete description of a room.
 
     //Initialize all of the necessary variables.
-    var entities = this.localize(getEntities());
-    var exits = this.exits;
+    var entities = Object.values(this.localize(getEntities()));
+    var exits = Object.values(this.getExits());
+
     //Set a blank description and add each element if it applies.
     var description = "";
     description += this.description;
@@ -627,13 +636,15 @@ const Room = function(name, description, exits, givenName, image, music) {
     return description;
   }
   this.localize = function(interactables) {
-    return new NamedArray(interactables.filter((element) => {
+    interactableArray = Array.isArray(interactables) ? interactables :
+     Object.values(interactables);
+    return Setup.objectify(interactableArray.filter((element) => {
       return element.locations[0] == this.name;
     }));
   }
   this.describeEntities = function() {
     var descriptionArray = [];
-    var entities = this.localize(getEntities());
+    var entities = Object.values(this.localize(getEntities()));
     for (var i = 0; i < entities.length; i++) {
       var entity = entities[i];
       var entityDescription = Display.embolden(entity.description, entity.givenName);
@@ -643,31 +654,36 @@ const Room = function(name, description, exits, givenName, image, music) {
   }
   this.describeExits = function() {
     var descriptionArray = []
-    var exits = this.getExits();
+    var exits = Object.values(this.getExits());
     for (var i = 0; i < exits.length; i++) {
       descriptionArray.push(Display.embolden(exits[i].description, exits[i].name));
     }
     return Display.manageListGrammar(descriptionArray, "or") + ".";
   }
   this.getObstructionExits = function(obstructions) {
-    obstructions = this.localize(obstructions);
-    var exitArray = [];
+    obstructions = Array.isArray(obstructions) ? obstructions : Object.values(obstructions);
+    var exitObject = [];
     for (var i = 0; i < obstructions.length; i++) {
       var exits = obstructions[i].exits;
       for (var j = 0; j < exits.length; j++) {
-        exitArray.push(exits[j]);
+        exitObject[exits[j].name] = exits[j];
       }
     }
-    return exitArray;
+    return exitObject;
   }
   this.getExits = function() {
-    var obstructed = this.getObstructionExits(getObstructions());
-    var intercepted = this.getObstructionExits(getObstructions().filter(
+    var obstructed = this.getObstructionExits(this.localize(getObstructions()));
+    obstructed = Object.values(obstructed);
+
+    var intercepted = Object.values(this.localize(getObstructions())).filter(
       function(obstruction) {
         return obstruction.additive;
-    }));
+    });
+    intercepted = this.getObstructionExits(Setup.objectify(intercepted));
+    intercepted = Object.values(intercepted);
+
     //remove exits colliding with *any* obstructions
-    var exits = new NamedArray(this.exits.filter(function(exit) {
+    var exits = Object.values(this.exits).filter(function(exit) {
       var collisions = 0;
       for (var i = 0; i < obstructed.length; i++) {
         if (obstructed[i].name == exit.name) {
@@ -675,12 +691,12 @@ const Room = function(name, description, exits, givenName, image, music) {
         }
       }
       return collisions < 1;
-    }));
+    });
     //add exits belonging to additive obstructions ("interceptors")
-    return exits.concat(intercepted);
+    return Setup.objectify(exits.concat(intercepted));
   }
   this.testForExits = function(input) {
-    var exits = this.getExits();
+    var exits = Object.values(this.getExits());
     for (var i = 0; i < exits.length; i++) {
       var exit = exits[i];
       if (Parser.testForWord(input, exit.name)) {
@@ -690,17 +706,7 @@ const Room = function(name, description, exits, givenName, image, music) {
     return false;
   }
   this.contains = function(name) {
-    //Checks the room with the given roomName for the entity with the given name.
-    //Get all the entities in the room
-    var entities = this.localize(getInteractables());
-    //Find the entity you're looking for
-    var item = entities.findByName(name);
-    //If it exists
-    if (typeof item == "object") {
-      return true;
-    } else {
-      return false;
-    }
+    return this.localize(getInteractables())[name] ? true : false;
   }
   this.type = "Room";
   return this;
@@ -713,36 +719,6 @@ const Exit = function(name, take, description) {
   this.description = description;
   this.type = "Exit";
   return this;
-}
-const NamedArray = function(array) {
-  array = array.length >= 0
-    ? array
-    : typeof array != "undefined"
-    ? [array]
-    : [];
-  array.findByName = function(name) {
-    for (var i = 0; i < this.length; i++) {
-      if (this[i].name == name) {
-        return this[i];
-      }
-    }
-  }
-  array.concat = function(...args) {
-    var newArray = this.slice();
-    for (var i = 0; i < args.length; i++) {
-      var arg = args[i];
-      if (typeof arg.length != "undefined") {
-        for (var j = 0; j < arg.length; j++) {
-          newArray.push(arg[j]);
-        }
-      } else {
-        newArray.push(arg);
-      }
-    }
-    return new NamedArray(newArray);
-  }
-  this.type = "NamedArray";
-  return array;
 }
 const Moving = function(name, location) {
   this.name = name;
@@ -768,12 +744,12 @@ const Moving = function(name, location) {
   this.move = function(direction) {
     //Moves an entity in the given direction. If there is no such direction, it
     //will fail loudly.
-    var exits = getRooms().findByName(this.locations[0]).getExits();
-    exits.findByName(direction).take(this);
+    var exits = getRooms()[this.locations[0]].getExits();
+    exits[direction].take(this);
   }
   return this;
 }
-const GameWorld = function(players, rooms, entities, obstructions,
+const GameWorld = function(player, rooms, entities, obstructions,
  init, endLogic) {
   rooms = rooms.concat([
     new Room("Inventory",
@@ -791,32 +767,24 @@ const GameWorld = function(players, rooms, entities, obstructions,
       [],
       ""
     )]);
-  this.players = players.type == "NamedArray" ? players :
-   new NamedArray(players);
-  this.activePlayer = 0;
-  this.rooms = rooms.type == "NamedArray" ? rooms :
-   new NamedArray(rooms);
-  this.entities = entities.type == "NamedArray" ? entities :
-   new NamedArray(entities);
-  this.obstructions = obstructions.type == "NamedArray" ? obstructions :
-   new NamedArray(obstructions);
+  this.player = player;
+  this.rooms = Setup.objectify(rooms);
+  this.entities = Setup.objectify(entities);
+  this.obstructions = Setup.objectify(obstructions);
   this.init = init ? init : function() {};
   this.endLogic = endLogic ? endLogic : function() {};
 
   this.nextTurn = function() {
-    var interactables = getInteractables();
-    interactables = new NamedArray(interactables.filter(function(element) {
+    var interactables = Object.values(getInteractables());
+    interactables = interactables.filter(function(element) {
       return element.locations[0] != "Nowhere";
-    }));
+    });
     for (var i = 0; i < interactables.length; i++) {
       interactables[i].age += 1;
       if (interactables[i].turn) {
         interactables[i].turn();
       }
     }
-  }
-  this.setActivePlayer = function(index) {
-    this.activePlayer = index;
   }
   this.preload = function() {
     Setup.preloadImages(this.getRoomImages());
@@ -848,7 +816,7 @@ const GameWorld = function(players, rooms, entities, obstructions,
       (() => {
         var position = getConfiguration().worldstack.indexOf(this);
         var oldWorld = getConfiguration().getWorld(position - 1);
-        return oldWorld.getAllObjects().findByName(object);
+        return oldWorld.getAllObjects()[object];
       })() : object;
     //Throw an error if the specified object does not exist
     if (!object) {
@@ -861,7 +829,7 @@ const GameWorld = function(players, rooms, entities, obstructions,
       "Obstruction": this.obstructions,
       "Room": this.rooms
     }
-    collections[object.type].push(object);
+    collections[object.type][object.name] = object;
   }
   this.getRoomImages = function() {
     var rooms = this.getRooms();
@@ -881,7 +849,7 @@ const GameWorld = function(players, rooms, entities, obstructions,
   }
   this.getPlayer = function() {
     //Returns the global Player object.
-      return this.players[this.activePlayer];
+    return this.player;
   }
   this.getRooms = function() {
     return this.rooms;
@@ -890,7 +858,9 @@ const GameWorld = function(players, rooms, entities, obstructions,
     return this.conversations;
   }
   this.getInteractables = function() {
-    return this.getEntities().concat(this.getPlayer());
+    var interactables = Object.assign({}, this.getEntities());
+    interactables[getPlayer().name] = getPlayer();
+    return interactables;
   }
   this.getEntities = function() {
     return this.entities;
@@ -941,13 +911,12 @@ const Wrapping = function() {
   return this;
 }
 const Conversational = function(init, endLogic) {
-  Object.assign(this, new Wrapping());
   this.start = function() {
     new GameWorld(
       new PlayerEntity("Nowhere", {}, () => {}),
-      new NamedArray([]),
-      new NamedArray([this]),
-      new NamedArray([]),
+      [],
+      [this],
+      [],
       init ? init :
         () => {
           IO.output("**********");
@@ -956,7 +925,7 @@ const Conversational = function(init, endLogic) {
       endLogic ? endLogic :
         () => {
           IO.output("**********");
-          getRooms().findByName(getPlayer().locations[0]).updateDisplay();
+          getRooms()[getPlayer().locations[0]].updateDisplay();
         }
     ).start();
   }
@@ -967,21 +936,17 @@ const Conversational = function(init, endLogic) {
 }
 const Topical = function(topics) {
   Object.assign(this, new Wrapping());
-
   this.addTopic = function(key, paragraph) {
     if (typeof paragraph == "string") {
       paragraph = this.wrap(paragraph);
     }
     this.methods[key] = paragraph;
   }
-
   this.methods = {};
-
   var keys = Object.keys(topics);
   for (var i = 0; i < keys.length; i++) {
     this.addTopic(keys[i], topics[keys[i]]);
   }
-
   return this;
 }
 //Context Accessors

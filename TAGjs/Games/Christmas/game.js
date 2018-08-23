@@ -42,7 +42,7 @@ var Configuration = new GameConfiguration(
   },
   {
     main: new GameWorld(
-      new PlayerEntity("home.livingroom",
+      new PlayerEntity("home.kitchen",
         {
           hint: function() {
             IO.output("Hint: Typing 'HINT' will give you a helpful hint.");
@@ -51,7 +51,7 @@ var Configuration = new GameConfiguration(
         },
         function() {  }
       ),
-      new NamedArray([
+      [
         //Home
         new Room("home.livingroom",
           "You're in the living room, which is set up for Christmas.",
@@ -217,7 +217,7 @@ var Configuration = new GameConfiguration(
             new Exit("east","truenorth.oasis","east to a lake"),
             new Exit("west","truenorth.igloo","west to an igloo"),
             new Exit("south",function() {
-              if (getRooms().findByName("truenorth.bearroom").contains("truenorth.polarbear")) {
+              if (getRooms()["truenorth.bearroom"].contains("truenorth.polarbear")) {
                 IO.output("The polar bear is blocking your way to the south.");
               } else {
                 getPlayer().warp("truenorth.workshopout");
@@ -272,8 +272,8 @@ var Configuration = new GameConfiguration(
           ],
           "THE END"
         ),
-      ]),
-      new NamedArray([
+      ],
+      [
         //inventory
         new Entity("inventory.coat",
           "home.livingroom",
@@ -341,7 +341,7 @@ var Configuration = new GameConfiguration(
               var input = getInput();
               if (getPlayer().inventoryContains("home.redornament")) {
                 if (Parser.testForWord(input, "red ornament")) {
-                  var red = getInteractables().findByName("home.redornament");
+                  var red = getInteractables()["home.redornament"];
                   red.warp("Nowhere");
                   this.parent.red = true;
                   IO.output("You hang the <strong>red ornament</strong> on the tree.");
@@ -350,7 +350,7 @@ var Configuration = new GameConfiguration(
                 }
               } else if (Parser.testForWord(input, "blue ornament")) {
                 if (getPlayer().inventoryContains("home.blueornament")) {
-                  var blue = getInteractables().findByName("home.blueornament");
+                  var blue = getInteractables()["home.blueornament"];
                   blue.warp("Nowhere");
                   this.parent.blue = true;
                   IO.output("You hang the <strong>blue ornament</strong> on the tree.");
@@ -366,7 +366,7 @@ var Configuration = new GameConfiguration(
                   the trunk of the tree.");
                 IO.output("<em>If you want to see what's changed, you can \
                   <strong>look</strong> around.</em>");
-                var button = getObstructions().findByName("home.button");
+                var button = getObstructions()["home.button"];
                 button.warp("home.livingroom");
               }
             }
@@ -416,7 +416,7 @@ var Configuration = new GameConfiguration(
                   IO.output("You get just enough of a spark going to light the fire. As \
                   the flames take hold, you hear a little jingle, kind of like a \
                   computer's startup sound.");
-                  var livingroom = getRooms().findByName("home.livingroom");
+                  var livingroom = getRooms()["home.livingroom"];
                   this.parent.lit = true;
                   this.parent.description = "a roaring fireplace";
                 } else {
@@ -432,7 +432,7 @@ var Configuration = new GameConfiguration(
               if (getPlayer().inventoryContains("home.catalog")) {
                 if (Parser.testForWord(input, "catalog")) {
                   IO.output("You toss the catalog into the fireplace.");
-                  var catalog = getEntities().findByName("home.catalog");
+                  var catalog = getEntities()["home.catalog"];
                   catalog.warp("Nowhere");
                   this.parent.letter = true;
                   return;
@@ -441,7 +441,7 @@ var Configuration = new GameConfiguration(
               if (getPlayer().inventoryContains("home.book")) {
                 if (Parser.testForWord(input, "book")) {
                   IO.output("You toss <em>Celsius 233</em> into the fireplace.");
-                  var book = getEntities().findByName("home.book");
+                  var book = getEntities()["home.book"];
                   book.warp("Nowhere");
                   this.parent.book = true;
                   return;
@@ -479,8 +479,8 @@ var Configuration = new GameConfiguration(
               if (getPlayer().inventoryContains("home.sugarplum")) {
                 IO.output("He laughs, tosses you a <strong>red ornament</strong>, and \
                   scampers off.");
-                var ornament = getEntities().findByName("home.redornament");
-                var sugarplum = getEntities().findByName("home.sugarplum");
+                var ornament = getEntities()["home.redornament"];
+                var sugarplum = getEntities()["home.sugarplum"];
                 ornament.warp("Inventory");
                 sugarplum.warp("Nowhere");
                 this.parent.warp("Nowhere");
@@ -564,7 +564,7 @@ var Configuration = new GameConfiguration(
               } else {
                 IO.output("You rifle through the toolbox and find a <strong>lighter</strong>.");
                 IO.output("You take the lighter. It might come in handy for the fireplace.");
-                var lighter = getEntities().findByName("home.lighter");
+                var lighter = getEntities()["home.lighter"];
                 lighter.warp("Inventory");
               }
             },
@@ -614,7 +614,7 @@ var Configuration = new GameConfiguration(
                 IO.output("You clear away the snow, revealing the <strong>mailbox</strong>");
                 IO.output("<em>If you want to see what's changed, you can \
                   <strong>look</strong> around.</em>");
-                var mailbox = getEntities().findByName("home.mailbox");
+                var mailbox = getEntities()["home.mailbox"];
                 mailbox.warp("home.outside");
                 this.parent.warp("Nowhere");
               } else {
@@ -658,7 +658,7 @@ var Configuration = new GameConfiguration(
                 IO.output("Inside the mailbox, you find a present <strong>catalog</strong>. \
                   Looks flammable.");
                 IO.output("You take the catalog with you.");
-                var catalog = getEntities().findByName("home.catalog");
+                var catalog = getEntities()["home.catalog"];
                 catalog.warp("Inventory");
                 this.parent.empty = true;
               }
@@ -702,13 +702,13 @@ var Configuration = new GameConfiguration(
               IO.output("Longitude: 0, Latitude: 90");
               IO.output("Knowing this, you should be able to fly to the real north \
                 pole now.")
-              var interceptor = getObstructions().findByName("space.truenorth");
+              var interceptor = getObstructions()["space.truenorth"];
               interceptor.warp("space.junction");
             },
             take: function() {
               IO.output("You take the coordinates. You should be able to fly to the \
                 real north pole now.");
-              var interceptor = getObstructions().findByName("space.truenorth");
+              var interceptor = getObstructions()["space.truenorth"];
               this.parent.warp("Inventory");
               interceptor.warp("space.junction");
             }
@@ -732,8 +732,8 @@ var Configuration = new GameConfiguration(
                 been to the ISS. Here's your complimentary fishing pole. \
                 If you need any <strong>bait</strong>, just ask one \
                 of the cosmonauts. They always have a stock of space crawdad.\"");
-                var fishingpole = getEntities().findByName("northpole.fishingpole");
-                var coupon = getEntities().findByName("space.coupon");
+                var fishingpole = getEntities()["northpole.fishingpole"];
+                var coupon = getEntities()["space.coupon"];
                 fishingpole.warp("Inventory");
                 coupon.warp("Nowhere");
               } else {
@@ -774,7 +774,7 @@ var Configuration = new GameConfiguration(
             talk: function() {
               IO.output("You start a conversation. <em>You can type \
               <strong>goodbye</strong> to end it.");
-              getCutscenes().findByName("truenorth.snowman").gracefullyStart();
+              getCutscenes()["truenorth.snowman"].gracefullyStart();
             },
             attack: function() {
               IO.output("The snowman tells you to chill out.");
@@ -794,13 +794,13 @@ var Configuration = new GameConfiguration(
             },
             fish: function() {
               if (getPlayer().inventoryContains("northpole.fishingpole") && getPlayer().inventoryContains("space.spacecrawdad")) {
-                if (getRooms().findByName("Nowhere").contains("truenorth.hints")) {
+                if (getRooms()["Nowhere"].contains("truenorth.hints")) {
                   IO.output("You stick your fishing pole in the water and wait. Before \
                   too long, you get a nibble, and you expertly catch it.");
                   IO.output("You caught a... piece of paper. And it somehow ate your space crawdad. It's \
                   labeled \"ISS SECRET CODE <strong>CLUES</strong>\".");
-                  var hints = getEntities().findByName("truenorth.hints");
-                  var crawdad = getEntities().findByName("space.spacecrawdad");
+                  var hints = getEntities()["truenorth.hints"];
+                  var crawdad = getEntities()["space.spacecrawdad"];
                   hints.warp("Inventory");
                   crawdad.warp("Nowhere");
                 } else {
@@ -881,7 +881,7 @@ var Configuration = new GameConfiguration(
               IO.output("You put the space helmet on. You can probably go to space now.");
               this.parent.warp("Inventory");
               this.parent.on = true;
-              var hashelmet = getObstructions().findByName("space.hashelmet");
+              var hashelmet = getObstructions()["space.hashelmet"];
               hashelmet.warp("space.junction");
             },
             look: function() {
@@ -909,7 +909,7 @@ var Configuration = new GameConfiguration(
               go talk to my elves and get this all sorted out. In the meantime, \
               you can go home. Your presents should be there in the morning.\"");
               getPlayer().warp("endroom");
-              getRooms().findByName("endroom").updateDisplay();
+              getRooms()["endroom"].updateDisplay();
             },
             look: function() {
               IO.output("It's Santa Claus, with a full white beard and a jolly red cap.");
@@ -929,7 +929,7 @@ var Configuration = new GameConfiguration(
               IO.output("You can't understand the cosmonaut. For whatever reason, he \
                 gives you a <strong>space crawdad</strong> and mimes a fish swimming \
                 with his hand.");
-              var crawdad = getEntities().findByName("space.spacecrawdad");
+              var crawdad = getEntities()["space.spacecrawdad"];
               crawdad.warp("Inventory");
             },
             look: function() {
@@ -1035,7 +1035,7 @@ var Configuration = new GameConfiguration(
                 prize!\"");
                 IO.output("A small hatch opens, and a <strong>space fish</strong>, somehow \
                 still fresh, floats out into the room. You take it with you.");
-                var fish = getEntities().findByName("truenorth.fish");
+                var fish = getEntities()["truenorth.fish"];
                 fish.warp("Inventory");
               } else {
                 IO.output("The keypad's display says, \"That's not the code! Try again!\"");
@@ -1062,7 +1062,7 @@ var Configuration = new GameConfiguration(
             fish: function() {
               if (getPlayer().inventoryContains("truenorth.fish")) {
                 IO.output("You throw the space fish at the bear, and it lumbers away.");
-                var bearroom = getRooms().findByName("truenorth.bearroom");
+                var bearroom = getRooms()["truenorth.bearroom"];
                 this.parent.warp("Nowhere");
               } else {
                 IO.output("You don't have a fish!");
@@ -1071,13 +1071,13 @@ var Configuration = new GameConfiguration(
             talk: function() {
               IO.output("You start a conversation. <em>You can type \
               <strong>goodbye</strong> to end it.");
-              getCutscenes().findByName("truenorth.polarbear").gracefullyStart();
+              getCutscenes()["truenorth.polarbear"].gracefullyStart();
             }
           },
           "polar bear"
         )
-      ]),
-      new NamedArray([
+      ],
+      [
         //home
         new Obstruction("home.button",
           "Nowhere",
@@ -1101,7 +1101,7 @@ var Configuration = new GameConfiguration(
           ],
           true
         )
-      ]),
+      ],
       function() {
         IO.output("It's Christmas day, and you're feeling very excited to get \
          on with it. Unfortunately, you've been told that \"opening presents at \
@@ -1112,11 +1112,11 @@ var Configuration = new GameConfiguration(
          horror that none of them are labeled with your name. Pragmatic \
          10-year-old that you are, you decide that this will require a visit to \
          Santa.");
-        getRooms().findByName(getPlayer().locations[0]).updateDisplay();
+        getRooms()[getPlayer().locations[0]].updateDisplay();
       }
     )
   },
-  new NamedArray([
+  [
     new Conversation("truenorth.snowman",
       {
         "hello": "Hi! It's *ice* to meet you! Do you want to be my \
@@ -1151,7 +1151,7 @@ var Configuration = new GameConfiguration(
           capacity to understand your statements.)"
       }
     )
-  ])
+  ]
 )
 //Execution---------------------------------------------------------------------
 Setup.setup();
