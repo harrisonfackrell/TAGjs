@@ -42,7 +42,7 @@ var Configuration = new GameConfiguration(
   },
   {
     main: new GameWorld(
-      new PlayerEntity("home.kitchen",
+      new PlayerEntity("home.livingroom",
         {
           hint: function() {
             IO.output("Hint: Typing 'HINT' will give you a helpful hint.");
