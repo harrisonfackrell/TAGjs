@@ -51,9 +51,9 @@ var Configuration = new GameConfiguration(
         },
         function() {  }
       ),
-      [
+      {
         //Home
-        new Room("home.livingroom",
+        "home.livingroom": new Room(
           "You're in the living room, which is set up for Christmas.",
           [
             new Exit("kitchen","home.kitchen","go down the hall to the kitchen"),
@@ -70,7 +70,7 @@ var Configuration = new GameConfiguration(
           ],
           "Living Room"
         ),
-        new Room("home.readingroom",
+        "home.readingroom": new Room(
           "The reading room is rather large. Sometimes, you wonder why anyone \
           would ever dedicate that much space to something as boring as books.",
           [
@@ -78,7 +78,7 @@ var Configuration = new GameConfiguration(
           ],
           "Reading Room"
         ),
-        new Room("home.kitchen",
+        "home.kitchen": new Room(
 
 
           "The kitchen is nicely decorated.",
@@ -88,7 +88,7 @@ var Configuration = new GameConfiguration(
           ],
           "Kitchen"
         ),
-        new Room("home.garage",
+        "home.garage": new Room(
 
 
           "The garage is a little more drab than the rest of the house.",
@@ -98,7 +98,7 @@ var Configuration = new GameConfiguration(
           ],
           "Garage"
         ),
-        new Room("home.outside",
+        "home.outside": new Room(
 
 
           "You are outside. Your exterior decorations are humble, but they're not the worst you've \
@@ -111,7 +111,7 @@ var Configuration = new GameConfiguration(
           "Outside"
         ),
         //Space
-        new Room("space.junction",
+        "space.junction": new Room(
 
 
           "You're flying high in sky on a Christmas tree rocket. Who needs cheap \
@@ -124,7 +124,7 @@ var Configuration = new GameConfiguration(
           ],
           "Flying on a Rocket Tree"
         ),
-        new Room("space.station",
+        "space.station": new Room(
 
 
           "You've made it to the International Space Station. Nifty.",
@@ -134,7 +134,7 @@ var Configuration = new GameConfiguration(
           ],
           "International Space Station"
         ),
-        new Room("space.stationin",
+        "space.stationin": new Room(
 
 
           "The inside of the space station is just as robotic and filled-with-computers \
@@ -145,7 +145,7 @@ var Configuration = new GameConfiguration(
           ],
           "Inside the ISS"
         ),
-        new Room("space.stationback",
+        "space.stationback": new Room(
 
 
           "The back of the station is also robotic and filled-with-computers.",
@@ -155,7 +155,7 @@ var Configuration = new GameConfiguration(
           "Back of the ISS"
         ),
         //northpole
-        new Room("northpole.landing",
+        "northpole.landing": new Room(
 
 
           "This is where you've landed your rocket-tree.",
@@ -165,7 +165,7 @@ var Configuration = new GameConfiguration(
           ],
           "North Pole Landing"
         ),
-        new Room("northpole.workshopout",
+        "northpole.workshopout": new Room(
 
 
           "You seem to be standing near a village.",
@@ -175,7 +175,7 @@ var Configuration = new GameConfiguration(
           ],
           "Village"
         ),
-        new Room("northpole.alaskasign",
+        "northpole.alaskasign": new Room(
 
 
           "Okay. This is North Pole, Alaska. Probably not where Santa lives, but it \
@@ -186,7 +186,7 @@ var Configuration = new GameConfiguration(
           ],
           "North Pole, Alaska"
         ),
-        new Room("northpole.fishingstore",
+        "northpole.fishingstore": new Room(
 
 
           "Welcome to <em>Star Fish</em>, the greatest fishing utility shop in North \
@@ -197,7 +197,7 @@ var Configuration = new GameConfiguration(
           "Star Fish Fishing Utility Shop"
         ),
         //truenorth
-        new Room("truenorth.landing",
+        "truenorth.landing": new Room(
 
 
           "This is probably the right North Pole. Granted, your judgement was pretty \
@@ -210,7 +210,7 @@ var Configuration = new GameConfiguration(
           ],
           "True North Pole Landing"
         ),
-        new Room("truenorth.bearroom",
+        "truenorth.bearroom": new Room(
 
 
           "As you walk out into the frozen tundra, you start to feel grateful for \
@@ -229,7 +229,7 @@ var Configuration = new GameConfiguration(
           ],
           "Frozen Tundra"
         ),
-        new Room("truenorth.igloo",
+        "truenorth.igloo": new Room(
 
 
           "The inside of the igloo is surprisingly warm.",
@@ -238,7 +238,7 @@ var Configuration = new GameConfiguration(
           ],
           "Igloo"
         ),
-        new Room("truenorth.oasis",
+        "truenorth.oasis": new Room(
 
 
           "As it turns out, the north pole *isn't* just a big sheet of ice.",
@@ -247,7 +247,7 @@ var Configuration = new GameConfiguration(
           ],
           "Lake"
         ),
-        new Room("truenorth.workshopout",
+        "truenorth.workshopout": new Room(
 
 
           "This is it. Santa's workshop is right here.",
@@ -257,7 +257,7 @@ var Configuration = new GameConfiguration(
           ],
           "Santa's Workshop"
         ),
-        new Room("truenorth.workshop",
+        "truenorth.workshop": new Room(
 
 
           "After all that work, you've made it.",
@@ -266,7 +266,7 @@ var Configuration = new GameConfiguration(
           ],
           "Santa Claus"
         ),
-        new Room("endroom",
+        "endroom": new Room(
 
 
           "Sure enough, there are presents there for you in the morning--not the \
@@ -275,10 +275,10 @@ var Configuration = new GameConfiguration(
           ],
           "THE END"
         ),
-      ],
-      [
+      },
+      {
         //inventory
-        new Entity("inventory.coat",
+        "inventory.coat": new Entity(
           "home.livingroom",
           "a warm winter coat",
           {
@@ -322,7 +322,7 @@ var Configuration = new GameConfiguration(
           "coat"
         ),
         //Home
-        new Entity("home.tree",
+        "home.tree": new Entity(
           "home.livingroom",
           "a heavily ornamented tree",
           {
@@ -377,7 +377,7 @@ var Configuration = new GameConfiguration(
           },
           "tree"
         ),
-        new Entity("home.presents",
+        "home.presents": new Entity(
           "home.livingroom",
           "a stack of presents",
           {
@@ -396,7 +396,7 @@ var Configuration = new GameConfiguration(
           },
           "presents"
         ),
-        new Entity("home.fireplace",
+        "home.fireplace": new Entity(
           "home.livingroom",
           "a depressingly empty fireplace",
           {
@@ -457,7 +457,7 @@ var Configuration = new GameConfiguration(
           },
           "fireplace"
         ),
-        new Entity("home.elf",
+        "home.elf": new Entity(
           "home.kitchen",
           "an elf on the shelf",
           {
@@ -495,7 +495,7 @@ var Configuration = new GameConfiguration(
           },
           "elf"
         ),
-        new Entity("home.sugarplum",
+        "home.sugarplum": new Entity(
           "home.readingroom",
           "a delicious sugar plum",
           {
@@ -516,7 +516,7 @@ var Configuration = new GameConfiguration(
           },
           "sugar plum"
         ),
-        new Entity("home.redornament",
+        "home.redornament": new Entity(
           "Nowhere",
           "a shiny red ornament",
           {
@@ -529,7 +529,7 @@ var Configuration = new GameConfiguration(
           },
           "red ornament"
         ),
-        new Entity("home.blueornament",
+        "home.blueornament": new Entity(
           "home.garage",
           "a dull blue ornament",
           {
@@ -550,7 +550,7 @@ var Configuration = new GameConfiguration(
           },
           "blue ornament"
         ),
-        new Entity("home.toolbox",
+        "home.toolbox": new Entity(
           "home.garage",
           "a toolbox",
           {
@@ -578,7 +578,7 @@ var Configuration = new GameConfiguration(
           },
           "toolbox"
         ),
-        new Entity("home.lighter",
+        "home.lighter": new Entity(
           "Nowhere",
           "a red and black lighter",
           {
@@ -588,7 +588,7 @@ var Configuration = new GameConfiguration(
           },
           "lighter"
         ),
-        new Entity("home.catalog",
+        "home.catalog": new Entity(
           "Nowhere",
           "a catalog",
           {
@@ -602,7 +602,7 @@ var Configuration = new GameConfiguration(
           },
           "catalog"
         ),
-        new Entity("home.snowdrift",
+        "home.snowdrift": new Entity(
           "home.outside",
           "an enormous snowdrift",
           {
@@ -631,7 +631,7 @@ var Configuration = new GameConfiguration(
           },
           "snowdrift"
         ),
-        new Entity("home.shovel",
+        "home.shovel": new Entity(
           "home.garage",
           "a snowshovel",
           {
@@ -648,7 +648,7 @@ var Configuration = new GameConfiguration(
           },
           "snowshovel"
         ),
-        new Entity("home.mailbox",
+        "home.mailbox": new Entity(
           "Nowhere",
           "the mailbox",
           {
@@ -675,7 +675,7 @@ var Configuration = new GameConfiguration(
           },
           "mailbox"
         ),
-        new Entity("home.book",
+        "home.book": new Entity(
           "home.readingroom",
           "a book labeled <em>Celsius 233</em>",
           {
@@ -695,7 +695,7 @@ var Configuration = new GameConfiguration(
           "book"
         ),
         //northpole
-        new Entity("northpole.coordinates",
+        "northpole.coordinates": new Entity(
           "northpole.alaskasign",
           "a paper with the coordinates of the real north pole",
           {
@@ -718,7 +718,7 @@ var Configuration = new GameConfiguration(
           },
           "coordinates"
         ),
-        new Entity("northpole.fishingcashier",
+        "northpole.fishingcashier": new Entity(
           "northpole.fishingstore",
           "a cashier at the counter",
           {
@@ -749,7 +749,7 @@ var Configuration = new GameConfiguration(
           },
           "cashier"
         ),
-        new Entity("northpole.fishingpole",
+        "northpole.fishingpole": new Entity(
           "Nowhere",
           "a blue fishing pole",
           {
@@ -763,7 +763,7 @@ var Configuration = new GameConfiguration(
           "fishing pole"
         ),
         //truenorth
-        new Entity("truenorth.snowman",
+        "truenorth.snowman": new Entity(
           "truenorth.landing",
           "a snowman here",
           {
@@ -788,7 +788,7 @@ var Configuration = new GameConfiguration(
           },
           "snowman"
         ),
-        new Entity("truenorth.lake",
+        "truenorth.lake": new Entity(
           "truenorth.oasis",
           "the lake, which remarkably isn't frozen over",
           {
@@ -817,7 +817,7 @@ var Configuration = new GameConfiguration(
           },
           "lake"
         ),
-        new Entity("truenorth.hints",
+        "truenorth.hints": new Entity(
           "Nowhere",
           "ISS SECRET CODE CLUES",
           {
@@ -837,7 +837,7 @@ var Configuration = new GameConfiguration(
           },
           "CLUES"
         ),
-        new Entity("truenorth.fish",
+        "truenorth.fish": new Entity(
           "Nowhere",
           "a space fish",
           {
@@ -870,7 +870,7 @@ var Configuration = new GameConfiguration(
           },
           "space fish"
         ),
-        new Entity("truenorth.spacehelmet",
+        "truenorth.spacehelmet": new Entity(
           "truenorth.igloo",
           "a space helmet",
           {
@@ -894,7 +894,7 @@ var Configuration = new GameConfiguration(
           },
           "space helmet"
         ),
-        new Entity("truenorth.santaclaus",
+        "truenorth.santaclaus": new Entity(
           "truenorth.workshop",
           "Santa Claus himself",
           {
@@ -922,7 +922,7 @@ var Configuration = new GameConfiguration(
           "Santa Claus"
         ),
         //space
-        new Entity("space.cosmonaut",
+        "space.cosmonaut": new Entity(
           "space.station",
           "a cosmonaut",
           {
@@ -946,7 +946,7 @@ var Configuration = new GameConfiguration(
           },
           "cosmonaut"
         ),
-        new Entity("space.spacecrawdad",
+        "space.spacecrawdad": new Entity(
           "Nowhere",
           "a space crawdad",
           {
@@ -971,7 +971,7 @@ var Configuration = new GameConfiguration(
           },
           "space crawdad"
         ),
-        new Entity("space.coupon",
+        "space.coupon": new Entity(
           "space.stationin",
           "a coupon for a fishing pole",
           {
@@ -996,7 +996,7 @@ var Configuration = new GameConfiguration(
           },
           "coupon"
         ),
-        new Entity("space.sign",
+        "space.sign": new Entity(
           "space.stationin",
           "a sign that says \"Take one\"",
           {
@@ -1018,7 +1018,7 @@ var Configuration = new GameConfiguration(
           },
           "sign"
         ),
-        new Entity("space.keypad",
+        "space.keypad": new Entity(
           "space.stationback",
           "a keypad with a label above it that says, \"TYPE THE SECRET CODE, WIN A \
           PRIZE!\" Beneath this label is a sticky note that says, \"The clues for \
@@ -1052,7 +1052,7 @@ var Configuration = new GameConfiguration(
           },
           "keypad"
         ),
-        new Entity("truenorth.polarbear",
+        "truenorth.polarbear": new Entity(
           "truenorth.bearroom",
           "a polar bear in your path",
           {
@@ -1080,8 +1080,9 @@ var Configuration = new GameConfiguration(
           },
           "polar bear"
         )
-      ],
+      },
       function() {
+        console.log(getWorld());
         IO.output("It's Christmas day, and you're feeling very excited to get \
          on with it. Unfortunately, you've been told that \"opening presents at \
          3 in the morning is ridiculous\". Well, fine, but that's not going to stop \
@@ -1095,8 +1096,8 @@ var Configuration = new GameConfiguration(
       }
     )
   },
-  [
-    new Conversation("truenorth.snowman",
+  {
+    "truenorth.snowman": new Conversation(
       {
         "hello": "Hi! It's *ice* to meet you! Do you want to be my \
         <strong>friend</strong>? Everybody else is giving me the *cold* shoulder, and \
@@ -1110,7 +1111,7 @@ var Configuration = new GameConfiguration(
         "nothing": "I'm afraid I don't understand! But that's okay!"
       },
     ),
-    new Conversation("truenorth.polarbear",
+    "truenorth.polarbear": new Conversation(
       {
         "hello": "ROARROARRRRGROWLROAR. (Hello, traveler; I am glad to meet your  \
           acquaintence. Unfortunately, however, I find my mood to be dampened, \
@@ -1130,7 +1131,7 @@ var Configuration = new GameConfiguration(
           capacity to understand your statements.)"
       }
     )
-  ]
+  }
 )
 //Execution---------------------------------------------------------------------
 Setup.setup();

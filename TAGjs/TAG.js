@@ -48,6 +48,13 @@ const Setup = (function() {
     }
     return object;
   }
+  this.addObjectNames = function(object) {
+    var keys = Object.keys(object);
+    for (var i = 0; i < keys.length; i++) {
+      object[keys[i]].name = keys[i];
+    }
+    return object;
+  }
   this.preloadImages = function(images) {
     for (var i = 0; i < images.length; i++) {
       if (typeof images[i] != "undefined" && images[i] != "") {
@@ -286,25 +293,25 @@ const GameConfiguration = function(globals, synonyms, worlds, cutscenes) {
   return this;
 }
 const GameWorld = function(player, rooms, entities, init, endLogic) {
-  rooms = rooms.concat([
-    new Room("Inventory",
+  rooms = Object.assign(rooms, {
+    "Inventory": new Room(
       "This is an inventory.",
       [],
       "Inventory"
     ),
-    new Room("Conversing",
+    "Conversing": new Room(
       "",
       [],
       ""
     ),
-    new Room("Nowhere",
+    "Nowhere": new Room(
       "",
       [],
       ""
-    )]);
+    )});
   this.player = player;
-  this.rooms = Setup.objectify(rooms);
-  this.entities = Setup.objectify(entities);
+  this.rooms = Setup.addObjectNames(rooms);
+  this.entities = Setup.addObjectNames(entities);
   this.init = init ? init : function() {};
   this.endLogic = endLogic ? endLogic : function() {};
   this.nextTurn = function() {
@@ -400,8 +407,9 @@ const GameWorld = function(player, rooms, entities, init, endLogic) {
   return this;
 }
 const PlayerEntity = function(location, methods, turn) {
-  Object.assign(this, new Interactable("player", location, methods, "player",
+  Object.assign(this, new Interactable(location, methods, "player",
    turn));
+  this.name = "player"
   this.methods = Object.assign(this.methods, {
     nothing: function() {
       var exits = getRooms()[this.parent.locations[0]].getActiveExits();
@@ -464,7 +472,7 @@ const PlayerEntity = function(location, methods, turn) {
     }
   }
   this.lose = function(message, undoMessage) {
-    new Conversation("Lose",
+    new Conversation(
       {
         "message": message ? message : "You have lost.",
         "nothing": Display.embolden(undoMessage ? undoMessage :
@@ -483,8 +491,8 @@ const PlayerEntity = function(location, methods, turn) {
   this.type = "PlayerEntity";
   return this;
 }
-const Room = function(name, description, exits, givenName, image, music) {
-  this.name = name;
+const Room = function(description, exits, givenName, image, music) {
+  this.name = "uninitialized";
   this.image = image ? image : "";
   this.music = music ? music : "";
   this.description = description;
@@ -569,8 +577,8 @@ const Room = function(name, description, exits, givenName, image, music) {
   this.type = "Room";
   return this;
 }
-const Entity = function(name, location, description, methods, givenName, turn) {
-  Object.assign(this, new Interactable(name, location, methods, givenName,
+const Entity = function(location, description, methods, givenName, turn) {
+  Object.assign(this, new Interactable(location, methods, givenName,
      turn));
   this.methods = Object.assign( {
     nothing: function() {
@@ -587,8 +595,8 @@ const Entity = function(name, location, description, methods, givenName, turn) {
   this.type = "Entity";
   return this;
 }
-const Conversation = function(name, topics, init, endLogic) {
-  Object.assign(this, new Interactable(name, "Nowhere", {}, "", function() {}),
+const Conversation = function(topics, init, endLogic) {
+  Object.assign(this, new Interactable("Nowhere", {}, "", function() {}),
     new Wrapping(), new Conversational(init, endLogic), new Topical(topics));
   this.type = "Conversation";
   return this;
@@ -615,7 +623,7 @@ const Sequence = function(array) {
   array.type = "Sequence"
   return array;
 }
-const Monolog = function(name, sequence, init, endLogic) {
+const Monolog = function(sequence, init, endLogic) {
   Object.assign(this, new Conversational(init, endLogic),
    new Interactable(name, "Nowhere", {}, "", function() {}));
   this.methods = {
@@ -631,7 +639,7 @@ const Monolog = function(name, sequence, init, endLogic) {
   this.type = "Monolog"
   return this;
 }
-const Movie = function(name, sequence, init, endLogic, imgSuffix, sndSuffix) {
+const Movie = function(sequence, init, endLogic, imgSuffix, sndSuffix) {
   Object.assign(this, new Monolog(name, sequence, init, endLogic));
   this.imgSuffix = imgSuffix ? imgSuffix : "jpg";
   this.sndSuffix = sndSuffix ? sndSufix : "wav";
@@ -680,8 +688,9 @@ const Exit = function(givenName, take, description, active, introduction) {
   return this;
 }
 //Components
-const Interactable = function(name, location, methods, givenName, turn) {
-  Object.assign(this, new Moving(name, location));
+const Interactable = function(location, methods, givenName, turn) {
+  Object.assign(this, new Moving(location));
+  this.name = "uninitialized";
   this.methods = methods;
   this.methods.parent = this;
   this.givenName = givenName;
@@ -691,8 +700,7 @@ const Interactable = function(name, location, methods, givenName, turn) {
   this.type = "Interactable";
   return this;
 }
-const Moving = function(name, location) {
-  this.name = name;
+const Moving = function(location) {
   this.locations = [location, "", "", "", ""];
   Object.seal(this.locations);
   this.warp = function(roomName) {
@@ -740,9 +748,9 @@ const Conversational = function(init, endLogic) {
   this.start = function() {
     new GameWorld(
       new PlayerEntity("Nowhere", {}, () => {}),
-      [],
-      [this],
-      [],
+      {},
+      {"conversation": this},
+      {},
       init ? init :
         () => {
           IO.output("**********");
