@@ -425,7 +425,7 @@ const PlayerEntity = function(location, methods, turn) {
     },
     inventory: function() {
       var inventory = getRooms()["Inventory"];
-      var entities = inventory.localize(getEntities());
+      var entities = Object.values(inventory.localize(getEntities()));
       if (entities.length > 0) {
         var description = inventory.describeEntities();
         IO.output("You have " + inventory.describeEntities());

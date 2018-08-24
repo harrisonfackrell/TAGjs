@@ -20,14 +20,14 @@ var Configuration = new GameConfiguration(
   },
   {/*worlds*/
     main: new GameWorld(
-      [/*players*/],
-      [/*rooms*/],
-      [/*entities*/],
+      /*player*/,
+      {/*rooms*/},
+      {/*entities*/},
       function() {/*init*/},
       function() {/*endLogic*/}
     )
   },
-  [/*cutscenes*/]
+  {/*cutscenes*/}
 )
 //Execution---------------------------------------------------------------------
 Setup.setup();
