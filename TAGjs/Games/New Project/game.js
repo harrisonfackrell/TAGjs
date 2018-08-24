@@ -23,7 +23,6 @@ var Configuration = new GameConfiguration(
       [/*players*/],
       [/*rooms*/],
       [/*entities*/],
-      [/*obstructions*/],
       function() {/*init*/},
       function() {/*endLogic*/}
     )

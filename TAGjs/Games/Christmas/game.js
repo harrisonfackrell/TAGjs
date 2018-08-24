@@ -65,7 +65,8 @@ var Configuration = new GameConfiguration(
                 IO.output("You step outside briefly, but it's too cold without \
                 your <strong>coat</strong>.");
               }
-            },"out through the door")
+            },"out through the door"),
+            new Exit("button","space.junction","press the <strong>rocket button</strong>", false)
           ],
           "Living Room"
         ),
@@ -117,7 +118,9 @@ var Configuration = new GameConfiguration(
           thrills like skiing?",
           [
             new Exit("home","home.livingroom","fly home"),
-            new Exit("north pole","northpole.landing","head to the north pole")
+            new Exit("north pole","northpole.landing","head to the north pole"),
+            new Exit("true north","truenorth.landing","fly to true north", false),
+            new Exit("space","space.station","go to space", false)
           ],
           "Flying on a Rocket Tree"
         ),
@@ -366,8 +369,9 @@ var Configuration = new GameConfiguration(
                   the trunk of the tree.");
                 IO.output("<em>If you want to see what's changed, you can \
                   <strong>look</strong> around.</em>");
-                var button = getObstructions()["home.button"];
-                button.warp("home.livingroom");
+                getRooms()["home.livingroom"].exits.find(function(exit) {
+                  return exit.givenName == "button";
+                }).activate();
               }
             }
           },
@@ -702,15 +706,14 @@ var Configuration = new GameConfiguration(
               IO.output("Longitude: 0, Latitude: 90");
               IO.output("Knowing this, you should be able to fly to the real north \
                 pole now.")
-              var interceptor = getObstructions()["space.truenorth"];
-              interceptor.warp("space.junction");
+              getRooms()["space.junction"].exits.filter(function(exit) {
+                return exit.givenName == "true north";
+              }).activate();
             },
             take: function() {
-              IO.output("You take the coordinates. You should be able to fly to the \
-                real north pole now.");
-              var interceptor = getObstructions()["space.truenorth"];
+              IO.output("You take the coordinates.");
               this.parent.warp("Inventory");
-              interceptor.warp("space.junction");
+              this.look();
             }
           },
           "coordinates"
@@ -881,8 +884,9 @@ var Configuration = new GameConfiguration(
               IO.output("You put the space helmet on. You can probably go to space now.");
               this.parent.warp("Inventory");
               this.parent.on = true;
-              var hashelmet = getObstructions()["space.hashelmet"];
-              hashelmet.warp("space.junction");
+              getRooms()["space.junction"].exits.find(function(exit) {
+                return exit.givenName == "space";
+              }).activate();
             },
             look: function() {
               IO.output("It's a black-and-white space helmet, straight out of 1969");
@@ -1075,31 +1079,6 @@ var Configuration = new GameConfiguration(
             }
           },
           "polar bear"
-        )
-      ],
-      [
-        //home
-        new Obstruction("home.button",
-          "Nowhere",
-          [
-            new Exit("button","space.junction","press the <strong>rocket button</strong>")
-          ],
-          true
-        ),
-        //space
-        new Obstruction("space.truenorth",
-          "Nowhere",
-          [
-            new Exit("true north","truenorth.landing","fly to true north")
-          ],
-          true
-        ),
-        new Obstruction("space.hashelmet",
-          "Nowhere",
-          [
-            new Exit("space","space.station","go to space")
-          ],
-          true
         )
       ],
       function() {
