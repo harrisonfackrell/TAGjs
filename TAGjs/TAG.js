@@ -16,7 +16,6 @@ const Setup = (function() {
         IO.enterHandler();
       }
     }
-    inputBox.focus();
   }
   var imageSetup = function() {
     var imageDisplay = document.getElementById("imageDisplay");
@@ -27,19 +26,11 @@ const Setup = (function() {
       imageDisplay.style.display = "none";
     }
   }
-  var audioSetup = function() {
-    var musicButton = document.getElementById("musicButton");
-    var soundButton = document.getElementById("soundButton");
-    musicButton.onclick = function() {Sound.toggleElement("music");};
-    soundButton.onclick = function() {Sound.toggleElement("sound");};
-    if (getConfiguration().globals.useMusicControls == false) {
-      var musicControls = document.getElementById("musicControls");
-      musicControls.style.display = "none";
-    }
-    if (getConfiguration().globals.useSoundControls == false) {
-      var soundControls = document.getElementById("soundControls");
-      soundControls.style.display = "none";
-    }
+  var startMainWorld = function() {
+    var inputBox = document.getElementById("inputBox");
+    inputBox.removeEventListener("click", startMainWorld);
+    inputBox.value = "";
+    getConfiguration().worlds["main"].start();
   }
   this.objectify = function(array) {
     var object = {};
@@ -70,21 +61,14 @@ const Setup = (function() {
     }
   }
   this.setup = function() {
+    document.getElementById("inputBox").addEventListener("click", startMainWorld);
     nameSetup();
     inputSetup();
     imageSetup();
-    audioSetup();
-    var movies = getCutscenes();
-    for (var i = 0; i < movies.length; i++) {
-      if (typeof movies[i].preload != "undefined") {
-        movies[i].preload();
-      }
-    }
     var worlds = getConfiguration().worlds;
     Object.keys(worlds).forEach(function(key) {
       worlds[key].preload();
     })
-    worlds["main"].start();
   }
   return this;
 })();
@@ -239,44 +223,90 @@ const Display = (function() {
   }
   return this;
 })();
-const Sound = (function() {
-  this.toggleElement = function(elementName) {
-    var musicButton = document.getElementById(elementName + "Button");
-    if (musicButton.muted) {
-      musicButton.muted = false;
-      musicButton.src = "../../Sound.png";
-      var music = document.getElementById(elementName);
-      music.volume = 1;
+//Object Constructors
+const AudioChannel = function(HTMLProperties) {
+  var HTMLAudio = document.createElement("audio");
+  Object.entries(HTMLProperties).forEach(function(keyValuePair) {
+    HTMLAudio[keyValuePair[0]] = keyValuePair[1];
+  })
+  var queue = [];
+  var inProgress = false;
+  var update = function() {
+    var nextInQueue = queue.pop();
+    if (nextInQueue) {
+      new Promise(nextInQueue).then(update);
     } else {
-      musicButton.muted = true;
-      musicButton.src = "../../Muted.png";
-      var music = document.getElementById(elementName);
-      music.volume = 0;
+      inProgress = false;
     }
   }
-  this.changeMusic = function(song) {
-    var music = document.getElementById("music");
-    var currentSong = music.currentSong;
-    if (song == currentSong) {
+  var handleQueue = function() {
+    if (inProgress) {
       return;
     } else {
-      music.src = song;
-      music.currentSong = song;
+      inProgress = true;
+      update();
     }
   }
-  this.playEffect = function(sound) {
-    var soundPlayer = document.getElementById("sound");
-    soundPlayer.src = sound;
-    soundPlayer.play();
+  this.play = function(sound) {
+    sound = sound || HTMLAudio.src;
+    queue.unshift(function(resolve, reject) {
+    	if (HTMLAudio.src != sound) {
+      	HTMLAudio.src = sound;
+      }
+      HTMLAudio.play().then(resolve);
+    })
+    handleQueue();
+  }
+  this.pause = function() {
+    queue.unshift(function(resolve, reject) {
+      HTMLAudio.pause();
+      resolve();
+    })
+    handleQueue();
+  }
+  this.fade = function(target, interval, sound) {
+    interval = interval || 40;
+    this.play(sound);
+    queue.unshift(function(resolve, reject) {
+    	var fadeLoop = setInterval(function() {
+      	HTMLAudio.volume += HTMLAudio.volume < target
+        	? HTMLAudio.volume <= 0.99
+          ? 0.01
+          : 0.0
+          : HTMLAudio.volume >= 0.01
+          ? -0.01
+          : 0.0;
+      	if (Math.abs(HTMLAudio.volume - target) <= 0.01)  {
+        	HTMLAudio.volume = target;
+          clearInterval(fadeLoop);
+        	resolve();
+      	}
+      }, 40);
+    })
+    handleQueue();
+  }
+  this.setVolume = function(volume) {
+    queue.unshift(function(resolve, reject) {
+      HTMLAudio.volume = volume < 0.0
+        ? 0.0
+        : volume > 1.0
+        ? 1.0
+        : volume;
+      resolve();
+    })
+  }
+  this.setCurrentTime = function(time) {
+    queue.unshift(function(resolve, reject) {
+      HTMLAudio.currentTime = time;
+      resolve();
+    })
   }
   return this;
-})();
-//Object Constructors
-const GameConfiguration = function(globals, synonyms, worlds, cutscenes) {
+}
+const GameConfiguration = function(globals, synonyms, worlds, cutscenes,
+ audioChannels) {
   this.globals = Object.assign({
-    useImages: false,
-    useMusicControls: false,
-    useSoundControls: false
+    useImages: false
   }, globals);
   this.synonyms = synonyms;
   this.worlds = Object.keys(worlds).length > 0 ? worlds : {main: worlds};
@@ -290,6 +320,7 @@ const GameConfiguration = function(globals, synonyms, worlds, cutscenes) {
     return this.cutscenes;
   }
   this.type = "GameWorld";
+  this.audioChannels = audioChannels;
   return this;
 }
 const GameWorld = function(player, rooms, entities, init, endLogic) {
@@ -407,9 +438,8 @@ const GameWorld = function(player, rooms, entities, init, endLogic) {
   return this;
 }
 const PlayerEntity = function(location, methods, turn) {
-  Object.assign(this, new Interactable(location, methods, "player",
-   turn));
-  this.name = "player"
+  Object.assign(this, new Interactable(location, methods, "player", turn));
+  this.name = "player";
   this.methods = Object.assign(this.methods, {
     nothing: function() {
       var exits = getRooms()[this.parent.locations[0]].getActiveExits();
@@ -500,7 +530,6 @@ const Room = function(description, exits, givenName, image, music) {
   this.givenName = givenName;
   this.updateDisplay = function() {
     Display.updateNameDisplay(this.givenName);
-    Sound.changeMusic(this.music);
     IO.output(this.buildCompleteDescription());
   }
   this.buildCompleteDescription = function() {
@@ -639,36 +668,6 @@ const Monolog = function(sequence, init, endLogic) {
   this.type = "Monolog"
   return this;
 }
-const Movie = function(sequence, init, endLogic, imgSuffix, sndSuffix) {
-  Object.assign(this, new Monolog(name, sequence, init, endLogic));
-  this.imgSuffix = imgSuffix ? imgSuffix : "jpg";
-  this.sndSuffix = sndSuffix ? sndSufix : "wav";
-  this.methods = {
-    nothing: function() {
-      var sequence = this.parent.sequence;
-      var folder = "movies/" + this.parent.name;
-      var imgPath = folder + "/images/" + (sequence.position) + "." + imgSuffix;
-      var sndPath = folder + "/audio/" + (sequence.position) + "." + sndSuffix;
-      Display.updateImageDisplay(imgPath);
-      Sound.playEffect(sndPath);
-      sequence.advance();
-    }
-  }
-  this.methods.parent = this;
-  this.preload = function() {
-    var folder = "movies/" + this.name;
-    var images = [];
-    var audio = [];
-    for (var i = 0; i < this.sequence.length; i++) {
-      images.push(folder + "/images/" + i + "." + this.imgSuffix);
-      audio.push(folder + "/audio/" + i + "." + this.sndSuffix);
-    }
-    Setup.preloadImages(images);
-    Setup.preloadAudio(audio);
-  }
-  this.type = "Movie"
-  return this;
-}
 const Exit = function(givenName, take, description, active, introduction) {
   this.givenName = givenName;
   this.take = typeof take == "string" ? function(entity) {
@@ -786,6 +785,9 @@ const Topical = function(topics) {
 //Context Accessors
 function getConfiguration() {
   return Configuration;
+}
+function getAudioChannels() {
+  return getConfiguration().audioChannels;
 }
 function getPlayer() {
   return getWorld().getPlayer();

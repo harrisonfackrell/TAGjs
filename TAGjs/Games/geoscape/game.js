@@ -2,8 +2,6 @@
 var Configuration = new GameConfiguration(
   {/*settings*/
     useImages: false,
-    useMusicControls: false,
-    useSoundControls: false
   },
   {/*synonyms*/
     look: ["look","examine"],

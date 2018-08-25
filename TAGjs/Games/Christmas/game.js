@@ -1130,6 +1130,9 @@ var Configuration = new GameConfiguration(
           capacity to understand your statements.)"
       }
     )
+  },
+  {
+    "music": new AudioChannel({"loop": true})
   }
 )
 //Execution---------------------------------------------------------------------

@@ -50,6 +50,7 @@ body {
   vertical-align: text-bottom;
 }
 #outputBox {
+  text-indent: 0em;
   width: 98%;
   position:relative;
   margin-left: auto;
@@ -66,7 +67,7 @@ body {
   text-indent: 1em;
 }
 #outputBox p {
-  text-indent: 0;
+  text-indent: 0em;
   margin-top: 0;
   margin-bottom: 0.3em;
 }
