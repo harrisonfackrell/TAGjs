@@ -1,35 +1,15 @@
 //Modules
 const Setup = (function() {
-  var nameSetup = function() {
-    var nameDisplay = document.getElementById("roomNameDisplay");
-    nameDisplay.addEventListener("webkitAnimationEnd", function(event) {
-      nameDisplay.className = "";
-    });
-    nameDisplay.addEventListener("animationend", function(event) {
-      nameDisplay.className = "";
-    });
-  }
   var inputSetup = function() {
-    var inputBox = document.getElementById("inputBox");
-    inputBox.onkeydown = function(event) {
+    IO.inputBox.onkeydown = function(event) {
       if (event.key == "Enter") {
         IO.enterHandler();
       }
     }
   }
-  var imageSetup = function() {
-    var imageDisplay = document.getElementById("imageDisplay");
-    if (Configuration.useImages) {
-      var room = getRooms()[getPlayer().locations[0]];
-      Display.updateImageDisplay(room.image);
-    } else {
-      imageDisplay.style.display = "none";
-    }
-  }
   var startMainWorld = function() {
-    var inputBox = document.getElementById("inputBox");
-    inputBox.removeEventListener("click", startMainWorld);
-    inputBox.value = "";
+    IO.inputBox.removeEventListener("click", startMainWorld);
+    IO.inputBox.value = "";
     getConfiguration().worlds["main"].start();
   }
   this.objectify = function(array) {
@@ -61,10 +41,8 @@ const Setup = (function() {
     }
   }
   this.setup = function() {
-    document.getElementById("inputBox").addEventListener("click", startMainWorld);
-    nameSetup();
+    IO.inputBox.addEventListener("click", startMainWorld);
     inputSetup();
-    imageSetup();
     var worlds = getConfiguration().worlds;
     Object.keys(worlds).forEach(function(key) {
       worlds[key].preload();
@@ -73,62 +51,27 @@ const Setup = (function() {
   return this;
 })();
 const IO = (function() {
+  this.inputBox = document.getElementById("inputBox");
+  this.outputBox = document.getElementById("outputBox");
   this.enterHandler = function() {
-    Parser.parseAndExecuteInput(Parser.getInput());
-    var room = getRooms()[getPlayer().locations[0]];
-    Display.updateImageDisplay(room.image);
+    Parser.parseAndExecuteInput(this.getInput());
     inputBox.value = "";
+  }
+  this.getInput = function() {
+    return this.inputBox.value;
   }
   this.output = function(str) {
     str = str ? "<p>> " + str + "</p>" : "";
-    var outputBox = document.getElementById("outputBox");
-    outputBox.innerHTML += str;
-    outputBox.scrollTop = outputBox.scrollHeight;
+    this.outputBox.innerHTML += str;
+    this.outputBox.scrollTop = outputBox.scrollHeight;
   }
   this.outputUserText = function(str) {
-    var re = /<|>/g;
-    sanitizedStr = str.replace(re, "");
-    sanitizedStr = sanitizedStr ?
-     "<span class=\"userText\">" + sanitizedStr + "</span>" : "";
-    IO.output(sanitizedStr);
+    str = str.replace(/<|>/g, "");
+    this.output(str ? "<span class=\"userText\">" + str + "</span>" : "");
   }
   return this;
 })();
 const Parser = (function() {
-  this.testForWord = function(input, word) {
-    input = input.toLowerCase();
-    word = word.toLowerCase();
-    var synonyms = Parser.getSynonyms(word);
-    if (input.includes(word)) {
-      return true;
-    }
-    if (synonyms) {
-      for (var i = 0; i < synonyms.length; i++) {
-        if (input.includes(synonyms[i])) {
-          return true;
-        }
-      }
-    }
-    return false;
-  }
-  this.getSynonyms = function(word) {
-    if (word) {
-      return Configuration.synonyms[word.toLowerCase()];
-    } else {
-      return Configuration.synonyms;
-    }
-  }
-  this.addSynonyms = function(word, synonyms) {
-    var synonymContainer = Parser.getSynonyms();
-    if (typeof synonymContainer[word] == "undefined") {
-      synonymContainer[word] = [];
-    }
-    synonymContainer[word] = synonymContainer[word].concat(synonyms);
-  }
-  this.getInput = function() {
-    var inputBox = document.getElementById("inputBox");
-    return inputBox.value;
-  }
   var detectEntity = function(input, entities) {
     entities = Array.isArray(entities) ? entities : Object.values(entities);
     for (var i = 0; i < entities.length; i++) {
@@ -164,6 +107,36 @@ const Parser = (function() {
     var action = detectAction(input, subject);
     return [subject, action];
   }
+  this.testForWord = function(input, word) {
+    input = input.toLowerCase();
+    word = word.toLowerCase();
+    var synonyms = Parser.getSynonyms(word);
+    if (input.includes(word)) {
+      return true;
+    }
+    if (synonyms) {
+      for (var i = 0; i < synonyms.length; i++) {
+        if (input.includes(synonyms[i])) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+  this.getSynonyms = function(word) {
+    if (word) {
+      return Configuration.synonyms[word.toLowerCase()];
+    } else {
+      return Configuration.synonyms;
+    }
+  }
+  this.addSynonyms = function(word, synonyms) {
+    var synonymContainer = Parser.getSynonyms();
+    if (typeof synonymContainer[word] == "undefined") {
+      synonymContainer[word] = [];
+    }
+    synonymContainer[word] = synonymContainer[word].concat(synonyms);
+  }
   this.parseAndExecuteInput = function(input) {
     var parsedInput = parseInput(input);
     var subject = parsedInput[0];
@@ -177,17 +150,24 @@ const Parser = (function() {
   return this;
 })();
 const Display = (function() {
-  this.updateImageDisplay = function(image) {
-    var imageDisplay = document.getElementById("imageDisplay");
-    image = typeof image == "undefined" || image == "" ? imageDisplay.src
-     : image;
-    imageDisplay.src = image;
-  }
+  this.roomNameDisplay = document.getElementById("roomNameDisplay");
+  this.imageDisplay = document.getElementById("imageDisplay");
   this.updateNameDisplay = function(str) {
-    var nameDisplay = document.getElementById("roomNameDisplay");
+    var nameDisplay = this.roomNameDisplay;
     str = str ? str : nameDisplay.innerHTML
     nameDisplay.innerHTML = str;
     nameDisplay.className = "emphasizeName";
+  }
+  this.emphasizeName = function() {
+    var nameDisplay = this.roomNameDisplay;
+    var removeClass = function() {
+      nameDisplay.className = "";
+      nameDisplay.removeEventListener("webkitAnimationEnd", removeClass);
+      nameDisplay.removeEventListener("animationend", removeClass);
+    };
+    nameDisplay.className = "emphasizeName";
+    nameDisplay.addEventListener("webkitAnimationEnd", removeClass);
+    nameDisplay.addEventListener("animationend", removeClass);
   }
   this.manageListGrammar = function(elements, delimiter) {
     var description = "";
@@ -224,69 +204,106 @@ const Display = (function() {
   return this;
 })();
 //Object Constructors
+const ImageChannel = function(zindex, HTMLProperties) {
+  Object.assign(this, new Queued());
+  var HTMLImage = document.createElement("img");
+  HTMLImage.alt = "";
+  HTMLImage.style.zindex = zindex.toString();
+  HTMLImage.style.opacity = 1;
+  Object.entries(HTMLProperties || {}).forEach(function(keyValuePair) {
+    HTMLImage[keyValuePair[0]] = keyValuePair[1];
+  });
+  Display.imageDisplay.appendChild(HTMLImage);
+  var setOpacityInstantly = (opacity) => {
+    HTMLImage.style.opacity = opacity;
+  }
+  var setSrcInstantly = (image) => {
+    HTMLImage.src = typeof image == "undefined" || image == "" ? HTMLImage.src : image;
+  }
+  this.setSrc = (image) => {
+    this.getQueue().unshift(function(resolve, reject) {
+      setSrcInstantly(image);
+      resolve();
+    });
+    this.handleQueue();
+  }
+  this.fade = (targetOpacity, seconds, image) => {
+    this.getQueue().unshift((resolve, reject) => {
+      this.setSrc(image);
+      seconds = seconds || 2;
+      var rate = (seconds * 10) * Math.abs(this.getOpacity() - targetOpacity);
+      var opacityStep = 0;
+      var fadeLoop = setInterval(() => {
+        opacityStep = this.getOpacity() < targetOpacity
+          ? this.getOpacity() <= 0.99 ? 0.01 : 0.0
+          : this.getOpacity() >= 0.01 ? -0.01 : 0.0;
+        setOpacityInstantly(this.getOpacity() + opacityStep);
+        if (Math.abs(this.getOpacity() - targetOpacity) <= 0.01)  {
+          setOpacityInstantly(targetOpacity);
+          clearInterval(fadeLoop);
+          resolve();
+        }
+      }, rate > 0 ? rate : 1);
+    });
+    this.handleQueue();
+  }
+  this.getOpacity = () => {
+    return parseFloat(HTMLImage.style.opacity);
+  }
+  this.setOpacity = (opacity) => {
+    this.getQueue().unshift((resolve, reject) => {
+      setOpacityInstantly(opacity);
+      resolve();
+    });
+    this.handleQueue();
+  }
+}
 const AudioChannel = function(HTMLProperties) {
+  Object.assign(this, new Queued());
   var HTMLAudio = document.createElement("audio");
-  Object.entries(HTMLProperties).forEach(function(keyValuePair) {
+  Object.entries(HTMLProperties || {}).forEach(function(keyValuePair) {
     HTMLAudio[keyValuePair[0]] = keyValuePair[1];
-  })
-  var queue = [];
-  var inProgress = false;
-  var update = function() {
-    var nextInQueue = queue.pop();
-    if (nextInQueue) {
-      new Promise(nextInQueue).then(update);
-    } else {
-      inProgress = false;
-    }
-  }
-  var handleQueue = function() {
-    if (inProgress) {
-      return;
-    } else {
-      inProgress = true;
-      update();
-    }
-  }
-  this.play = function(sound) {
+  });
+  var playInstantly = (sound) => {
     sound = sound || HTMLAudio.src;
-    queue.unshift(function(resolve, reject) {
-    	if (HTMLAudio.src != sound) {
-      	HTMLAudio.src = sound;
-      }
-      HTMLAudio.play().then(resolve);
-    })
-    handleQueue();
+    if (HTMLAudio.src != sound)
+     HTMLAudio.src = sound;
+    return HTMLAudio.play();
   }
-  this.pause = function() {
-    queue.unshift(function(resolve, reject) {
+  this.play = (sound) => {
+    this.getQueue().unshift((resolve, reject) => {
+      playInstantly(sound).then(resolve);
+    })
+    this.handleQueue();
+  }
+  this.pause = () => {
+    this.getQueue().unshift((resolve, reject) => {
       HTMLAudio.pause();
       resolve();
-    })
-    handleQueue();
+    });
+    this.handleQueue();
   }
-  this.fade = function(target, interval, sound) {
-    interval = interval || 40;
-    this.play(sound);
-    queue.unshift(function(resolve, reject) {
-    	var fadeLoop = setInterval(function() {
-      	HTMLAudio.volume += HTMLAudio.volume < target
-        	? HTMLAudio.volume <= 0.99
-          ? 0.01
-          : 0.0
-          : HTMLAudio.volume >= 0.01
-          ? -0.01
-          : 0.0;
-      	if (Math.abs(HTMLAudio.volume - target) <= 0.01)  {
-        	HTMLAudio.volume = target;
-          clearInterval(fadeLoop);
-        	resolve();
-      	}
-      }, 40);
-    })
-    handleQueue();
+  this.fade = (targetVolume, seconds, sound) => {
+    this.getQueue().unshift((resolve, reject) => {
+      playInstantly(sound).then(() => {
+        seconds = seconds || 4;
+        var rate = (seconds * 10) * Math.abs(HTMLAudio.volume - targetVolume);
+    	  var fadeLoop = setInterval(function() {
+          HTMLAudio.volume += HTMLAudio.volume < targetVolume
+            ? HTMLAudio.volume <= 0.99 ? 0.01 : 0.0
+            : HTMLAudio.volume >= 0.01 ? -0.01 : 0.0;
+          if (Math.abs(HTMLAudio.volume - targetVolume) <= 0.01)  {
+            HTMLAudio.volume = targetVolume;
+            clearInterval(fadeLoop);
+            resolve();
+          }
+        }, rate > 0 ? rate : 1);
+      })
+    });
+    this.handleQueue();
   }
-  this.setVolume = function(volume) {
-    queue.unshift(function(resolve, reject) {
+  this.setVolume = (volume) => {
+    this.getQueue().unshift((resolve, reject) => {
       HTMLAudio.volume = volume < 0.0
         ? 0.0
         : volume > 1.0
@@ -294,19 +311,26 @@ const AudioChannel = function(HTMLProperties) {
         : volume;
       resolve();
     })
+    this.handleQueue();
   }
-  this.setCurrentTime = function(time) {
-    queue.unshift(function(resolve, reject) {
+  this.setCurrentTime = (time) => {
+    this.getQueue().unshift((resolve, reject) => {
       HTMLAudio.currentTime = time;
       resolve();
     })
+    this.handleQueue();
   }
   return this;
 }
-const GameConfiguration = function(globals, synonyms, worlds, cutscenes,
- audioChannels) {
+const GameConfiguration = function(worlds, synonyms, cutscenes, globals,
+ imageChannels, audioChannels) {
   this.globals = Object.assign({
-    useImages: false
+    unrecognizedCommandMessage: "I'm afraid I don't understand.",
+    defaultRoomTransition: function() {
+      var targetRoom = getRooms()[getPlayer().locations[0]];
+      getImageChannels()["background"].setSrc(targetRoom.image);
+      IO.output(targetRoom.buildCompleteDescription());
+    }
   }, globals);
   this.synonyms = synonyms;
   this.worlds = Object.keys(worlds).length > 0 ? worlds : {main: worlds};
@@ -320,7 +344,8 @@ const GameConfiguration = function(globals, synonyms, worlds, cutscenes,
     return this.cutscenes;
   }
   this.type = "GameWorld";
-  this.audioChannels = audioChannels;
+  this.imageChannels = imageChannels || {"background": new ImageChannel(0)};
+  this.audioChannels = audioChannels || {"music": new AudioChannel({"loop": true})};
   return this;
 }
 const GameWorld = function(player, rooms, entities, init, endLogic) {
@@ -445,13 +470,13 @@ const PlayerEntity = function(location, methods, turn) {
       var exits = getRooms()[this.parent.locations[0]].getActiveExits();
       exits = Object.values(exits);
       for (var i = 0; i < exits.length; i++) {
-        if (Parser.getInput().toLowerCase()
+        if (IO.getInput().toLowerCase()
          == exits[i].givenName.toLowerCase()) {
           this.move();
           return;
         }
       }
-      IO.output("I'm afraid I don't understand.");
+      IO.output(getConfiguration().globals["unrecognizedCommandMessage"]);
     },
     inventory: function() {
       var inventory = getRooms()["Inventory"];
@@ -464,7 +489,7 @@ const PlayerEntity = function(location, methods, turn) {
       }
     },
     move: function() {
-      this.parent.moveByInput(Parser.getInput());
+      this.parent.moveByInput(IO.getInput());
       getWorld().nextTurn();
     },
     look: function() {
@@ -672,7 +697,7 @@ const Exit = function(givenName, take, description, active, introduction) {
   this.givenName = givenName;
   this.take = typeof take == "string" ? function(entity) {
     entity.warp(take);
-    getRooms()[getPlayer().locations[0]].updateDisplay();
+    getConfiguration().globals.defaultRoomTransition();
   } : take;
   this.description = description;
   this.active = active == false ? false : true;
@@ -687,6 +712,30 @@ const Exit = function(givenName, take, description, active, introduction) {
   return this;
 }
 //Components
+const Queued = function() {
+  var queue = [];
+  var inProgress = false;
+  var update = () => {
+    var nextInQueue = this.getQueue().pop();
+    if (nextInQueue) {
+      new Promise(nextInQueue).then(update);
+    } else {
+      inProgress = false;
+    }
+  }
+  this.handleQueue = () => {
+    if (inProgress) {
+      return;
+    } else {
+      inProgress = true;
+      update();
+    }
+  }
+  this.getQueue = () => {
+    return queue;
+  }
+  return this;
+}
 const Interactable = function(location, methods, givenName, turn) {
   Object.assign(this, new Moving(location));
   this.name = "uninitialized";
@@ -785,6 +834,9 @@ const Topical = function(topics) {
 //Context Accessors
 function getConfiguration() {
   return Configuration;
+}
+function getImageChannels() {
+  return getConfiguration().imageChannels;
 }
 function getAudioChannels() {
   return getConfiguration().audioChannels;

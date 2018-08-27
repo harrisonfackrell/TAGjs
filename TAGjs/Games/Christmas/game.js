@@ -1,46 +1,6 @@
 //Globals-----------------------------------------------------------------------
 var Configuration = new GameConfiguration(
   {
-    useImages: false,
-    useMusicControls: false,
-    useSoundControls: false
-  },
-  {
-    look: ["look","examine"],
-    attack: ["attack","kick","punch","fight","destroy","crush","break","smash","kill","bite"],
-    move: ["move","go","walk","run","step","fly","head","press"],
-    throw: ["throw","toss"],
-    use: ["use"],
-    open: ["open","search","check"],
-    close: ["close","shut"],
-    talk: ["talk","ask","say","shout","speak"],
-    take: ["take","pick up","steal","get","keep"],
-    unequip: ["unequip","take off"],
-    equip: ["equip","put on","wear"],
-    hang: ["hang","put","place"],
-    snowdrift: ["snowdrift","snow"],
-    toolbox: ["toolbox","tools","box"],
-    snowshovel: ["snowshovel","shovel"],
-    "blue ornament": ["blue", "ornament"],
-    "red ornament": ["red", "ornament"],
-    mailbox: ["mail"],
-    fireplace: ["fire"],
-    put: ["put","throw","toss","place"],
-    "space helmet": ["helmet"],
-    "space crawdad": ["crawdad"],
-    "polar bear": ["bear"],
-    "santa claus": ["santa"],
-    "sugar plum": ["plum"],
-    book: ["book", "celsius"],
-    enter: ["enter","type"],
-    keypad: ["keypad","enter","type","45271836"],
-    "space fish": ["fish"],
-    "insult": ["stupid","dumb","idiot","hate","awful"],
-    "praise": ["cool","awesome","nerd"],
-    "inventory": ["inventory","item"],
-    "rocket button": ["button"]
-  },
-  {
     main: new GameWorld(
       new PlayerEntity("home.livingroom",
         {
@@ -1096,6 +1056,41 @@ var Configuration = new GameConfiguration(
     )
   },
   {
+    look: ["look","examine"],
+    attack: ["attack","kick","punch","fight","destroy","crush","break","smash","kill","bite"],
+    move: ["move","go","walk","run","step","fly","head","press"],
+    throw: ["throw","toss"],
+    use: ["use"],
+    open: ["open","search","check"],
+    close: ["close","shut"],
+    talk: ["talk","ask","say","shout","speak"],
+    take: ["take","pick up","steal","get","keep"],
+    unequip: ["unequip","take off"],
+    equip: ["equip","put on","wear"],
+    hang: ["hang","put","place"],
+    snowdrift: ["snowdrift","snow"],
+    toolbox: ["toolbox","tools","box"],
+    snowshovel: ["snowshovel","shovel"],
+    "blue ornament": ["blue", "ornament"],
+    "red ornament": ["red", "ornament"],
+    mailbox: ["mail"],
+    fireplace: ["fire"],
+    put: ["put","throw","toss","place"],
+    "space helmet": ["helmet"],
+    "space crawdad": ["crawdad"],
+    "polar bear": ["bear"],
+    "santa claus": ["santa"],
+    "sugar plum": ["plum"],
+    book: ["book", "celsius"],
+    enter: ["enter","type"],
+    keypad: ["keypad","enter","type","45271836"],
+    "space fish": ["fish"],
+    "insult": ["stupid","dumb","idiot","hate","awful"],
+    "praise": ["cool","awesome","nerd"],
+    "inventory": ["inventory","item"],
+    "rocket button": ["button"]
+  },
+  {
     "truenorth.snowman": new Conversation(
       {
         "hello": "Hi! It's *ice* to meet you! Do you want to be my \
@@ -1132,7 +1127,10 @@ var Configuration = new GameConfiguration(
     )
   },
   {
-    "music": new AudioChannel({"loop": true})
+    useImages: false
+  },
+  {
+    "background": new ImageChannel(0, {"src": "candle.jpg"})
   }
 )
 //Execution---------------------------------------------------------------------

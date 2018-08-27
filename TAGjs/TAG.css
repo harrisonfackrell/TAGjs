@@ -13,7 +13,8 @@ body {
 #roomDisplay {
   border: 3px solid;
   margin: auto;
-  max-width: 700px;
+  max-width: 21em;
+  min-width: 19em;
   font-family: reformedEllar;
   font-size: 200%;
 }
@@ -29,25 +30,18 @@ body {
   animation-duration: 0.5s;
 }
 #imageDisplay {
+  border: none;
   display: block;
   margin: auto;
-  width: 90%;
-  height: 30%;
-}
-#audio {
-  position:absolute;
-}
-#audio p {
-  cursor: default;
   position: relative;
-  font: 3em reformedEllar;
-  bottom: 1.5em;
-  margin-left: 0.5em;
-  float: left;
+  width: 18em;
+  height: 9em;
 }
-#audio img {
-  position: relative;
-  vertical-align: text-bottom;
+#imageDisplay img {
+  border: none;
+  position: absolute;
+  width: 100%;
+  height: 100%;
 }
 #outputBox {
   text-indent: 0em;
