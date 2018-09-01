@@ -1,9 +1,13 @@
 //Globals-----------------------------------------------------------------------
 var Configuration = new GameConfiguration(
-  {/*settings*/
-    useImages: false,
-    useMusicControls: false,
-    useSoundControls: false
+  {/*worlds*/
+    main: new GameWorld(
+      /*player*/,
+      {/*rooms*/},
+      {/*entities*/},
+      function() {/*init*/},
+      function() {/*endLogic*/}
+    )
   },
   {/*synonyms*/
     look: ["look","examine"],
@@ -17,15 +21,6 @@ var Configuration = new GameConfiguration(
     take: ["take","pick up","steal","get","keep"],
     unequip: ["unequip","take off"],
     equip: ["equip","put on","wear"],
-  },
-  {/*worlds*/
-    main: new GameWorld(
-      /*player*/,
-      {/*rooms*/},
-      {/*entities*/},
-      function() {/*init*/},
-      function() {/*endLogic*/}
-    )
   },
   {/*cutscenes*/}
 )
