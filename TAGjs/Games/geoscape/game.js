@@ -2,10 +2,14 @@
 var Configuration = new GameConfiguration(
   {/*worlds*/
     main: new GameWorld(
-      /*player*/,
+      /*player*/new PlayerEntity("Nowhere",
+        {}
+      ),
       {/*rooms*/},
       {/*entities*/},
-      function() {/*init*/},
+      function() {/*init*/
+        getCutscenes()["ending"].start();
+      },
       function() {/*endLogic*/}
     )
   },
@@ -24,7 +28,7 @@ var Configuration = new GameConfiguration(
   },
   {/*cutscenes*/
     "notabadperson": new Monolog([
-      "\"There's a voice inside my head,\" Alec says as he appears in the \
+      "\"There is a voice inside my head,\" Alec says as he appears in the \
       mirror. \"It is the voice of a man who radiates light.",
       "\'You're not a bad person.",
       "I hope you realize that.",
@@ -37,83 +41,121 @@ var Configuration = new GameConfiguration(
       <strong>hallway</strong> behind it."
     ]),
     "ending": new Monolog([
-      "\"I am a bad person,\" Alec says softly. There is no malice, nor \
-      bitterness, in his voice. \"I cannot believe anything to the contrary.",
-      "At the least, I can say that the world would be better without me; for \
-      though I have summoned voices to speak on my behalf,",
-      "The voices of the others are so much louder.",
-      "Four witnesses, in the darkness, testify against me. Four witnesses \
-      cry of the pain that I brought them.",
-      "I can hear them, if I let myself. I can hear them if I open my mind to \
-      the void in which they reside.\"",
-      "Alec grips the frame of the mirror for stability. He's clearly dreading \
-      what he's about to do.",
-      "\"I AM SORRY,\" he yells, shaking the mirror slightly. The sharp \
-      increase in the volume of his voice is mildly startling. You feel, from \
-      his presence, a wave of guilt and revulsion, a feeling of wrongness that \
-      seems unresolvable.",
+      Display.colorize("red", "\"I am a bad person,\" Alec says softly. \"I cannot \
+      believe anything to the contrary.\"", ["bad person", "cannot believe"]),
+      "\"How can I, when I can hear them,\"",
+      "\"the voices of the others?\"",
+      "\"...\"",
       function() {
-        IO.output("Suddenly, Alec's face falls, and you become aware of another mind. No, \
-        that's not it. It's a set of minds, a collection of--");
-        IO.output("\"Four witnesses,\" Alec says solemnly.")
+        getAudioChannels()["music"].setVolume(0.1);
+        getAudioChannels()["music"].play("music/Raucous Rancor.ogg")
+        IO.output("You aware of another mind.");
       },
-      "The presence of these \"witnesses\" seems to grow steadily. They're \
-      getting closer, clearer. Alec's mind is <em>burning</em>, consuming \
-      itself in anticipation of what's coming.",
-      "The witnesses--you can clearly sense them now--carry a collective, \
-      heavy well of nebulous, negative <em>emotion</em>. It's a pressure against \
-      your psyche, and it grows more oppressive with every passing second.",
-      "Your breathing begins to slow, to become more labored. Exposure to this \
-      freneticism, to this unrelenting tide of sorrow, is at the limit of the \
-      experience that you can handle.",
-      "Before you realize it, you find yourself gripping the frame of the \
-      mirror, your hand meeting Alec's. You look up to see him smiling. His \
-      expression is not one of malevolence, though, nor is it one of joy. It's \
-      more complex than that, and through the M-Path, you can tell that he \
-      himself doesn't fully understand. He's smiling in spite of the tears--or \
-      with them; he's unsure.",
+      "You are aware of four other minds.",
+      "\"Four witnesses\", Alec says quietly.",
+      Display.colorize("red", "\"Four people.\"", "people"),
       function() {
-        IO.output("You're gasping now, as if more air will somehow sustain you \
-        against this cacaphony of psychic voice.");
-        IO.output("\"Do... Do you see? Do you hear my condemnation?\" Alec \
-        asks. He has difficulty forming the words.");
-      }
-      "\"I DON'T HATE YOU,\" someone says, \"AND NEITHER DID THEY.\" They're \
-      not yelling, but their voice seems to be amplified.",
-      "\"I KNOW IT'S HARD TO AVOID THE DEMONS,\" another voice continues, \
-      BUT I BELIEVE IN YOU.\"",
-      "Alec's expression has changed entirely, and he's now looking at you \
-      with complete shock.",
-      "Slowly, the atmosphere that you are experiencing changes. Fear turns to \
-      hope as the witnesses--the residents of the Geoscape--consider the words \
-      of the Man of Light, spoken to them in their time of need."
-      "Alec begins to glow.",
-      "First luminous,",
-      "and then radiant.",
-      "In one stroke, you understand. Alec himself is the Man of Light. His is \
-      the voice of hope in the Geoscape's desolation. The joy of helping \
-      people--of empathy and of compassion--is what motivates him. His charity \
-      precludes his guilt.",
-      "The dark shades of the room begin to light up brilliantly. The walls \
-      are leaking luminescence.",
-      "They begin to disintegrate, to dissolve at their edges. But this is not a \
-      destruction; it is a reconstruction, a dispelling of that which is old \
-      to allow for that which is new.",
-      "Alec swipes his hand to the side, shattering the mirror. The fragments \
-      disintegrate, along with everything else.",
+        getAudioChannels()["music"].setVolume(0.2);
+        IO.output(Display.colorize("red", "\"I'm burning,\" Alec says. He \
+        smiles ironically.", "burning"));
+      },
+      function() {
+        getAudioChannels()["music"].setVolume(0.5);
+        IO.output(Display.colorize("red", "\"These people have DIED at my \
+        hands!\"", ["DIED", "my hands"]));
+      },
+      Display.colorize("red", "I'm sorry."),
+      function() {
+        getAudioChannels()["music"].setVolume(1);
+        IO.output(Display.colorize("red", "I didn't mean for this."));
+      },
+      function() {
+        getAudioChannels()["sound"].play("sound/breathing tired.ogg");
+        IO.output("You're gasping now.")
+      },
+      "You're desperately gripping the frame of the mirror.",
+      "You feel afraid,",
+      "sad,",
+      "guilty,",
+      "exhausted.",
+      "You are breaking, but cannot shatter.",
+      function() {
+        getAudioChannels()["sound"].play("sound/scream_horror1.ogg");
+        IO.output(Display.colorize("red", "Do you hear my condemnation?"));
+      },
+      function() {
+        getAudioChannels()["sound"].play("sound/scream_horror1.ogg");
+        IO.output(Display.colorize("red", "Do you hear the accusations screaming in their souls?"));
+      },
+      "You can't hear;",
+      "you can't think;",
+      "you can barely even register that you've fallen to the ground.",
+      function() {
+        getAudioChannels()["music"].pause();
+        getAudioChannels()["sound"].pause();
+        IO.output("\"I don't hate you;\" someone says.");
+      },
+      "\"they didn't either.\"",
+      "\"I know it's hard to avoid the demons,\"",
+      "\"but I believe in you.\"",
+      function() {
+        getAudioChannels()["music"].setVolume(0);
+        getAudioChannels()["music"].fade(1, 5, "music/motions.ogg");
+        IO.output("\"You've run the race so valiantly;\"");
+      },
+      "\"you can rest now if you need it.\"",
+      "\"Carry on, my child;\"",
+      "\"I know you will overcome.\"",
+      "Alec is shocked.",
+      "Fear turns to hope,",
+      "and sadness turns to comfort.",
+      "Alec begins to <em>glow</em>.",
+      "\"It's okay; you are not evil.\" Alec forms the words soundlessly.",
+      "Benevolence fills your mind.",
+      "The shadows of the room begin to light up brilliantly.",
+      "The walls begin to leak luminescence.",
+      "It all begins to break, to crumble, to dissolve",
+      "This is not a destruction;",
+      "it is a reconstruction,",
+      "a dispelling of that which is old",
+      "to allow for that which is new.",
+      function() {
+        getAudioChannels()["sound"].play("sound/glass_breaking.ogg");
+        IO.output("With a swipe of his hand, Alec shatters the mirror.");
+      },
+      function() {
+        getAudioChannels()["sound"].play("sound/ghostbreath.ogg");
+        IO.output("The fragments disintegrate.");
+      },
+      "The ground disintegrates.",
+      "You're falling, faster and faster.",
       "The last thing you see, before the M-Path disconnects, is an infinite \
       canvas of white.",
       function() {
         IO.output("**********");
         IO.output("GEOSCAPE");
+      },
+      function() {
+        getAudioChannels()["music"].fade(0, 2);
         IO.output("Created by Harrison Fackrell.");
       },
-      "\"You're not a bad person.",
-      "\"I hope you believe that;",
-      "\"for the light",
-      "\"shines from you",
-      "\"in rays.\""
+      "\"You're not a bad person.\"",
+      "\"I hope you believe that;\"",
+      "\"for the light\"",
+      "\"shines from you\"",
+      function() {
+        IO.output("\"in rays.\"");
+        IO.inputBox.disabled = true;
+      }
     ])
+  },
+  {/*globals*/},
+  {
+    "background": new ImageChannel(0)
+  },
+  {
+    "music": new AudioChannel({"loop": true}),
+    "sound": new AudioChannel()
   }
 )
 //Execution---------------------------------------------------------------------

@@ -61,7 +61,7 @@ const IO = (function() {
     return this.inputBox.value;
   }
   this.output = function(str) {
-    str = str ? "<p>> " + str + "</p>" : "";
+    str = (str ? "<p>> " + str + "</p>" : "").replace(/\s+/g,' ');
     this.outputBox.innerHTML += str;
     this.outputBox.scrollTop = outputBox.scrollHeight;
   }
@@ -182,24 +182,24 @@ const Display = (function() {
     }
     return description;
   }
-  this.embolden = function(string, substr) {
-    return this.addTag("strong", string, substr);
+  this.embolden = function(string, substringArray) {
+    return this.addTag("strong", string, substringArray);
   }
-  this.colorize = function(color, string, substr) {
-    return this.addTag("span style=\"color: " + color + "\"", string, substr);
+  this.colorize = function(color, string, substringArray) {
+    return this.addTag("span style=\"color: " + color + "\"", string, substringArray);
   }
-  this.addTag = function(tagtext, string, substr) {
-    if (substr[0].length > 1) {
-      for (var i = 0; i < substr.length; i++) {
-        this.addTag(substr[i]);
-      }
-    } else {
-      substr = new RegExp(typeof substr == "undefined" || substr == "" ?
-        string : substr, "i");
-      return string.replace(substr, function(str) {
+  this.addTag = function(tagtext, string, substringArray) {
+    string = string.replace(/\s+/g,' ');
+    substringArray = substringArray || ".*";
+    substringArray = typeof substringArray == "string" ? [substringArray] :
+      substringArray;
+    substringArray.forEach(function(substring) {
+      substring = new RegExp(substring || string, "i");
+      string = string.replace(substring, function(str) {
         return "<" + tagtext + ">" + str + "</" + tagtext + ">";
       });
-    }
+    })
+    return string;
   }
   return this;
 })();
@@ -210,9 +210,12 @@ const ImageChannel = function(zindex, HTMLProperties) {
   HTMLImage.alt = "";
   HTMLImage.style.zindex = zindex.toString();
   HTMLImage.style.opacity = 1;
-  Object.entries(HTMLProperties || {}).forEach(function(keyValuePair) {
-    HTMLImage[keyValuePair[0]] = keyValuePair[1];
-  });
+  this.setProperties = (HTMLProperties) => {
+    Object.entries(HTMLProperties || {}).forEach(function(keyValuePair) {
+      HTMLAudio[keyValuePair[0]] = keyValuePair[1];
+    })
+  }
+  this.setProperties(HTMLProperties);
   Display.imageDisplay.appendChild(HTMLImage);
   var setOpacityInstantly = (opacity) => {
     HTMLImage.style.opacity = opacity;
@@ -261,9 +264,12 @@ const ImageChannel = function(zindex, HTMLProperties) {
 const AudioChannel = function(HTMLProperties) {
   Object.assign(this, new Queued());
   var HTMLAudio = document.createElement("audio");
-  Object.entries(HTMLProperties || {}).forEach(function(keyValuePair) {
-    HTMLAudio[keyValuePair[0]] = keyValuePair[1];
-  });
+  this.setProperties = (HTMLProperties) => {
+    Object.entries(HTMLProperties || {}).forEach(function(keyValuePair) {
+      HTMLAudio[keyValuePair[0]] = keyValuePair[1];
+    })
+  }
+  this.setProperties(HTMLProperties);
   var playInstantly = (sound) => {
     sound = sound || HTMLAudio.src;
     if (HTMLAudio.src != sound)
@@ -674,12 +680,12 @@ const Sequence = function(array) {
   }
   array.position = -1;
   array.parent = null;
-  array.type = "Sequence"
+  array.type = "Sequence";
   return array;
 }
 const Monolog = function(sequence, init, endLogic) {
   Object.assign(this, new Conversational(init, endLogic),
-   new Interactable(name, "Nowhere", {}, "", function() {}));
+   new Interactable("Nowhere", {}, "", function() {}));
   this.methods = {
     nothing: function() {
       this.parent.sequence.advance();
@@ -689,8 +695,8 @@ const Monolog = function(sequence, init, endLogic) {
     }
   }
   this.methods.parent = this;
-  this.sequence = sequence.advance ? new Sequence(sequence) : sequence;
-  this.type = "Monolog"
+  this.sequence = sequence.advance ? sequence : new Sequence(sequence);
+  this.type = "Monolog";
   return this;
 }
 const Exit = function(givenName, take, description, active, introduction) {
@@ -733,6 +739,11 @@ const Queued = function() {
   }
   this.getQueue = () => {
     return queue;
+  }
+  this.wait = (seconds) => {
+    this.getQueue().unshift((resolve, reject) => {
+      setTimeout(resolve, seconds * 1000);
+    })
   }
   return this;
 }
@@ -797,8 +808,7 @@ const Conversational = function(init, endLogic) {
     new GameWorld(
       new PlayerEntity("Nowhere", {}, () => {}),
       {},
-      {"conversation": this},
-      {},
+      {"": this},
       init ? init :
         () => {
           IO.output("**********");
