@@ -205,23 +205,17 @@ const Display = (function() {
 })();
 //Object Constructors
 const ImageChannel = function(zindex, HTMLProperties) {
-  Object.assign(this, new Queued());
-  var HTMLImage = document.createElement("img");
-  HTMLImage.alt = "";
-  HTMLImage.style.zindex = zindex.toString();
-  HTMLImage.style.opacity = 1;
-  this.setProperties = (HTMLProperties) => {
-    Object.entries(HTMLProperties || {}).forEach(function(keyValuePair) {
-      HTMLAudio[keyValuePair[0]] = keyValuePair[1];
-    })
-  }
+  Object.assign(this, new QueuedHTMLInterface("img", HTMLProperties));
+  this.HTMLElement.alt = "";
+  this.HTMLElement.style.zindex = zindex.toString();
+  this.HTMLElement.style.opacity = 1;
   this.setProperties(HTMLProperties);
-  Display.imageDisplay.appendChild(HTMLImage);
+  Display.imageDisplay.appendChild(this.HTMLElement);
   var setOpacityInstantly = (opacity) => {
-    HTMLImage.style.opacity = opacity;
+    this.HTMLElement.style.opacity = opacity;
   }
   var setSrcInstantly = (image) => {
-    HTMLImage.src = typeof image == "undefined" || image == "" ? HTMLImage.src : image;
+    this.HTMLElement.src = typeof image == "undefined" || image == "" ? this.HTMLElement.src : image;
   }
   this.setSrc = (image) => {
     this.getQueue().unshift(function(resolve, reject) {
@@ -251,7 +245,7 @@ const ImageChannel = function(zindex, HTMLProperties) {
     this.handleQueue();
   }
   this.getOpacity = () => {
-    return parseFloat(HTMLImage.style.opacity);
+    return parseFloat(this.HTMLElement.style.opacity);
   }
   this.setOpacity = (opacity) => {
     this.getQueue().unshift((resolve, reject) => {
@@ -262,19 +256,12 @@ const ImageChannel = function(zindex, HTMLProperties) {
   }
 }
 const AudioChannel = function(HTMLProperties) {
-  Object.assign(this, new Queued());
-  var HTMLAudio = document.createElement("audio");
-  this.setProperties = (HTMLProperties) => {
-    Object.entries(HTMLProperties || {}).forEach(function(keyValuePair) {
-      HTMLAudio[keyValuePair[0]] = keyValuePair[1];
-    })
-  }
-  this.setProperties(HTMLProperties);
+  Object.assign(this, new QueuedHTMLInterface("audio", HTMLProperties));
   var playInstantly = (sound) => {
-    sound = sound || HTMLAudio.src;
-    if (HTMLAudio.src != sound)
-     HTMLAudio.src = sound;
-    return HTMLAudio.play();
+    sound = sound || this.HTMLElement.src;
+    if (this.HTMLElement.src != sound)
+      this.HTMLElement.src = sound;
+    return this.HTMLElement.play();
   }
   this.play = (sound) => {
     this.getQueue().unshift((resolve, reject) => {
@@ -284,33 +271,22 @@ const AudioChannel = function(HTMLProperties) {
   }
   this.pause = () => {
     this.getQueue().unshift((resolve, reject) => {
-      HTMLAudio.pause();
+      this.HTMLElement.pause();
       resolve();
     });
     this.handleQueue();
   }
   this.fade = (targetVolume, seconds, sound) => {
-    this.getQueue().unshift((resolve, reject) => {
-      playInstantly(sound).then(() => {
-        seconds = seconds || 4;
-        var rate = (seconds * 10) * Math.abs(HTMLAudio.volume - targetVolume);
-    	  var fadeLoop = setInterval(function() {
-          HTMLAudio.volume += HTMLAudio.volume < targetVolume
-            ? HTMLAudio.volume <= 0.99 ? 0.01 : 0.0
-            : HTMLAudio.volume >= 0.01 ? -0.01 : 0.0;
-          if (Math.abs(HTMLAudio.volume - targetVolume) <= 0.01)  {
-            HTMLAudio.volume = targetVolume;
-            clearInterval(fadeLoop);
-            resolve();
-          }
-        }, rate > 0 ? rate : 1);
-      })
-    });
-    this.handleQueue();
+    console.log("fading");
+    this.play(sound);
+    this.fadeProperty("volume", targetVolume, seconds, 0.0, 1.0);
+  }
+  this.fadeSpeed = (targetSpeed, seconds) => {
+    this.fadeProperty("playbackRate", targetSpeed, seconds, 0.07)
   }
   this.setVolume = (volume) => {
     this.getQueue().unshift((resolve, reject) => {
-      HTMLAudio.volume = volume < 0.0
+      this.HTMLElement.volume = volume < 0.0
         ? 0.0
         : volume > 1.0
         ? 1.0
@@ -319,9 +295,16 @@ const AudioChannel = function(HTMLProperties) {
     })
     this.handleQueue();
   }
+  this.setSpeed = (speed) => {
+    this.getQueue().unshift((resolve, reject) => {
+      this.HTMLElement.volume = speed > 0.0 ? speed : 0;
+      resolve();
+    })
+    this.handleQueue();
+  }
   this.setCurrentTime = (time) => {
     this.getQueue().unshift((resolve, reject) => {
-      HTMLAudio.currentTime = time;
+      this.HTMLElement.currentTime = time;
       resolve();
     })
     this.handleQueue();
@@ -744,6 +727,48 @@ const Queued = function() {
     this.getQueue().unshift((resolve, reject) => {
       setTimeout(resolve, seconds * 1000);
     })
+  }
+  return this;
+}
+const HTMLInterface = function(elementType, HTMLProperties) {
+  this.HTMLElement = document.createElement(elementType);
+  this.setProperties = (HTMLProperties) => {
+    Object.entries(HTMLProperties || {}).forEach((keyValuePair) => {
+      console.log(this.HTMLElement);
+      this.HTMLElement[keyValuePair[0]] = keyValuePair[1];
+    })
+  }
+  this.setProperties(HTMLProperties);
+  return this;
+}
+const QueuedHTMLInterface = function(elementType, HTMLProperties) {
+  Object.assign(this, new Queued(),
+    new HTMLInterface(elementType, HTMLProperties));
+  this.fadeProperty = function(property, target, seconds, min, max) {
+    min = typeof min == "undefined" ? Number.NEGATIVE_INFINITY : min;
+    max = typeof max == "undefined" ? Infinity : max;
+    target = target > min ?
+      target < max ?
+        target
+        : max
+      : min;
+    seconds = seconds || 4;
+    this.getQueue().unshift((resolve, reject) => {
+      var rate = (seconds * 10) / Math.abs(this.HTMLElement[property] - target);
+      var step = 0.01;
+    	var fadeLoop = setInterval(() => {
+        console.log(this.HTMLElement[property])
+        this.HTMLElement[property] += this.HTMLElement[property] < target
+          ? this.HTMLElement[property] + step <= max ? step : 0.0
+          : this.HTMLElement[property] - step >= min ? -step : 0.0;
+        if (Math.abs(this.HTMLElement[property] - target) <= 0.01)  {
+          this.HTMLElement[property] = target;
+          clearInterval(fadeLoop);
+          resolve();
+        }
+      }, rate > 0 && isFinite(rate) ? rate : 1);
+    });
+    this.handleQueue();
   }
   return this;
 }

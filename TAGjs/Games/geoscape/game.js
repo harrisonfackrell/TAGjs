@@ -8,7 +8,7 @@ var Configuration = new GameConfiguration(
       {/*rooms*/},
       {/*entities*/},
       function() {/*init*/
-        getCutscenes()["ending"].start();
+        getCutscenes()["fightshadow"].start();
       },
       function() {/*endLogic*/}
     )
@@ -27,6 +27,87 @@ var Configuration = new GameConfiguration(
     equip: ["equip","put on","wear"],
   },
   {/*cutscenes*/
+    "fightshadow": new Monolog([
+      "You raise your weapons and approach the shadow. It attacks quickly and \
+      aggressively.",
+      function() {
+        getAudioChannels()["music"].setVolume(0);
+        getAudioChannels()["music"].fade(1, 2, "music/fight_looped.ogg");
+        IO.output("Instinctively, you block the strikes with your weapons. You're holding \
+        them upside-down now, which feels natural.")
+      },
+      "The weapons, they're called tonfa. How you know that is a mystery, \
+      but it's a sure and oddly comforting knowledge. These are defensive \
+      instruments; they keep their weilder safe.",
+      "Your actions, timid at first, become stronger and more confident. You \
+      feel like you have used these tonfa many times, on the order of \
+      thousands.",
+      "You fall in to familiar motions, forms of defense that you know by \
+      heart.",
+      function() {
+        getAudioChannels()["music"].fadeSpeed(1.2, 4);
+        IO.output("Gradually, the tempo of your combat increases. You're blocking and \
+        striking faster and faster, with greater speed and alacrity. Every \
+        interaction takes more concentration than the last.");
+      },
+      "You feel like you're balancing on a highwire. You're performing \
+      gracefully, but you're past the point of return. The momentum of the fight \
+      is such that if you stopped, or if you tripped or stuttered, you would \
+      lose all of that grace instantly.",
+      "Your breathing begins to slow. Your eyes defocus, and then \
+      focus on <em>everything</em>. In this place, in this interaction, you \
+      are completely in control. You're not fighting anymore--you're \
+      performing. This shadow is not your enemy.",
+      "This shadow is your friend, providing a distraction from--",
+      function() {
+        getAudioChannels()["music"].pause();
+        getAudioChannels()["music"].setSpeed(1.0);
+        IO.output("No. I will not follow that line of cognition.");
+      },
+      function() {
+        getAudioChannels()["music"].play();
+        IO.output("You throw yourself back in to the battle--the duel. In the land of your \
+        mind, you can be perfection. You can expertly dodge and block and \
+        attack, only to meet a perfect parry and start all over again.")
+      },
+      "It's wonderful to forget everything else, to pour all of your focus \
+      into sustaining a complex and nuanced exercise. You feel exhausted, \
+      tired, and yet incredibly relieved. This frantic, chaotic state is \
+      underscored with a calm feeling of peace.",
+      "There is no room for panic, no room for fear inside of your mind. There \
+      is nothing that can harm you, for nothing exists. There is only \
+      the frenetic rhythm of determination.",
+      function() {
+        getAudioChannels()["music"].fadeSpeed(0.75, 2);
+        IO.output("Slowly, however, your acuity weakens, and your exhaustion finds you.");
+      },
+      function() {
+        getAudioChannels()["music"].fadeSpeed(0.25, 2);
+        getAudioChannels()["music"].fade(0, 3);
+        IO.output("You miss a block, and the shadow's tonfa passes through your skull \
+        harmlessly. It's nothing more than an illusion, one that has now been broken.")
+      },
+      function() {
+        getAudioChannels()["music"].pause();
+        getAudioChannels()["music"].setSpeed(1);
+        getAudioChannels()["sound"].play("sound/ghostbreath.ogg");
+        IO.output("The shadow disappears, and you're left feeling numb, tired, and \
+        slightly worried. You are safe for now, but that safety feels fragile.");
+      }
+    ]),
+    "playtrumpet": new Monolog([
+      function() {
+        getAudioChannels()["sound"].play("sound/bicycle-horn-1(slow).ogg");
+        IO.output("You raise the trumpet to your lips and play a discordant \
+        tone. Immediately, everyone in the room turns to stare at you. The \
+        conductor makes a sharp silencing motion with his hand as he scowls.");
+      },
+      "Shadows start to form around you. They look hollow--you <em>feel</em> \
+      hollow.",
+      "You feel sick.",
+      "You blink against a well of water, and as your vision blurs, you find \
+      yourself somewhere else."
+    ]),
     "darksilhouette": new Monolog([
       "Before you can otherwise interact with the mirror, you find yourself \
       stopped by the image the mirror contains.",
@@ -34,8 +115,8 @@ var Configuration = new GameConfiguration(
       "The man in the mirror is a dark silhouette, a hole in reality.",
       function() {
         getAudioChannels()["sound"].play("sound/glass_breaking.ogg");
-        IO.output("In a quick, startling motion, he raises his right hand and extends it to \
-        the side. The mirror breaks.");
+        IO.output("With a quick, startling motion, he raises his right hand \
+        and extends it to the side. The mirror breaks.");
       },
       "Behind the mirror, you find a key, which you take."
     ]),
@@ -160,12 +241,12 @@ var Configuration = new GameConfiguration(
       },
       function() {
         getAudioChannels()["sound"].play("sound/wind.ogg");
+        getAudioChannels()["sound"].setProperties({"loop": true});
         IO.output("You're falling, faster and faster.");
       },
       function() {
-        getAudioChannels()["sound"].fade(0, 5);
-        IO.output("The last thing you see, before the M-Path disconnects, is an infinite \
-        canvas of white.");
+        IO.output("The last thing you see, before the M-Path disconnects, \
+        is an infinite canvas of white.");
       },
       function() {
         IO.output("**********");
