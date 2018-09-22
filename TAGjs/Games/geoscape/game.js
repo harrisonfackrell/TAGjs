@@ -27,6 +27,18 @@ var Configuration = new GameConfiguration(
     equip: ["equip","put on","wear"],
   },
   {/*cutscenes*/
+    "ilethimdie": new Monolog([
+      "\"There was nothing that you could have done, Alec.\"",
+      "\"That's not true. That <em>cannot</em> be true.\"",
+      "\"He was comatose.\"",
+      "\"But he was <em>alive</em>.\"",
+      "\"Was he alive? Or was he living his death?\"",
+      "\"He still had a chance.\"",
+      "\"A chance without hope.\"",
+      "\"Shall I kill a hopeless man?\"",
+      "\"You didn't kill him.\"",
+      Display.colorize("red", "\"But I let him die.\"", "I let him die")
+    ]),
     "fightshadow": new Monolog([
       "You raise your weapons and approach the shadow. It attacks quickly and \
       aggressively.",
@@ -60,8 +72,9 @@ var Configuration = new GameConfiguration(
       performing. This shadow is not your enemy.",
       "This shadow is your friend, providing a distraction from--",
       function() {
+        getAudioChannels()["music"].clearQueue();
         getAudioChannels()["music"].pause();
-        getAudioChannels()["music"].setSpeed(1.0);
+        getAudioChannels()["music"].setSpeed(1);
         IO.output("No. I will not follow that line of cognition.");
       },
       function() {
@@ -82,12 +95,13 @@ var Configuration = new GameConfiguration(
         IO.output("Slowly, however, your acuity weakens, and your exhaustion finds you.");
       },
       function() {
-        getAudioChannels()["music"].fadeSpeed(0.25, 2);
+        getAudioChannels()["music"].fadeSpeed(0.25, 1);
         getAudioChannels()["music"].fade(0, 3);
         IO.output("You miss a block, and the shadow's tonfa passes through your skull \
         harmlessly. It's nothing more than an illusion, one that has now been broken.")
       },
       function() {
+        getAudioChannels()["music"].clearQueue();
         getAudioChannels()["music"].pause();
         getAudioChannels()["music"].setSpeed(1);
         getAudioChannels()["sound"].play("sound/ghostbreath.ogg");

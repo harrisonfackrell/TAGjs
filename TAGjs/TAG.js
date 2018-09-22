@@ -205,44 +205,30 @@ const Display = (function() {
 })();
 //Object Constructors
 const ImageChannel = function(zindex, HTMLProperties) {
-  Object.assign(this, new QueuedHTMLInterface("img", HTMLProperties));
+  Object.assign(this, new QueuedHTMLInterface("img", HTMLProperties,
+  {
+    "opacity": () => {return parseFloat(this.HTMLElement.style.opacity)}
+  },
+  {
+    "opacity": () => {this.HTMLElement.style.opacity = opacity}
+  }));
   this.HTMLElement.alt = "";
   this.HTMLElement.style.zindex = zindex.toString();
   this.HTMLElement.style.opacity = 1;
   this.setProperties(HTMLProperties);
   Display.imageDisplay.appendChild(this.HTMLElement);
-  var setOpacityInstantly = (opacity) => {
-    this.HTMLElement.style.opacity = opacity;
-  }
   var setSrcInstantly = (image) => {
     this.HTMLElement.src = typeof image == "undefined" || image == "" ? this.HTMLElement.src : image;
   }
   this.setSrc = (image) => {
-    this.getQueue().unshift(function(resolve, reject) {
-      setSrcInstantly(image);
-      resolve();
-    });
+    this.getQueue().unshift(new TerminableOperation((terminate) => {
+      terminate();
+    }, () => {setSrcInstantly(image);}));
     this.handleQueue();
   }
-  this.fade = (targetOpacity, seconds, image) => {
-    this.getQueue().unshift((resolve, reject) => {
-      this.setSrc(image);
-      seconds = seconds || 2;
-      var rate = (seconds * 10) * Math.abs(this.getOpacity() - targetOpacity);
-      var opacityStep = 0;
-      var fadeLoop = setInterval(() => {
-        opacityStep = this.getOpacity() < targetOpacity
-          ? this.getOpacity() <= 0.99 ? 0.01 : 0.0
-          : this.getOpacity() >= 0.01 ? -0.01 : 0.0;
-        setOpacityInstantly(this.getOpacity() + opacityStep);
-        if (Math.abs(this.getOpacity() - targetOpacity) <= 0.01)  {
-          setOpacityInstantly(targetOpacity);
-          clearInterval(fadeLoop);
-          resolve();
-        }
-      }, rate > 0 ? rate : 1);
-    });
-    this.handleQueue();
+  this.fade = (target, seconds, image) => {
+    this.setSrc(image);
+    this.fadeProperty("opacity", target, seconds);
   }
   this.getOpacity = () => {
     return parseFloat(this.HTMLElement.style.opacity);
@@ -264,55 +250,56 @@ const AudioChannel = function(HTMLProperties) {
     return this.HTMLElement.play();
   }
   this.play = (sound) => {
-    this.getQueue().unshift((resolve, reject) => {
-      playInstantly(sound).then(resolve);
-    })
+    this.getQueue().unshift(new TerminableOperation((terminate) => {
+      playInstantly(sound).then(terminate);
+    }));
     this.handleQueue();
   }
   this.pause = () => {
-    this.getQueue().unshift((resolve, reject) => {
-      this.HTMLElement.pause();
-      resolve();
-    });
+    this.getQueue().unshift(new TerminableOperation(
+      (terminate) => {terminate();},
+      () => {this.HTMLElement.pause();}
+    ));
     this.handleQueue();
   }
   this.fade = (targetVolume, seconds, sound) => {
-    console.log("fading");
     this.play(sound);
-    this.fadeProperty("volume", targetVolume, seconds, 0.0, 1.0);
+    this.fadeProperty("volume", targetVolume, seconds);
   }
   this.fadeSpeed = (targetSpeed, seconds) => {
-    this.fadeProperty("playbackRate", targetSpeed, seconds, 0.07)
+    this.fadeProperty("playbackRate", targetSpeed, seconds);
   }
   this.setVolume = (volume) => {
-    this.getQueue().unshift((resolve, reject) => {
-      this.HTMLElement.volume = volume < 0.0
-        ? 0.0
-        : volume > 1.0
-        ? 1.0
-        : volume;
-      resolve();
-    })
+    this.getQueue().unshift(new TerminableOperation(
+      (terminate) => {terminate();},
+      () => {
+        this.HTMLElement.volume = volume < 0.0
+          ? 0.0
+          : volume > 1.0
+          ? 1.0
+          : volume;
+      }
+    ));
     this.handleQueue();
   }
   this.setSpeed = (speed) => {
-    this.getQueue().unshift((resolve, reject) => {
-      this.HTMLElement.volume = speed > 0.0 ? speed : 0;
-      resolve();
-    })
+    this.getQueue().unshift(new TerminableOperation(
+      (terminate) => {terminate();},
+      () => {this.HTMLElement.playbackRate = speed > 0.0 ? speed : 0;}
+    ));
     this.handleQueue();
   }
   this.setCurrentTime = (time) => {
-    this.getQueue().unshift((resolve, reject) => {
-      this.HTMLElement.currentTime = time;
-      resolve();
-    })
+    this.getQueue().unshift(new TerminableOperation(
+      (terminate) => {terminate();},
+      () => {this.HTMLElement.currentTime = time;}
+    ));
     this.handleQueue();
   }
   return this;
 }
 const GameConfiguration = function(worlds, synonyms, cutscenes, globals,
- imageChannels, audioChannels) {
+    imageChannels, audioChannels) {
   this.globals = Object.assign({
     unrecognizedCommandMessage: "I'm afraid I don't understand.",
     defaultRoomTransition: function() {
@@ -703,72 +690,104 @@ const Exit = function(givenName, take, description, active, introduction) {
 //Components
 const Queued = function() {
   var queue = [];
-  var inProgress = false;
+  var state = "idle";
   var update = () => {
-    var nextInQueue = this.getQueue().pop();
+    var nextInQueue = queue[queue.length - 1];
     if (nextInQueue) {
-      new Promise(nextInQueue).then(update);
+      switch (state) {
+        case "idle":
+        case "working":
+          state = "working";
+          nextInQueue.start().then(() => {queue.pop(); update();});
+          break;
+        case "clearing":
+          nextInQueue.terminate().then(() => {queue.pop(); update();});
+          break;
+      }
     } else {
-      inProgress = false;
+      state = "idle";
     }
   }
   this.handleQueue = () => {
-    if (inProgress) {
-      return;
-    } else {
-      inProgress = true;
+    if (state == "idle") {
       update();
     }
   }
   this.getQueue = () => {
     return queue;
   }
+  this.clearQueue = () => {
+    if (queue[0]) {
+      state = "clearing";
+      queue[0].terminate();
+    }
+  }
   this.wait = (seconds) => {
-    this.getQueue().unshift((resolve, reject) => {
-      setTimeout(resolve, seconds * 1000);
-    })
+    this.getQueue().unshift(new TerminableOperation((terminate) => {
+      setTimeout(terminate, seconds * 1000);
+    }));
   }
   return this;
 }
-const HTMLInterface = function(elementType, HTMLProperties) {
+const HTMLInterface = function(elementType, HTMLProperties, getters, setters) {
   this.HTMLElement = document.createElement(elementType);
   this.setProperties = (HTMLProperties) => {
     Object.entries(HTMLProperties || {}).forEach((keyValuePair) => {
-      console.log(this.HTMLElement);
       this.HTMLElement[keyValuePair[0]] = keyValuePair[1];
     })
   }
   this.setProperties(HTMLProperties);
+  this.getters = getters || {};
+  this.setters = setters || {};
   return this;
 }
-const QueuedHTMLInterface = function(elementType, HTMLProperties) {
+const QueuedHTMLInterface = function(elementType, HTMLProperties,
+    getters, setters) {
   Object.assign(this, new Queued(),
-    new HTMLInterface(elementType, HTMLProperties));
-  this.fadeProperty = function(property, target, seconds, min, max) {
-    min = typeof min == "undefined" ? Number.NEGATIVE_INFINITY : min;
-    max = typeof max == "undefined" ? Infinity : max;
-    target = target > min ?
-      target < max ?
-        target
-        : max
-      : min;
-    seconds = seconds || 4;
-    this.getQueue().unshift((resolve, reject) => {
-      var rate = (seconds * 10) / Math.abs(this.HTMLElement[property] - target);
-      var step = 0.01;
-    	var fadeLoop = setInterval(() => {
-        console.log(this.HTMLElement[property])
-        this.HTMLElement[property] += this.HTMLElement[property] < target
-          ? this.HTMLElement[property] + step <= max ? step : 0.0
-          : this.HTMLElement[property] - step >= min ? -step : 0.0;
-        if (Math.abs(this.HTMLElement[property] - target) <= 0.01)  {
-          this.HTMLElement[property] = target;
-          clearInterval(fadeLoop);
-          resolve();
-        }
-      }, rate > 0 && isFinite(rate) ? rate : 1);
-    });
+    new HTMLInterface(elementType, HTMLProperties, getters, setters));
+  this.fadeProperty = function(property, target, seconds) {
+    var get = this.getters[property] ||
+      (() => {return this.HTMLElement[property];});
+    var set = this.setters[property] ||
+      ((value) => {this.HTMLElement[property] = value;});
+    var fadeLoop;
+    this.getQueue().unshift(new TerminableOperation(
+      (terminate) => {
+        var rate = (seconds * 10) / Math.abs(this.HTMLElement[property] - target);
+    	  fadeLoop = setInterval(() => {
+          if (Math.abs(get() - target) >= 0.01) {
+            set(get() + (get() < target ? 0.01 : -0.01));
+          } else {
+            terminate();
+          }
+        }, rate > 0 && isFinite(rate) ? rate : 1);
+      },
+      () => {
+        set(target);
+        clearInterval(fadeLoop);
+      }
+    ));
     this.handleQueue();
+  }
+  return this;
+}
+const TerminableOperation = function(callback, terminate) {
+  var createTerminatePromise = function() {
+    return new Promise((resolve, reject) => {
+      (typeof terminate == "undefined" ? () => {} : terminate)();
+      resolve();
+    });
+  }
+  this.start = function() {
+    return new Promise((resolve, reject) => {
+      callback(this.terminate = () => {
+        resolve();
+        return createTerminatePromise();
+      });
+    });
+  }
+  this.terminate = () => {
+    return createTerminatePromise();
   }
   return this;
 }
