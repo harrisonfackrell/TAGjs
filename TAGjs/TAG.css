@@ -30,12 +30,13 @@ body {
   animation-duration: 0.5s;
 }
 #imageDisplay {
+  background-color: black;
   border: none;
   display: block;
   margin: auto;
   position: relative;
-  width: 18em;
-  height: 9em;
+  width: 640px;
+  height: 320px;
 }
 #imageDisplay img {
   border: none;

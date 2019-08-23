@@ -1,0 +1,45 @@
+body {
+  background-color: Sienna;
+}
+@font-face {
+  font-family: custom;
+  src: url("../../Fonts/Reformed Ellar.ttf");
+}
+#roomDisplay {
+  background-color: BurlyWood;
+  border-color: SaddleBrown;
+}
+#roomNameDisplay {
+  font-family: custom;
+  color: black;
+}
+#imageDisplay {
+
+}
+#audio p {
+  font: 3em custom;
+  color: black;
+}
+#outputBox {
+  background-color: BurlyWood;
+  border-color: SaddleBrown;
+  color: black;
+  font-family: custom;
+}
+#outputBox .userText {
+  color: dimgrey;
+}
+#inputBackground {
+  background-color: BurlyWood;
+  border-color: SaddleBrown;
+}
+#inputBox {
+  background-color: ghostwhite;
+  border-color: dimgrey;
+  color: black;
+  font-family: custom;
+}
+footer {
+  color: black;
+  font-family: custom;
+}

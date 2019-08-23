@@ -27,8 +27,11 @@ const Setup = (function() {
     return object;
   }
   this.preloadImages = function(images) {
+
     for (var i = 0; i < images.length; i++) {
+
       if (typeof images[i] != "undefined" && images[i] != "") {
+
         new Image().src = images[i];
       }
     }
@@ -156,7 +159,7 @@ const Display = (function() {
     var nameDisplay = this.roomNameDisplay;
     str = str ? str : nameDisplay.innerHTML
     nameDisplay.innerHTML = str;
-    nameDisplay.className = "emphasizeName";
+    this.emphasizeName();
   }
   this.emphasizeName = function() {
     var nameDisplay = this.roomNameDisplay;
@@ -204,54 +207,76 @@ const Display = (function() {
   return this;
 })();
 //Object Constructors
-const ImageChannel = function(zindex, HTMLProperties) {
-  Object.assign(this, new QueuedHTMLInterface("img", HTMLProperties,
-  {
-    "opacity": () => {return parseFloat(this.HTMLElement.style.opacity)}
-  },
-  {
-    "opacity": () => {this.HTMLElement.style.opacity = opacity}
+const ImageChannel = function(HTMLProperties, CSSProperties) {
+  Object.assign(this, new QueuedHTMLInterface("img",
+    HTMLProperties, CSSProperties,
+    { "opacity": () => {return parseFloat(this.HTMLElement.style.opacity)} },
+    { "opacity": (opacity) => {this.HTMLElement.style.opacity = opacity}
   }));
+
   this.HTMLElement.alt = "";
-  this.HTMLElement.style.zindex = zindex.toString();
   this.HTMLElement.style.opacity = 1;
   this.setProperties(HTMLProperties);
   Display.imageDisplay.appendChild(this.HTMLElement);
+
   var setSrcInstantly = (image) => {
-    this.HTMLElement.src = typeof image == "undefined" || image == "" ? this.HTMLElement.src : image;
+    this.HTMLElement.src = typeof image == "undefined" || image == ""
+      ? this.HTMLElement.src : image;
   }
-  this.setSrc = (image) => {
+  var renderInstantly = (time) => {
+    this.HTMLElement.style.display = "inline";
+  }
+  var derenderInstantly = () => {
+    this.HTMLElement.style.display = "none";
+  }
+  var queueInstantOperation = (operation, ...parameters) => {
     this.getQueue().unshift(new TerminableOperation((terminate) => {
       terminate();
-    }, () => {setSrcInstantly(image);}));
+    }, () => {operation.apply(this, parameters);}));
     this.handleQueue();
+  }
+  this.setSrc = (image) => {
+    queueInstantOperation(setSrcInstantly, image);
   }
   this.fade = (target, seconds, image) => {
     this.setSrc(image);
     this.fadeProperty("opacity", target, seconds);
   }
   this.getOpacity = () => {
-    return parseFloat(this.HTMLElement.style.opacity);
+    return this.getters["opacity"]();
   }
   this.setOpacity = (opacity) => {
-    this.getQueue().unshift((resolve, reject) => {
-      setOpacityInstantly(opacity);
-      resolve();
-    });
-    this.handleQueue();
+    queueInstantOperation(this.setters["opacity"], opacity);
+  }
+  this.renderTime = Infinity;
+  this.render = (time) => {
+    this.renderTime = typeof time == "undefined" ? Infinity : time;
+    queueInstantOperation(renderInstantly, time);
+  }
+  this.derender = () => {
+    this.renderTime = 0;
+    queueInstantOperation(derenderInstantly);
   }
 }
-const AudioChannel = function(HTMLProperties) {
-  Object.assign(this, new QueuedHTMLInterface("audio", HTMLProperties));
+const AudioChannel = function(HTMLProperties, CSSProperties) {
+  Object.assign(this, new QueuedHTMLInterface("audio", HTMLProperties,
+    CSSProperties));
+  this.currSong = "";
   var playInstantly = (sound) => {
-    sound = sound || this.HTMLElement.src;
-    if (this.HTMLElement.src != sound)
-      this.HTMLElement.src = sound;
+    if (sound) {
+      this.prevSong = this.currSong;
+      this.currSong = sound;
+      if (this.currSong != this.prevSong) {
+        this.HTMLElement.src = sound;
+      }
+    }
     return this.HTMLElement.play();
   }
   this.play = (sound) => {
     this.getQueue().unshift(new TerminableOperation((terminate) => {
+      var speed = this.HTMLElement.playbackRate;
       playInstantly(sound).then(terminate);
+      this.HTMLElement.playbackRate = speed;
     }));
     this.handleQueue();
   }
@@ -303,8 +328,34 @@ const GameConfiguration = function(worlds, synonyms, cutscenes, globals,
   this.globals = Object.assign({
     unrecognizedCommandMessage: "I'm afraid I don't understand.",
     defaultRoomTransition: function() {
+      var entities = getEntities();
       var targetRoom = getRooms()[getPlayer().locations[0]];
-      getImageChannels()["background"].setSrc(targetRoom.image);
+      for (i in entities) for (j in entities[i].sprites) {
+        var sprite = entities[i].sprites[j];
+        if (typeof sprite != "undefined") {
+          sprite.fade(0, 0.5);
+          sprite.derender();
+          sprite.setOpacity(1);
+        }
+      }
+      entities = targetRoom.localize(entities);
+      for (i in entities) {
+        var sprite = entities[i].sprites["world"];
+        if (typeof sprite != "undefined") {
+          sprite.setOpacity(0);
+          sprite.render();
+          sprite.fade(1, 0.5)
+        }
+      }
+      var background = getImageChannels()["background"];
+      background.fade(0, 0.5);
+      background.fade(1, 0.5, targetRoom.image);
+      if (targetRoom.music && targetRoom.music != getAudioChannels()["music"].currSong) {
+        getAudioChannels()["music"].fade(0, 0.5);
+        getAudioChannels()["music"].play(targetRoom.music)
+        getAudioChannels()["music"].fade(1, 0.5);
+      }
+      Display.updateNameDisplay(targetRoom.givenName);
       IO.output(targetRoom.buildCompleteDescription());
     }
   }, globals);
@@ -320,8 +371,16 @@ const GameConfiguration = function(worlds, synonyms, cutscenes, globals,
     return this.cutscenes;
   }
   this.type = "GameWorld";
-  this.imageChannels = imageChannels || {"background": new ImageChannel(0)};
-  this.audioChannels = audioChannels || {"music": new AudioChannel({"loop": true})};
+  this.imageChannels = imageChannels || {
+    "background": new ImageChannel({}, {
+      "display": "inline",
+      "z-index": "0"
+    })
+  };
+  this.audioChannels = audioChannels || {
+    "music": new AudioChannel({"loop": true}),
+    "sound": new AudioChannel({"loop": false})
+  };
   return this;
 }
 const GameWorld = function(player, rooms, entities, init, endLogic) {
@@ -359,6 +418,7 @@ const GameWorld = function(player, rooms, entities, init, endLogic) {
     }
   }
   this.preload = function() {
+
     Setup.preloadImages(this.getRoomImages());
     Setup.preloadAudio(this.getRoomAudio());
   }
@@ -401,15 +461,16 @@ const GameWorld = function(player, rooms, entities, init, endLogic) {
     collections[object.type][object.name] = object;
   }
   this.getRoomImages = function() {
-    var rooms = this.getRooms();
+    var rooms = Object.values(this.getRooms());
     var images = [];
+
     for (var i = 0; i < rooms.length; i++) {
       images.push(rooms[i].image);
     }
     return images;
   }
   this.getRoomAudio = function() {
-    var rooms = this.getRooms();
+    var rooms = Object.values(this.getRooms());
     var audio = [];
     for (var i = 0; i < rooms.length; i++) {
       audio.push(rooms[i].music);
@@ -436,6 +497,16 @@ const GameWorld = function(player, rooms, entities, init, endLogic) {
   this.getAllObjects = function() {
     return this.getInteractables().concat(getObstructions(), getRooms());
   }
+  return this;
+}
+const OverlayWorld = function(player, rooms, entities, init, endLogic) {
+
+  Object.assign(this, getWorld());
+  this.player = player;
+  for (i in rooms) this.rooms[i] = rooms[i];
+  for (i in entities) this.entities[i] = entities[i];
+  this.init = init ? init : function() {};
+  this.endLogic = endLogic ? endLogic : function() {};
   return this;
 }
 const PlayerEntity = function(location, methods, turn) {
@@ -568,7 +639,7 @@ const Room = function(description, exits, givenName, image, music) {
     var description = "";
     var exits = this.getActiveExits();
     exits[0].introduction = exits[0].introduction ? exits[0].introduction
-     : "You can";
+     : "You can go";
     var descriptionArray = [];
     for (var i = 0; i < exits.length; i++) {
       if (exits[i].introduction) {
@@ -607,10 +678,11 @@ const Room = function(description, exits, givenName, image, music) {
   this.type = "Room";
   return this;
 }
-const Entity = function(location, description, methods, givenName, turn) {
-  Object.assign(this, new Interactable(location, methods, givenName,
-     turn));
-  this.methods = Object.assign( {
+const Entity = function(location, description, methods, givenName, sprites,
+    turn) {
+  Object.assign(this, new Interactable(location, methods, givenName, sprites,
+      turn));
+  this.methods = Object.assign({
     nothing: function() {
       IO.output("Do what with the " + givenName + "?");
     },
@@ -693,7 +765,8 @@ const Queued = function() {
   var state = "idle";
   var update = () => {
     var nextInQueue = queue[queue.length - 1];
-    if (nextInQueue) {
+
+    if (typeof nextInQueue != "undefined") {
       switch (state) {
         case "idle":
         case "working":
@@ -729,7 +802,7 @@ const Queued = function() {
   }
   return this;
 }
-const HTMLInterface = function(elementType, HTMLProperties, getters, setters) {
+const HTMLInterface = function(elementType, HTMLProperties, CSSProperties, getters, setters) {
   this.HTMLElement = document.createElement(elementType);
   this.setProperties = (HTMLProperties) => {
     Object.entries(HTMLProperties || {}).forEach((keyValuePair) => {
@@ -737,14 +810,20 @@ const HTMLInterface = function(elementType, HTMLProperties, getters, setters) {
     })
   }
   this.setProperties(HTMLProperties);
+  this.setCSS = (CSSProperties) => {
+    Object.entries(CSSProperties || {}).forEach((keyValuePair) => {
+      this.HTMLElement.style[keyValuePair[0]] = keyValuePair[1];
+    })
+  }
+  this.setCSS(CSSProperties);
   this.getters = getters || {};
   this.setters = setters || {};
   return this;
 }
-const QueuedHTMLInterface = function(elementType, HTMLProperties,
+const QueuedHTMLInterface = function(elementType, HTMLProperties, CSSProperties,
     getters, setters) {
   Object.assign(this, new Queued(),
-    new HTMLInterface(elementType, HTMLProperties, getters, setters));
+    new HTMLInterface(elementType, HTMLProperties, CSSProperties, getters, setters));
   this.fadeProperty = function(property, target, seconds) {
     var get = this.getters[property] ||
       (() => {return this.HTMLElement[property];});
@@ -753,7 +832,7 @@ const QueuedHTMLInterface = function(elementType, HTMLProperties,
     var fadeLoop;
     this.getQueue().unshift(new TerminableOperation(
       (terminate) => {
-        var rate = (seconds * 10) / Math.abs(this.HTMLElement[property] - target);
+        var rate = (seconds * 10) / Math.abs(get() - target);
     	  fadeLoop = setInterval(() => {
           if (Math.abs(get() - target) >= 0.01) {
             set(get() + (get() < target ? 0.01 : -0.01));
@@ -791,13 +870,21 @@ const TerminableOperation = function(callback, terminate) {
   }
   return this;
 }
-const Interactable = function(location, methods, givenName, turn) {
+const Interactable = function(location, methods, givenName, sprites, turn) {
   Object.assign(this, new Moving(location));
   this.name = "uninitialized";
   this.methods = methods;
   this.methods.parent = this;
   this.givenName = givenName;
-  this.turn = turn ? turn : function() {};
+  this.sprites = sprites ? sprites : {};
+  this.turn = () => {
+    for (var key in this.sprites) {
+      if ((this.sprites[key].renderTime)-- <= 0) {
+        this.sprites[key].derender();
+      }
+    }
+    if (turn) turn();
+  }
   this.age = 0;
   this.advanceTurn = true;
   this.type = "Interactable";
@@ -849,7 +936,7 @@ const Wrapping = function() {
 }
 const Conversational = function(init, endLogic) {
   this.start = function() {
-    new GameWorld(
+    new OverlayWorld(
       new PlayerEntity("Nowhere", {}, () => {}),
       {},
       {"": this},

@@ -681,7 +681,7 @@ var World = new GameWorld(
           if (playerColi.balance >= 2) {
             IO.output("He takes two of them, and gives you your pouch back. He \
              also tosses you another pouch labeled \"<strong>Caffeine</strong> \
-             (space drugs)\"");
+             (space drugs)\".");
             playerColi.debit(2);
             getEntities().findByName("venadapros.caffeine").warp("Inventory");
           } else {
